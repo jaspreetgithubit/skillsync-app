@@ -1,0 +1,697 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #080B12;
+    color: #F8FAFC;
+  }
+  ::selection {
+    background-color: #F59E0B;
+    color: #080B12;
+  }
+}
+
+/* =========================================================================
+   CINEMATIC CORPORATE TECH PALETTE (MATCHING USER'S 4K CORPORATE VIDEO)
+   OBSIDIAN GLASS (#080B12) • WARM AMBER GOLD (#F59E0B) • VIOLET ACCENTS
+   ========================================================================= */
+
+@keyframes amberGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25), 0 0 40px rgba(147, 51, 234, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), 0 0 60px rgba(147, 51, 234, 0.3);
+  }
+}
+
+@keyframes floatCard {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
+}
+
+.animate-amber-glow {
+  animation: amberGlow 4s ease-in-out infinite;
+}
+
+.animate-float-card {
+  animation: floatCard 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+
+/* Cinematic Frosted Glass Panel — Translucent so Background Video is Vividly Visible */
+.glass-panel-cinematic {
+  position: relative;
+  background: rgba(8, 12, 22, 0.32);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-cinematic:hover {
+  background: rgba(12, 18, 32, 0.42);
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Warm Metallic Amber Gold Button */
+.btn-amber-gold {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+  color: #080B12;
+  font-weight: 800;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+}
+
+.btn-amber-gold:hover {
+  background: linear-gradient(135deg, #FCD34D 0%, #FBBF24 50%, #EAB308 100%);
+  box-shadow: 0 6px 30px rgba(245, 158, 11, 0.55);
+  transform: translateY(-1px);
+}
+
+/* Frosted Glass Outline Button */
+.btn-glass-outline {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #F8FAFC;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+
+.btn-glass-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #080B12;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F59E0B;
+}
+
+/* AI Holographic Laser Scan Line */
+@keyframes laserScan {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-laser-scan {
+  animation: laserScan 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulseBorder {
+  0%, 100% {
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+  50% {
+    border-color: rgba(245, 158, 11, 0.65);
+  }
+}
+
+.animate-pulse-border {
+  animation: pulseBorder 3s ease-in-out infinite;
+}
+
+/* Rotating Radar / Radial Conic Beam */
+@keyframes radarSweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radarSweep 6s linear infinite;
+}
+/* Infinite Smooth Testimonial Marquee */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeScrollReverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 45s linear infinite;
+}
+
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}
+
+.animate-marquee-infinite-reverse {
+  display: flex;
+  width: max-content;
+  animation: marqueeScrollReverse 50s linear infinite;
+}
+
+.animate-marquee-infinite-reverse:hover {
+  animation-play-state: paused;
+}
+
+/* =========================================================================
+   ADVANCED CYBER ANIMATIONS: NLP WAVEFORMS, CONIC BORDERS & LIGHT SWEEPS
+   ========================================================================= */
+
+/* Animated NLP Audio / Frequency Waveform */
+@keyframes waveBar {
+  0%, 100% {
+    height: 4px;
+    opacity: 0.35;
+  }
+  50% {
+    height: 18px;
+    opacity: 1;
+  }
+}
+
+.animate-wave-1 { animation: waveBar 1.1s ease-in-out infinite; }
+.animate-wave-2 { animation: waveBar 1.1s ease-in-out 0.18s infinite; }
+.animate-wave-3 { animation: waveBar 1.1s ease-in-out 0.36s infinite; }
+.animate-wave-4 { animation: waveBar 1.1s ease-in-out 0.54s infinite; }
+.animate-wave-5 { animation: waveBar 1.1s ease-in-out 0.72s infinite; }
+
+/* Rotating Conic Shimmer Border */
+@keyframes conicRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-conic-rotate {
+  animation: conicRotate 8s linear infinite;
+}
+
+/* Light Shimmer Sweep across Buttons */
+@keyframes lightSweep {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  30%, 100% { transform: translateX(250%) skewX(-20deg); }
+}
+
+.animate-light-sweep {
+  animation: lightSweep 3.5s ease-in-out infinite;
+}
+
+/* Particle Drift */
+@keyframes particleDrift {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px) translateX(12px);
+    opacity: 0.85;
+  }
+}
+
+.animate-particle-drift {
+  animation: particleDrift 5s ease-in-out infinite;
+}
+
+/* =========================================================================
+   TEAMMATCH AI — 2026 PREMIUM 4K AUTHENTICATION STYLING & ANIMATIONS
+   DEEP OBSIDIAN • CYAN (#06B6D4) • PURPLE/VIOLET (#8B5CF6) • ROYAL BLUE (#3B82F6)
+   ========================================================================= */
+
+@keyframes pulseGlowCyan {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.2), 0 0 50px rgba(139, 92, 246, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(6, 182, 212, 0.45), 0 0 80px rgba(139, 92, 246, 0.3);
+  }
+}
+
+.animate-glow-cyan {
+  animation: pulseGlowCyan 4s ease-in-out infinite;
+}
+
+@keyframes neuralPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 12px #06B6D4);
+  }
+}
+
+.animate-neural-pulse {
+  animation: neuralPulse 3s ease-in-out infinite;
+}
+
+@keyframes floatOrb {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(15px, -20px) scale(1.05);
+  }
+  66% {
+    transform: translate(-15px, 15px) scale(0.95);
+  }
+}
+
+.animate-float-orb {
+  animation: floatOrb 12s ease-in-out infinite;
+}
+
+/* High-Tech 2026 Glassmorphism Card with Multi-Layer Specular Highlights */
+.teammatch-glass-card {
+  background: linear-gradient(135deg, rgba(10, 16, 32, 0.72) 0%, rgba(5, 8, 19, 0.85) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.85),
+    0 0 40px -10px rgba(6, 182, 212, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px rgba(6, 182, 212, 0.1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+/* TeamMatch Primary Gradient Button (Cyan to Purple/Blue) */
+.btn-teammatch-primary {
+  background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 50%, #8B5CF6 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35), 0 4px 15px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-teammatch-primary:hover {
+  background: linear-gradient(135deg, #22D3EE 0%, #60A5FA 50%, #A855F7 100%);
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.6), 0 6px 25px rgba(139, 92, 246, 0.45);
+  transform: translateY(-1.5px);
+}
+
+.btn-teammatch-primary:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+/* Floating Skill Capsule */
+.skill-capsule {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.skill-capsule:hover {
+  border-color: rgba(6, 182, 212, 0.6);
+  background: rgba(15, 23, 42, 0.9);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 15px 35px -5px rgba(6, 182, 212, 0.3);
+}
+
+/* Subtle Shimmer Ray */
+@keyframes raySweep {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(200%) rotate(45deg); }
+}
+
+.animate-ray-sweep {
+  animation: raySweep 5s ease-in-out infinite;
+}
+
+/* =========================================================================
+   3D TECH DEEP DIVE PORTAL ANIMATIONS (DEPTH PERSPECTIVE & UNROLL / UNFOLD)
+   ========================================================================= */
+
+.perspective-deep {
+  perspective: 1800px;
+  transform-style: preserve-3d;
+}
+
+@keyframes scanLaser {
+  0% {
+    top: 0%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.2;
+  }
+}
+
+.animate-scan-laser {
+  animation: scanLaser 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes portalPulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.3), 0 0 60px rgba(147, 51, 234, 0.2);
+    border-color: rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 55px rgba(245, 158, 11, 0.6), 0 0 100px rgba(147, 51, 234, 0.4);
+    border-color: rgba(245, 158, 11, 0.9);
+  }
+}
+
+.animate-portal-pulse {
+  animation: portalPulse 3s ease-in-out infinite;
+}
+
+@keyframes fastZoomPlunge {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-40px) rotateX(10deg);
+    filter: blur(6px) brightness(1.3);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0px) rotateX(0deg);
+    filter: blur(0px) brightness(1.1);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.18) translateY(25px) rotateX(-6deg);
+    filter: blur(0px) brightness(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65) translateY(135%) rotateX(-22deg);
+    filter: blur(10px) brightness(1.4);
+  }
+}
+
+.animate-zoom-plunge {
+  animation: fastZoomPlunge 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes warpSpeedLines {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-warp-speed {
+  animation: warpSpeedLines 0.4s linear infinite;
+}
+
+/* 360 Degree 3D Spin for Heading */
+@keyframes spin360Y {
+  0% {
+    transform: perspective(1000px) rotateY(0deg) scale(0.8);
+    opacity: 0;
+    filter: blur(8px);
+  }
+  50% {
+    transform: perspective(1000px) rotateY(180deg) scale(1.08);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(360deg) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.animate-spin-360 {
+  animation: spin360Y 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Alternating Photo Exits: Left & Right */
+@keyframes slideExitLeft {
+  0% {
+    transform: perspective(1400px) translateX(0) scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1400px) translateX(-120%) scale(0.88) rotateY(30deg);
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+.animate-exit-left {
+  animation: slideExitLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideExitRight {
+  0% {
+    transform: perspective(1400px) translateX(0) scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(1400px) translateX(120%) scale(0.88) rotateY(-30deg);
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+.animate-exit-right {
+  animation: slideExitRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Enter Center from Depth */
+@keyframes slideEnterCenter {
+  0% {
+    transform: perspective(1400px) scale(0.85) translateZ(-200px);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  100% {
+    transform: perspective(1400px) scale(1) translateZ(0);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.animate-enter-center {
+  animation: slideEnterCenter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Final Zoom-Out Exit into Sign Page */
+@keyframes zoomOutExit {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: scale(0.3) translateY(30px) rotateX(15deg);
+    opacity: 0;
+    filter: blur(14px);
+  }
+}
+
+.animate-zoom-out-exit {
+  animation: zoomOutExit 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* =========================================================================
+   CINEMATIC SCROLL-DRIVEN STORYTELLING SIGN IN ANIMATIONS
+   ========================================================================= */
+
+@keyframes textRevealFade {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-text-reveal {
+  animation: textRevealFade 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) translateX(-90px) rotateY(15deg) scale(0.9);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) translateX(0) rotateY(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) translateX(90px) rotateY(-15deg) scale(0.9);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) translateX(0) rotateY(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleInStory {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(30px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-scale-in-story {
+  animation: scaleInStory 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes blurToSharpEntry {
+  0% {
+    opacity: 0;
+    transform: scale(0.93) translateY(24px);
+    filter: blur(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.animate-form-reveal {
+  animation: blurToSharpEntry 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes radarScan {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-radar-scan {
+  animation: radarScan 2.5s linear infinite;
+}
+
+@keyframes dataStreamPulse {
+  0% { stroke-dashoffset: 60; opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.3; }
+}
+
+.animate-data-stream {
+  stroke-dasharray: 8 6;
+  animation: dataStreamPulse 1.8s linear infinite;
+}
+
+@keyframes nodeGlowPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.7); transform: scale(1.06); }
+}
+
+.animate-node-glow {
+  animation: nodeGlowPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes textReveal {
+  0% { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+.animate-text-reveal {
+  animation: textReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scanLaser {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.animate-scan-laser {
+  animation: scanLaser 3.5s ease-in-out infinite;
+}
+
+
+

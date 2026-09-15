@@ -1,0 +1,308 @@
+[
+  {
+    "id": "proj-1789364567427-wctsp",
+    "projectTitle": "DeFi Yield Optimizer",
+    "description": "Algorithmic liquidity routing protocol maximizing vault yields across decentralized automated market makers.",
+    "teamSize": 4,
+    "requiredSkills": [
+      {
+        "name": "Solana",
+        "weight": 40
+      },
+      {
+        "name": "Rust",
+        "weight": 30
+      },
+      {
+        "name": "TypeScript",
+        "weight": 20
+      },
+      {
+        "name": "GraphQL",
+        "weight": 10
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Backend Developer",
+        "count": 2
+      },
+      {
+        "role": "Full Stack Developer",
+        "count": 1
+      },
+      {
+        "role": "UI/UX Designer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Solana": 40,
+      "Rust": 30,
+      "TypeScript": 20,
+      "GraphQL": 10
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-14T05:42:47.428Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-1789321670811-zmi1j",
+    "projectTitle": "DeFi Yield Optimizer",
+    "description": "Algorithmic liquidity routing protocol maximizing vault yields across decentralized automated market makers.",
+    "teamSize": 4,
+    "requiredSkills": [
+      {
+        "name": "Solana",
+        "weight": 40
+      },
+      {
+        "name": "Rust",
+        "weight": 30
+      },
+      {
+        "name": "TypeScript",
+        "weight": 20
+      },
+      {
+        "name": "GraphQL",
+        "weight": 10
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Backend Developer",
+        "count": 2
+      },
+      {
+        "role": "Full Stack Developer",
+        "count": 1
+      },
+      {
+        "role": "UI/UX Designer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Solana": 40,
+      "Rust": 30,
+      "TypeScript": 20,
+      "GraphQL": 10
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-13T17:47:50.811Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-1789321634208-q37x9",
+    "projectTitle": "Autonomous Drone Swarm Coordinator",
+    "description": "Distributed real-time aerial mesh networking engine enabling autonomous flight synchronization and obstacle avoidance.",
+    "teamSize": 6,
+    "requiredSkills": [
+      {
+        "name": "Rust",
+        "weight": 40
+      },
+      {
+        "name": "Computer Vision",
+        "weight": 30
+      },
+      {
+        "name": "Go",
+        "weight": 20
+      },
+      {
+        "name": "Docker",
+        "weight": 10
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Backend Developer",
+        "count": 2
+      },
+      {
+        "role": "ML Engineer",
+        "count": 2
+      },
+      {
+        "role": "DevOps Engineer",
+        "count": 1
+      },
+      {
+        "role": "Full Stack Developer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Rust": 40,
+      "Computer Vision": 30,
+      "Go": 20,
+      "Docker": 10
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-13T17:47:14.208Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-1789321452076-3jh7g",
+    "projectTitle": "Autonomous Drone Swarm Coordinator",
+    "description": "Distributed real-time aerial mesh networking engine",
+    "teamSize": 6,
+    "requiredSkills": [
+      {
+        "name": "Rust",
+        "weight": 40
+      },
+      {
+        "name": "Computer Vision",
+        "weight": 30
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Backend Developer",
+        "count": 2
+      },
+      {
+        "role": "ML Engineer",
+        "count": 2
+      }
+    ],
+    "skillWeights": {
+      "Rust": 40,
+      "Computer Vision": 30
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-13T17:44:12.076Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-1789321165509-4xjni",
+    "projectTitle": "DeFi Institutional Yield Optimizer",
+    "description": "Automated market maker liquidity optimizer.",
+    "teamSize": 4,
+    "requiredSkills": [
+      {
+        "name": "Solana",
+        "weight": 40,
+        "level": "Advanced"
+      },
+      {
+        "name": "Rust",
+        "weight": 35,
+        "level": "Advanced"
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Backend Developer",
+        "count": 2
+      },
+      {
+        "role": "Full Stack Developer",
+        "count": 2
+      }
+    ],
+    "skillWeights": {},
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-13T17:39:25.509Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-1789321032167-gpgm8",
+    "projectTitle": "AI-Based Healthcare Assistant",
+    "description": "Autonomous clinical triage and patient diagnostic assistant.",
+    "teamSize": 5,
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "weight": 35,
+        "level": "Advanced"
+      },
+      {
+        "name": "Machine Learning",
+        "weight": 30,
+        "level": "Advanced"
+      },
+      {
+        "name": "React",
+        "weight": 20,
+        "level": "Intermediate"
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "ML Engineer",
+        "count": 2
+      },
+      {
+        "role": "Full Stack Developer",
+        "count": 2
+      },
+      {
+        "role": "UI/UX Designer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Python": 35,
+      "Machine Learning": 30,
+      "React": 20
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-13T17:37:12.168Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-init-001",
+    "projectTitle": "AI-Based Healthcare Assistant",
+    "description": "Autonomous clinical triage and patient diagnostic assistant utilizing multimodal LLMs, NLP record parsing, and privacy-preserving ML pipelines.",
+    "teamSize": 5,
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "weight": 35,
+        "level": "Advanced"
+      },
+      {
+        "name": "Machine Learning",
+        "weight": 30,
+        "level": "Advanced"
+      },
+      {
+        "name": "React",
+        "weight": 20,
+        "level": "Intermediate"
+      },
+      {
+        "name": "FastAPI",
+        "weight": 15,
+        "level": "Intermediate"
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "ML Engineer",
+        "count": 2
+      },
+      {
+        "role": "Full Stack Developer",
+        "count": 2
+      },
+      {
+        "role": "UI/UX Designer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Python": 35,
+      "Machine Learning": 30,
+      "React": 20,
+      "FastAPI": 15
+    },
+    "createdBy": "System Admin",
+    "createdAt": "2026-09-13T20:00:00.000Z",
+    "status": "active"
+  }
+]
