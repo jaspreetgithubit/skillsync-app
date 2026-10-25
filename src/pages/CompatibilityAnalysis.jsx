@@ -16,10 +16,10 @@ import SpotlightCard from '../components/common/SpotlightCard';
 import FloatingBadge from '../components/common/FloatingBadge';
 import NeuralConstellationBackground from '../components/common/NeuralConstellationBackground';
 
-export default function CompatibilityAnalysis({ projectId, onNavigate, onBack }) {
+export default function CompatibilityAnalysis({ projectId, project: passedProject, onNavigate, onBack }) {
   const { userProfile } = useUserProfile();
 
-  const project = MOCK_PROJECTS.find(p => p.id === projectId) || MOCK_PROJECTS[0];
+  const project = passedProject || MOCK_PROJECTS.find(p => p.id === projectId) || MOCK_PROJECTS[0];
   const compatibility = calculateCompatibility(userProfile, project);
 
   // Animated Count-up State for the Circular Gauge and Dimension Bars

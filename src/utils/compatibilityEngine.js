@@ -50,7 +50,8 @@ export function calculateCompatibility(userProfile, project) {
     const weight = req.weight || 20;
     totalSkillWeight += weight;
 
-    const userLevelStr = userSkillsMap.get(req.name.toLowerCase());
+    const skillName = typeof req === "string" ? req : (req?.name || "");
+    const userLevelStr = skillName ? userSkillsMap.get(skillName.toLowerCase()) : null;
     const reqLevelStr = req.minLevel || 'Medium';
 
     const reqRank = LEVEL_RANKS[reqLevelStr] || 2;
@@ -103,7 +104,7 @@ export function calculateCompatibility(userProfile, project) {
 
   // 2. Role Match
   const userRole = (userProfile.role || '').toLowerCase();
-  const reqRoles = (project.requiredRoles || []).map(r => r.toLowerCase());
+  const reqRoles = (project.requiredRoles || []).map(r => (typeof r === "string" ? r : (r?.role || "")).toLowerCase());
   let roleMatch = 70;
 
   if (reqRoles.some(r => r === userRole || userRole.includes(r) || r.includes(userRole))) {

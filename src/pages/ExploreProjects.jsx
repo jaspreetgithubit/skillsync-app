@@ -97,7 +97,7 @@ export default function ExploreProjects({ onNavigate }) {
         const matchesDesc = proj.description.toLowerCase().includes(q);
         const matchesDomain = proj.domain.toLowerCase().includes(q);
         const matchesSkill = (proj.requiredSkills || []).some(s => s.name.toLowerCase().includes(q));
-        const matchesRole = (proj.requiredRoles || []).some(r => r.toLowerCase().includes(q));
+        const matchesRole = (proj.requiredRoles || []).some(r => (typeof r === "string" ? r : (r?.role || "")).toLowerCase().includes(q));
         if (!matchesTitle && !matchesDesc && !matchesDomain && !matchesSkill && !matchesRole) {
           return false;
         }
@@ -110,7 +110,7 @@ export default function ExploreProjects({ onNavigate }) {
 
       // Role filter
       if (selectedRole !== 'All Roles') {
-        const hasRole = (proj.requiredRoles || []).some(r => r.toLowerCase() === selectedRole.toLowerCase());
+        const hasRole = (proj.requiredRoles || []).some(r => (typeof r === "string" ? r : (r?.role || "")).toLowerCase() === selectedRole.toLowerCase());
         if (!hasRole) return false;
       }
 

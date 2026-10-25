@@ -304,6 +304,7 @@ function AppContent() {
       {routeState.view === 'compatibility' && (
         <CompatibilityAnalysis 
           projectId={routeState.projectId || 'proj-1'}
+          project={routeState.project}
           onNavigate={navigateTo}
           onBack={() => navigateTo(`/project/${routeState.projectId || 'proj-1'}`)}
         />

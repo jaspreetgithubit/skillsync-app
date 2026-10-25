@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -275,25 +276,28 @@ export default function ProjectDetails({ projectId, project: passedProject, onNa
               </div>
 
               <div className="space-y-3.5">
-                {project.requiredSkills.map((skill) => {
+                {(project.requiredSkills || []).map((skill, sIdx) => {
+                  const skillName = typeof skill === 'string' ? skill : (skill?.name || 'Skill');
+                  const minLevel = typeof skill === 'object' && skill?.minLevel ? skill.minLevel : 'Medium';
+                  const weight = typeof skill === 'object' && skill?.weight ? skill.weight : 25;
                   const userHas = (userProfile.skills || []).find(
-                    s => s.name.toLowerCase() === skill.name.toLowerCase()
+                    s => (s?.name || '').toLowerCase() === skillName.toLowerCase()
                   );
 
                   return (
                     <div 
-                      key={skill.name}
+                      key={skillName + '-' + sIdx}
                       className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-amber-500/30 transition-all flex items-center justify-between gap-4"
                     >
                       <div className="min-w-0">
                         <div className="font-bold text-white text-sm flex items-center gap-2">
-                          <span>{skill.name}</span>
+                          <span>{skillName}</span>
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">
-                            Min: {skill.minLevel}
+                            Min: {minLevel}
                           </span>
                         </div>
                         <div className="text-[11px] font-mono text-slate-400 mt-1">
-                          Algorithm Weight: <strong className="text-slate-200">{skill.weight}%</strong> of project competency
+                          Algorithm Weight: <strong className="text-slate-200">{weight}%</strong> of project competency
                         </div>
                       </div>
 
@@ -326,12 +330,14 @@ export default function ProjectDetails({ projectId, project: passedProject, onNa
               </div>
 
               <div className="space-y-2.5">
-                {project.requiredRoles.map((role, idx) => {
-                  const isUserRole = (userProfile.role || '').toLowerCase() === role.toLowerCase();
+                {(project.requiredRoles || []).map((roleItem, idx) => {
+                  const roleName = typeof roleItem === 'string' ? roleItem : (roleItem?.role || 'Full Stack Developer');
+                  const count = typeof roleItem === 'object' && roleItem?.count ? roleItem.count : 1;
+                  const isUserRole = (userProfile.role || '').toLowerCase() === roleName.toLowerCase();
 
                   return (
                     <div
-                      key={role}
+                      key={roleName + '-' + idx}
                       className={`p-3 rounded-xl border flex items-center justify-between ${
                         isUserRole 
                           ? 'bg-amber-500/15 border-amber-500/50 shadow-md shadow-amber-500/10'
@@ -342,7 +348,9 @@ export default function ProjectDetails({ projectId, project: passedProject, onNa
                         <span className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[11px] font-mono text-slate-400 font-bold">
                           {idx + 1}
                         </span>
-                        <span className="text-xs font-bold text-white">{role}</span>
+                        <span className="text-xs font-bold text-white">
+                          {roleName} {count > 1 ? `(×${count})` : ''}
+                        </span>
                       </div>
 
                       {isUserRole ? (
