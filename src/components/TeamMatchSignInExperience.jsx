@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   Mail, 
@@ -33,6 +33,12 @@ export default function TeamMatchSignInExperience({
   const { updateProfile } = useUserProfile();
 
   const [mode, setMode] = useState(initialMode || 'signin'); // 'signin' | 'signup'
+
+  useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+    }
+  }, [initialMode]);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -382,7 +388,7 @@ export default function TeamMatchSignInExperience({
                   <span>Registration // New Account</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
-                  Create Your Account
+                  Sign Up
                 </h1>
                 <p className="text-xs text-slate-400 mt-1">
                   {isCreatorTrack 
@@ -403,7 +409,7 @@ export default function TeamMatchSignInExperience({
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isGoogleLoading}
-                className="w-full py-2.5 px-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-500/40 text-white text-xs font-mono font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/15 hover:border-amber-500/50 text-white text-sm font-mono font-bold flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-50 shadow-lg"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -507,7 +513,7 @@ export default function TeamMatchSignInExperience({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-xl btn-amber-gold uppercase tracking-wider flex items-center justify-center gap-2 text-xs sm:text-sm shadow-xl shadow-amber-500/25 cursor-pointer disabled:opacity-75 transition-colors"
+                    className="w-full py-4 rounded-2xl btn-amber-gold uppercase tracking-wider flex items-center justify-center gap-2.5 text-sm sm:text-base font-black shadow-2xl shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-75 transition-all"
                   >
                     {isSubmitting ? (
                       <>
@@ -516,7 +522,7 @@ export default function TeamMatchSignInExperience({
                       </>
                     ) : (
                       <>
-                        <span>Create Account & Continue</span>
+                        <span>Sign Up & Continue</span>
                         <ArrowRight className="w-4 h-4 text-[#080B12]" />
                       </>
                     )}
@@ -582,7 +588,7 @@ export default function TeamMatchSignInExperience({
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={isGoogleLoading}
-                className="w-full py-2.5 px-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-amber-500/40 text-white text-xs font-mono font-semibold flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/15 hover:border-amber-500/50 text-white text-sm font-mono font-bold flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-50 shadow-lg"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -678,7 +684,7 @@ export default function TeamMatchSignInExperience({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-xl btn-amber-gold uppercase tracking-wider flex items-center justify-center gap-2 text-xs sm:text-sm shadow-xl shadow-amber-500/25 cursor-pointer disabled:opacity-75 transition-colors"
+                    className="w-full py-4 rounded-2xl btn-amber-gold uppercase tracking-wider flex items-center justify-center gap-2.5 text-sm sm:text-base font-black shadow-2xl shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-75 transition-all"
                   >
                     {isSubmitting ? (
                       <>
@@ -707,7 +713,7 @@ export default function TeamMatchSignInExperience({
                     }}
                     className="text-[#F59E0B] hover:text-amber-300 font-bold ml-1 cursor-pointer transition-colors"
                   >
-                    Create Account →
+                    Sign Up / Create Account →
                   </button>
                 </p>
               </div>

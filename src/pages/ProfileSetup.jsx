@@ -20,7 +20,8 @@ import {
   Layers,
   BrainCircuit,
   Users,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 import { useUserProfile } from '../context/UserProfileContext';
 import BorderBeam from '../components/common/BorderBeam';
@@ -55,7 +56,7 @@ const INTEREST_TAGS = [
   'Full-Stack Web'
 ];
 
-export default function ProfileSetup({ onNavigate }) {
+export default function ProfileSetup({ onNavigate, onSignOut }) {
   const { userProfile, updateProfile } = useUserProfile();
 
   const handleBackToHome = () => {
@@ -272,7 +273,7 @@ export default function ProfileSetup({ onNavigate }) {
       <NeuralConstellationBackground />
 
       {/* Sleek Top Navigation Header: Back to Home */}
-      <header className="relative z-30 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 flex items-center justify-between">
+      <header className="relative z-30 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={handleBackToHome}
@@ -282,10 +283,29 @@ export default function ProfileSetup({ onNavigate }) {
           <span>Back to Home</span>
         </button>
 
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-mono text-slate-300 backdrop-blur-md">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-semibold text-white">TeamMatch AI</span>
-          <span className="text-amber-400 font-bold hidden sm:inline">· Stage 01</span>
+        <div className="flex items-center gap-2.5">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] font-mono text-slate-300 backdrop-blur-md">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold text-white">TeamMatch AI</span>
+            <span className="text-amber-400 font-bold">· Stage 01</span>
+          </div>
+
+          {/* Right Corner Sign Out / Log Out Button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onSignOut) {
+                onSignOut();
+              } else if (onNavigate) {
+                onNavigate('/');
+              }
+            }}
+            title="Sign Out and Return to Home"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 hover:border-rose-500/50 text-rose-300 hover:text-rose-200 text-xs font-mono font-bold transition-all cursor-pointer shadow-lg group"
+          >
+            <LogOut className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+            <span>Log Out</span>
+          </button>
         </div>
       </header>
 

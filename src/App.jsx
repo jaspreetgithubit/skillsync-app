@@ -136,6 +136,9 @@ function AppContent() {
       resolved.teamId = routeData.teamId;
       setActiveTeamId(routeData.teamId);
     }
+    if (routeData.mode) {
+      resolved.mode = routeData.mode;
+    }
     if (routeData.purpose) {
       resolved.purpose = routeData.purpose;
     }
@@ -296,6 +299,7 @@ function AppContent() {
         <ProfileSetup 
           onNavigate={navigateTo}
           onBack={() => navigateTo('/choose-purpose')}
+          onSignOut={handleSignOut}
         />
       )}
 
@@ -383,6 +387,7 @@ function AppContent() {
           ========================================================================= */}
       {routeState.view === 'auth' && (
         <TeamMatchSignInExperience 
+          key={`${routeState.mode || 'signin'}-${routeState.purpose || 'join-project'}`}
           initialMode={routeState.mode || 'signin'}
           purpose={routeState.purpose || 'join-project'}
           onAuthenticated={(userData) => {
@@ -463,19 +468,19 @@ function AppContent() {
 
           {/* WEBSITE CONTENT LAYER (FULL ORIGINAL LANDING PAGE - 100% UNCHANGED) */}
           <div className="relative z-10 flex flex-col min-h-screen">
-            <Navbar onOpenAuth={() => handleOpenAuth('signin', 'join-project')} onOpenAdmin={() => navigateTo('/admin')} />
+            <Navbar onOpenAuth={(mode = 'signin', purpose = 'join-project') => handleOpenAuth(mode, purpose)} onOpenAdmin={() => navigateTo('/admin')} />
             
             <main className="flex-1">
-              <Hero onOpenAuth={() => handleOpenAuth('signin', 'join-project')} />
+              <Hero onOpenAuth={(mode = 'signin', purpose = 'join-project') => handleOpenAuth(mode, purpose)} />
               <TechMarquee />
               <HowItWorks />
-              <BentoGrid onOpenAuth={() => handleOpenAuth('signin', 'join-project')} />
+              <BentoGrid onOpenAuth={(mode = 'signin', purpose = 'join-project') => handleOpenAuth(mode, purpose)} />
               <SquadSimulator />
               <ImpactMetrics />
               <Testimonials />
             </main>
 
-            <Footer onOpenAuth={() => handleOpenAuth('signin', 'join-project')} />
+            <Footer onOpenAuth={(mode = 'signin', purpose = 'join-project') => handleOpenAuth(mode, purpose)} />
 
             {/* Google Gemini AI Intelligent Copilot */}
             <GeminiChatbot onNavigate={navigateTo} />
