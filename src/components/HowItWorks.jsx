@@ -163,7 +163,7 @@ export default function HowItWorks() {
             <Sparkles className="h-3.5 w-3.5 text-[#F59E0B]" />
             <span>THE 4-PHASE SELECTION PIPELINE</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-200 tracking-tight">
             How Our AI Matches Skills & Forms Teams
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
@@ -220,7 +220,7 @@ export default function HowItWorks() {
 
               {/* Title & Subtitle */}
               <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-1">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-200 leading-tight mb-1">
                   {currentStep.title}
                 </h3>
                 <p className="text-xs font-mono text-amber-400/90 tracking-wide font-medium">

@@ -75,7 +75,7 @@ export default function Testimonials() {
             <Sparkles className="h-3.5 w-3.5 text-[#F59E0B]" />
             <span>REAL EXPERIENCES & CAMPUS SUCCESS</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          <h2 className="text-3xl sm:text-5xl font-black text-slate-200 tracking-tight">
             Trusted by Students & Faculty Mentors
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">

@@ -121,7 +121,7 @@ function UseCaseCard({ item, onExpand, onOpenAuth }) {
 
         {/* Title & Subtitle */}
         <div>
-          <h3 className="text-xl font-black text-white group-hover:text-[#F59E0B] transition-colors leading-snug mb-1">
+          <h3 className="text-xl font-black text-slate-200 group-hover:text-[#F59E0B] transition-colors leading-snug mb-1">
             {item.title}
           </h3>
           <p className="text-xs font-mono text-amber-400/90 font-medium">
@@ -236,7 +236,7 @@ export default function BentoGrid({ onOpenAuth }) {
             <Sparkles className="h-3.5 w-3.5 text-[#F59E0B]" />
             <span>BUILT FOR STUDENTS, HACKATHONS & ENTERPRISES</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-200 tracking-tight">
             Where Our AI Team Formation Excels
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">

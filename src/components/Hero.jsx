@@ -213,7 +213,7 @@ export default function Hero() {
             </div>
 
             {/* Glowing High-Impact Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08] drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-200 leading-[1.08] drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
               Form the{' '}
               <span className="relative inline-block">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-[#F59E0B] to-amber-500 drop-shadow-[0_0_35px_rgba(245,158,11,0.45)]">
@@ -225,8 +225,8 @@ export default function Hero() {
             </h1>
 
             {/* Subtitle with High-Contrast Typography */}
-            <p className="text-white text-sm sm:text-base leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] bg-[#080B12]/40 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
-              Students create profiles with their <strong className="text-white font-bold">skills, experience, interests, and preferred roles</strong>. When a project title is given, our <strong className="text-[#F59E0B] font-bold">NLP AI model</strong> extracts required skills, calculates compatibility scores, and recommends the best balanced team.
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto lg:mx-0 font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] bg-[#080B12]/40 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+              Students create profiles with their <strong className="text-slate-200 font-semibold">skills, experience, interests, and preferred roles</strong>. When a project title is given, our <strong className="text-[#F59E0B] font-bold">NLP AI model</strong> extracts required skills, calculates compatibility scores, and recommends the best balanced team.
             </p>
 
             {/* 3 Interactive Track Tiles with Subtle Neon Glare */}
@@ -235,7 +235,7 @@ export default function Hero() {
                 <div className="h-7 w-7 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-[#F59E0B] mx-auto mb-1.5 group-hover:scale-110 transition-transform">
                   <GraduationCap className="h-4 w-4" />
                 </div>
-                <div className="text-xs font-bold text-white group-hover:text-[#F59E0B] transition-colors">Student Projects</div>
+                <div className="text-xs font-bold text-slate-200 group-hover:text-[#F59E0B] transition-colors">Student Projects</div>
                 <div className="text-[10px] font-mono text-slate-300">University Capstone</div>
               </div>
 
@@ -243,7 +243,7 @@ export default function Hero() {
                 <div className="h-7 w-7 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400 mx-auto mb-1.5 group-hover:scale-110 transition-transform">
                   <Rocket className="h-4 w-4" />
                 </div>
-                <div className="text-xs font-bold text-white group-hover:text-[#F59E0B] transition-colors">Hackathons</div>
+                <div className="text-xs font-bold text-slate-200 group-hover:text-[#F59E0B] transition-colors">Hackathons</div>
                 <div className="text-[10px] font-mono text-slate-300">48h Rapid Teams</div>
               </div>
 
@@ -251,7 +251,7 @@ export default function Hero() {
                 <div className="h-7 w-7 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 mx-auto mb-1.5 group-hover:scale-110 transition-transform">
                   <Building2 className="h-4 w-4" />
                 </div>
-                <div className="text-xs font-bold text-white group-hover:text-[#F59E0B] transition-colors">Corporate</div>
+                <div className="text-xs font-bold text-slate-200 group-hover:text-[#F59E0B] transition-colors">Corporate</div>
                 <div className="text-[10px] font-mono text-slate-300">Agile Squads</div>
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function Hero() {
 
               <a
                 href="#simulator"
-                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/20 hover:border-[#F59E0B]/60 text-xs uppercase tracking-wider font-bold text-white transition-all backdrop-blur-md cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/20 hover:border-[#F59E0B]/60 text-xs uppercase tracking-wider font-bold text-slate-200 hover:text-white transition-all backdrop-blur-md cursor-pointer"
               >
                 <Brain className="h-4 w-4 text-[#F59E0B] animate-pulse" />
                 <span>Try Live NLP Demo</span>
@@ -385,7 +385,7 @@ export default function Hero() {
                   </div>
                 </div>
 
-                <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
+                <div className="text-xs sm:text-sm font-bold text-slate-200 tracking-wide">
                   "{current.projectTitle}"
                 </div>
 
@@ -423,7 +423,7 @@ export default function Hero() {
 
                         <div className="min-w-0">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs sm:text-sm font-bold text-white group-hover:text-[#F59E0B] transition-colors truncate">
+                            <span className="text-xs sm:text-sm font-bold text-slate-200 group-hover:text-[#F59E0B] transition-colors truncate">
                               {member.name}
                             </span>
                             <span className="text-[10px] font-mono text-slate-400 hidden sm:inline">

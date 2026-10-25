@@ -246,12 +246,10 @@ export default function SquadSimulator() {
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] text-xs font-mono text-[#F59E0B]">
             <BrainCircuit className="h-3.5 w-3.5 text-[#F59E0B]" />
             <span>REAL-TIME LIVE AI LAB</span>
-            <span>DUMMY AI FORMATION LAB</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-200 tracking-tight leading-tight">
             Live AI Team Formation & Project Roster
-            Dummy AI Formation & Project Roster
           </h2>
 
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">

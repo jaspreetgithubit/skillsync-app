@@ -324,7 +324,7 @@ export default function ImpactMetrics() {
             <Sparkles className="h-3.5 w-3.5 text-[#F59E0B]" />
             <span>MEASURABLE PROJECT IMPACT</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-200 tracking-tight">
             Why AI Team Formation Works Better
           </h2>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
