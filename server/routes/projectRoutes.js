@@ -1,17 +1,10 @@
 // server/routes/projectRoutes.js
-// Express API routes for TeamMatch AI Projects
+// Pure Node.js & Express API routes for TeamMatch AI Projects (No MongoDB)
 
 const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
-
-let Project;
-try {
-  Project = require('../models/Project');
-} catch (e) {
-  Project = null;
-}
 
 const dataFilePath = path.resolve(__dirname, '../../data/projects.json');
 
@@ -35,12 +28,8 @@ const writeLocalProjects = (data) => {
 };
 
 // GET /api/projects - Retrieve all projects
-router.get('/', async (req, res) => {
+router.get('/', (req, res) => {
   try {
-    if (Project && Project.db && Project.db.readyState === 1) {
-      const projects = await Project.find().sort({ createdAt: -1 });
-      return res.status(200).json({ success: true, count: projects.length, projects });
-    }
     const local = readLocalProjects();
     return res.status(200).json({ success: true, count: local.length, projects: local });
   } catch (err) {
@@ -49,7 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/projects - Create a new project
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   try {
     const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = req.body;
 
@@ -67,20 +56,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, error: 'At least one required role is required' });
     }
 
-    if (Project && Project.db && Project.db.readyState === 1) {
-      const newProj = await Project.create({
-        projectTitle: projectTitle.trim(),
-        description: description ? description.trim() : '',
-        teamSize: Number(teamSize),
-        requiredSkills,
-        requiredRoles,
-        skillWeights: skillWeights || {},
-        createdBy: createdBy || 'Admin Lead'
-      });
-      return res.status(201).json({ success: true, message: 'Project saved to MongoDB', project: newProj });
-    }
-
-    // Local JSON Database Fallback
+    // Local JSON Database Persistence
     const local = readLocalProjects();
     const newProject = {
       id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -98,11 +74,12 @@ router.post('/', async (req, res) => {
     local.unshift(newProject);
     writeLocalProjects(local);
 
-    return res.status(201).json({ success: true, message: 'Project saved to Local Store', project: newProject });
+    console.log(`[Node.js Backend] New Project registered: ${newProject.projectTitle} (${newProject.id})`);
+
+    return res.status(201).json({ success: true, message: 'Project saved successfully', project: newProject });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 module.exports = router;
-
