@@ -422,7 +422,7 @@ function AppContent() {
               playsInline
               onLoadedData={() => setVideoLoaded(true)}
               className={`absolute inset-0 w-full h-full object-cover filter contrast-105 brightness-105 transition-opacity duration-1000 ${
-                videoLoaded ? 'opacity-35' : 'opacity-20'
+                videoLoaded ? 'opacity-90' : 'opacity-80'
               }`}
             >
               <source src="/videos/Cinematic_K_corporate_office.mp4" type="video/mp4" />
@@ -431,9 +431,9 @@ function AppContent() {
             </video>
 
             {/* Lightweight translucent vignette */}
-            {/* High-Contrast Scrim Layer for Maximum Text Visibility */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#080B12]/85 via-[#080B12]/65 to-[#080B12]/90 pointer-events-none backdrop-blur-[1px]" />
-            <div className="absolute inset-0 bg-[#080B12]/40 pointer-events-none" />
+            {/* Balanced Vignette: Preserves Rich Video Motion While Framing Text */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#080B12]/50 via-transparent to-[#080B12]/65 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(8,11,18,0.55)_100%)] pointer-events-none" />
             
             {/* Ambient Lighting Bleeds */}
             <div className="absolute top-12 left-1/4 w-[750px] h-[500px] bg-purple-900/15 blur-[180px] rounded-full pointer-events-none" />

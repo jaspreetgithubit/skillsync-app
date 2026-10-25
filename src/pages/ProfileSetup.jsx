@@ -851,28 +851,13 @@ export default function ProfileSetup({ onNavigate }) {
             onClick={() => onNavigate && onNavigate('/admin')}
             className="group relative rounded-3xl border border-white/20 hover:border-amber-500/60 bg-[#0D121E]/95 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden cursor-pointer transition-colors"
           >
-            {/* Top Visual Image Header */}
-            <div className="relative h-52 sm:h-60 w-full overflow-hidden border-b border-white/10">
-              <img 
-                src="/images/step2_project.jpg" 
-                alt="Create a Project" 
-                className="w-full h-full object-cover filter contrast-105 brightness-110 saturate-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0D121E] via-transparent to-transparent pointer-events-none" />
-
-              {/* Floating Pill Badges on Image */}
-              <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between">
-                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[#F59E0B] text-[11px] font-mono font-bold uppercase tracking-wider shadow-xl">
-                  <Target className="h-3 w-3 text-[#F59E0B]" />
-                  <span>Project Creator & Lead</span>
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-slate-200 shadow-md">
-                  DIRECT ACCESS
-                </span>
-              </div>
-
-              {/* Live Metric Overlay */}
-              <div className="absolute bottom-3 left-3.5 flex items-center space-x-1.5 text-xs font-mono text-amber-400 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/40 shadow-xl">
+            {/* Clean Header Bar with Badges (Photo Removed) */}
+            <div className="p-6 sm:p-8 pb-0 flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#F59E0B] text-[11px] font-mono font-bold uppercase tracking-wider">
+                <Target className="h-3.5 w-3.5 text-[#F59E0B]" />
+                <span>Project Creator & Lead Track</span>
+              </span>
+              <div className="flex items-center space-x-1.5 text-xs font-mono text-amber-400 bg-black/60 px-3 py-1.5 rounded-lg border border-amber-500/30">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B] animate-ping" />
                 <span>Autonomous AI Squad Assembly</span>
               </div>

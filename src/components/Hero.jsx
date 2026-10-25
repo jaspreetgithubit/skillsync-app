@@ -213,7 +213,7 @@ export default function Hero() {
             </div>
 
             {/* Glowing High-Impact Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08] drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
               Form the{' '}
               <span className="relative inline-block">
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-[#F59E0B] to-amber-500 drop-shadow-[0_0_35px_rgba(245,158,11,0.45)]">
@@ -225,7 +225,7 @@ export default function Hero() {
             </h1>
 
             {/* Subtitle with High-Contrast Typography */}
-            <p className="text-slate-200 text-sm sm:text-base leading-relaxed max-w-xl mx-auto lg:mx-0 font-normal">
+            <p className="text-white text-sm sm:text-base leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] bg-[#080B12]/40 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
               Students create profiles with their <strong className="text-white font-bold">skills, experience, interests, and preferred roles</strong>. When a project title is given, our <strong className="text-[#F59E0B] font-bold">NLP AI model</strong> extracts required skills, calculates compatibility scores, and recommends the best balanced team.
             </p>
 
