@@ -1,0 +1,47 @@
+[
+  {
+    "id": "prof-1792942006917-ky8pn",
+    "name": "Jaspreet Dev",
+    "email": "jaspreet@tech.edu",
+    "roles": [
+      "Backend & Cloud Lead",
+      "Sprint Lead & PM"
+    ],
+    "role": "Backend & Cloud Lead, Sprint Lead & PM",
+    "experience": 4,
+    "skills": [
+      {
+        "name": "Node.js",
+        "level": "Strong"
+      },
+      {
+        "name": "Express",
+        "level": "Strong"
+      },
+      {
+        "name": "Docker",
+        "level": "Medium"
+      },
+      {
+        "name": "React",
+        "level": "Strong"
+      }
+    ],
+    "interests": [
+      "Distributed Systems",
+      "Cloud Architecture"
+    ],
+    "projects": [
+      {
+        "id": "proj-jas-1",
+        "title": "SkillSync AI Platform",
+        "role": "Backend Architect",
+        "techStack": "Node.js, Express, Vite, React",
+        "description": "Engineered high performance team matchmaking platform."
+      }
+    ],
+    "previousProjects": "SkillSync AI Platform (Backend Architect): Engineered high performance team matchmaking platform.",
+    "isLocked": true,
+    "updatedAt": "2026-10-25T15:26:46.917Z"
+  }
+]

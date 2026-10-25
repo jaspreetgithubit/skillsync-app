@@ -1,5 +1,21 @@
 [
   {
+    "id": "usr-1792940794045-jvdau",
+    "name": "JASPREET",
+    "email": "jaspreetsaini4170@gmail.com",
+    "role": "Full Stack Developer",
+    "passwordHash": "848363d37f4ed4ff7229840a997dcb95a8f8da5517733ec8e26cc838862ad77b",
+    "createdAt": "2026-10-25T15:06:34.045Z"
+  },
+  {
+    "id": "usr-1792940722570-wtcil",
+    "name": "jas",
+    "email": "saininavpreet16@gmail.com",
+    "role": "Full Stack Developer",
+    "passwordHash": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+    "createdAt": "2026-10-25T15:05:22.570Z"
+  },
+  {
     "id": "usr-1792939894802-d00rt",
     "name": "Jaspreet Tester",
     "email": "test_1792939894794@example.com",

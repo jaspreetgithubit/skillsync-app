@@ -224,7 +224,24 @@ export default function ProfileSetup({ onNavigate, onSignOut }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Helper to call profile API with fallback to localhost:5000
+  const callProfileApi = async (endpoint, payload) => {
+    try {
+      return await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      return await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (skills.length === 0) {
       setError('Please select or add at least one technical skill.');
@@ -244,22 +261,58 @@ export default function ProfileSetup({ onNavigate, onSignOut }) {
       .map(p => `${p.title}${p.role ? ` (${p.role})` : ''}: ${p.description || p.techStack}`)
       .join(' | ');
 
-    updateProfile({
+    const payload = {
+      name: candidateName,
+      email: candidateEmail,
       roles,
-      role: roles.join(', ') || 'Full Stack Developer',
       experience,
       skills,
       interests,
-      projects,
-      previousProjects: serializedProjects || 'Engineered scalable full stack systems.'
-    });
+      projects
+    };
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await callProfileApi('/api/profile', payload);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save profile. Please try again.');
+      }
+
+      updateProfile({
+        roles,
+        role: roles.join(', ') || 'Full Stack Developer',
+        experience,
+        skills,
+        interests,
+        projects,
+        previousProjects: serializedProjects || 'Engineered scalable full stack systems.',
+        isLocked: true
+      });
+
       if (onNavigate) {
         onNavigate('/explore-projects');
       }
-    }, 550);
+    } catch (err) {
+      console.warn('Profile save warning (persisting locally):', err.message);
+      // Fallback graceful navigation so user is never blocked
+      updateProfile({
+        roles,
+        role: roles.join(', ') || 'Full Stack Developer',
+        experience,
+        skills,
+        interests,
+        projects,
+        previousProjects: serializedProjects || 'Engineered scalable full stack systems.',
+        isLocked: true
+      });
+
+      if (onNavigate) {
+        onNavigate('/explore-projects');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredSuggestions = SUGGESTED_SKILLS.filter(

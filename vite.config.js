@@ -6,136 +6,18 @@ import path from 'path';
 import process from 'node:process';
 import crypto from 'node:crypto';
 
-// Vite Dev Server API Plugin for /api/projects
-function apiProjectsPlugin() {
+// Unified Pure Node.js API Middleware for Vite Dev Server (Zero DB required)
+function apiBackendPlugin() {
   return {
-    name: 'api-projects-plugin',
+    name: 'api-backend-plugin',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url || '';
 
-        // Match /api/projects endpoint
-        if (url.startsWith('/api/projects')) {
-          const dataFilePath = path.resolve(process.cwd(), 'data', 'projects.json');
-
-          const readProjects = () => {
-            try {
-              if (!fs.existsSync(dataFilePath)) {
-                fs.mkdirSync(path.dirname(dataFilePath), { recursive: true });
-                fs.writeFileSync(dataFilePath, '[]', 'utf-8');
-                return [];
-              }
-              const content = fs.readFileSync(dataFilePath, 'utf-8');
-              return JSON.parse(content || '[]');
-            } catch (e) {
-              console.error('Error reading projects.json:', e);
-              return [];
-            }
-          };
-
-          const writeProjects = (projects) => {
-            try {
-              fs.mkdirSync(path.dirname(dataFilePath), { recursive: true });
-              fs.writeFileSync(dataFilePath, JSON.stringify(projects, null, 2), 'utf-8');
-              return true;
-            } catch (e) {
-              console.error('Error writing projects.json:', e);
-              return false;
-            }
-          };
-
-          // GET /api/projects
-          if (req.method === 'GET') {
-            const projects = readProjects();
-            res.setHeader('Content-Type', 'application/json');
-            res.statusCode = 200;
-            res.end(JSON.stringify({ success: true, count: projects.length, projects }));
-            return;
-          }
-
-          // POST /api/projects
-          if (req.method === 'POST') {
-            let body = '';
-            req.on('data', (chunk) => {
-              body += chunk;
-            });
-
-            req.on('end', () => {
-              try {
-                const data = JSON.parse(body || '{}');
-
-                if (!data.projectTitle || !data.projectTitle.trim()) {
-                  res.statusCode = 400;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ success: false, error: 'Project Title is required.' }));
-                  return;
-                }
-
-                if (!data.teamSize || Number(data.teamSize) < 2) {
-                  res.statusCode = 400;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ success: false, error: 'Team Size must be at least 2 members.' }));
-                  return;
-                }
-
-                if (!Array.isArray(data.requiredSkills) || data.requiredSkills.length === 0) {
-                  res.statusCode = 400;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ success: false, error: 'At least one required skill is required.' }));
-                  return;
-                }
-
-                if (!Array.isArray(data.requiredRoles) || data.requiredRoles.length === 0) {
-                  res.statusCode = 400;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ success: false, error: 'At least one required role is required.' }));
-                  return;
-                }
-
-                const projects = readProjects();
-                const newProject = {
-                  id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-                  projectTitle: data.projectTitle.trim(),
-                  description: data.description ? data.description.trim() : '',
-                  teamSize: Number(data.teamSize),
-                  requiredSkills: data.requiredSkills,
-                  requiredRoles: data.requiredRoles,
-                  skillWeights: data.skillWeights || {},
-                  createdBy: data.createdBy || 'Admin Lead',
-                  createdAt: new Date().toISOString(),
-                  status: 'active'
-                };
-
-                projects.unshift(newProject);
-                writeProjects(projects);
-
-                res.statusCode = 201;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ success: true, message: 'Project successfully created and configured.', project: newProject }));
-              } catch (err) {
-                console.error('Error handling project payload:', err);
-                res.statusCode = 500;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ success: false, error: 'Internal Server Error parsing project payload.' }));
-              }
-            });
-            return;
-          }
+        // Only handle /api endpoints
+        if (!url.startsWith('/api') || url.startsWith('/api/chat')) {
+          return next();
         }
-
-        next();
-      });
-    }
-  };
-}
-
-// Vite Dev Server API Plugin for /api/auth and /api/feedback (Pure Node.js, Zero External DB)
-function apiAuthAndFeedbackPlugin() {
-  return {
-    name: 'api-auth-and-feedback-plugin',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        const url = req.url || '';
 
         const parseBody = (callback) => {
           let body = '';
@@ -159,63 +41,58 @@ function apiAuthAndFeedbackPlugin() {
           return crypto.createHash('sha256').update(password).digest('hex');
         };
 
-        const usersFilePath = path.resolve(process.cwd(), 'data', 'users.json');
-        const readUsers = () => {
+        // Paths to local JSON data stores
+        const usersFile = path.resolve(process.cwd(), 'data', 'users.json');
+        const profilesFile = path.resolve(process.cwd(), 'data', 'profiles.json');
+        const projectsFile = path.resolve(process.cwd(), 'data', 'projects.json');
+        const feedbacksFile = path.resolve(process.cwd(), 'data', 'feedbacks.json');
+
+        const readData = (filePath) => {
           try {
-            if (!fs.existsSync(usersFilePath)) return [];
-            return JSON.parse(fs.readFileSync(usersFilePath, 'utf-8') || '[]');
+            if (!fs.existsSync(filePath)) return [];
+            return JSON.parse(fs.readFileSync(filePath, 'utf-8') || '[]');
           } catch {
             return [];
           }
         };
 
-        const writeUsers = (users) => {
+        const writeData = (filePath, items) => {
           try {
-            fs.mkdirSync(path.dirname(usersFilePath), { recursive: true });
-            fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf-8');
+            fs.mkdirSync(path.dirname(filePath), { recursive: true });
+            fs.writeFileSync(filePath, JSON.stringify(items, null, 2), 'utf-8');
             return true;
           } catch {
             return false;
           }
         };
 
-        // POST /api/auth/signin
+        // 1. AUTH: POST /api/auth/signin
         if (url.startsWith('/api/auth/signin') && req.method === 'POST') {
-          parseBody((err, data) => {
+          return parseBody((err, data) => {
             if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
             const { email, password } = data;
-            if (!email || !password) {
-              return sendJson(400, { success: false, error: 'Email and password are required.' });
-            }
+            if (!email || !password) return sendJson(400, { success: false, error: 'Email and password are required.' });
+
             const cleanEmail = email.trim().toLowerCase();
-            const users = readUsers();
+            const users = readData(usersFile);
             const user = users.find((u) => (u.email || '').toLowerCase() === cleanEmail);
-            if (!user) {
-              return sendJson(401, { success: false, error: 'Invalid email or password. Please verify your credentials.' });
-            }
+            if (!user) return sendJson(401, { success: false, error: 'Invalid email or password. Please verify your credentials.' });
+
             const incomingHash = hashPassword(password);
             const isMatch = (user.passwordHash && user.passwordHash === incomingHash) || (user.password && user.password === password);
-            if (!isMatch) {
-              return sendJson(401, { success: false, error: 'Invalid email or password. Please verify your credentials.' });
-            }
+            if (!isMatch) return sendJson(401, { success: false, error: 'Invalid email or password. Please verify your credentials.' });
+
             return sendJson(200, {
               success: true,
               message: 'Signed in successfully!',
-              user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                createdAt: user.createdAt
-              }
+              user: { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt }
             });
           });
-          return;
         }
 
-        // POST /api/auth/signup
+        // 2. AUTH: POST /api/auth/signup
         if (url.startsWith('/api/auth/signup') && req.method === 'POST') {
-          parseBody((err, data) => {
+          return parseBody((err, data) => {
             if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
             const { name, email, password, role } = data;
             if (!name || !name.trim()) return sendJson(400, { success: false, error: 'Full name is required.' });
@@ -223,7 +100,7 @@ function apiAuthAndFeedbackPlugin() {
             if (!password || password.length < 6) return sendJson(400, { success: false, error: 'Password must be at least 6 characters.' });
 
             const cleanEmail = email.trim().toLowerCase();
-            const users = readUsers();
+            const users = readData(usersFile);
             if (users.some((u) => (u.email || '').toLowerCase() === cleanEmail)) {
               return sendJson(409, { success: false, error: 'An account with this email already exists. Please sign in instead.' });
             }
@@ -237,52 +114,133 @@ function apiAuthAndFeedbackPlugin() {
               createdAt: new Date().toISOString()
             };
             users.unshift(newUser);
-            writeUsers(users);
+            writeData(usersFile, users);
 
             return sendJson(201, {
               success: true,
               message: 'Account created successfully!',
-              user: {
-                id: newUser.id,
-                name: newUser.name,
-                email: newUser.email,
-                role: newUser.role,
-                createdAt: newUser.createdAt
-              }
+              user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role, createdAt: newUser.createdAt }
             });
           });
-          return;
         }
 
-        // GET /api/auth/health
-        if (url.startsWith('/api/auth/health') && req.method === 'GET') {
-          return sendJson(200, { status: 'ok', service: 'Vite Auth Middleware' });
-        }
-
-        // /api/feedback
-        if (url.startsWith('/api/feedback')) {
-          const feedbackFilePath = path.resolve(process.cwd(), 'data', 'feedbacks.json');
-          const readFeedbacks = () => {
-            try {
-              if (!fs.existsSync(feedbackFilePath)) return [];
-              return JSON.parse(fs.readFileSync(feedbackFilePath, 'utf-8') || '[]');
-            } catch { return []; }
-          };
-          const writeFeedbacks = (items) => {
-            try {
-              fs.mkdirSync(path.dirname(feedbackFilePath), { recursive: true });
-              fs.writeFileSync(feedbackFilePath, JSON.stringify(items, null, 2), 'utf-8');
-              return true;
-            } catch { return false; }
-          };
-
+        // 3. PROFILE: /api/profile
+        if (url.startsWith('/api/profile')) {
           if (req.method === 'GET') {
-            const list = readFeedbacks();
+            const parsedUrl = new URL(url, 'http://localhost');
+            const emailParam = parsedUrl.searchParams.get('email') || url.replace('/api/profile', '').replace('/', '').split('?')[0];
+            const profiles = readData(profilesFile);
+            if (emailParam && emailParam.includes('@')) {
+              const clean = emailParam.trim().toLowerCase();
+              const found = profiles.find((p) => (p.email || '').toLowerCase() === clean);
+              return sendJson(200, { success: true, profile: found || null });
+            }
+            return sendJson(200, { success: true, count: profiles.length, profiles });
+          }
+
+          if (req.method === 'POST') {
+            return parseBody((err, data) => {
+              if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
+              const { name, email, roles, experience, skills, interests, projects } = data;
+              if (!email || !email.includes('@')) return sendJson(400, { success: false, error: 'Valid email is required.' });
+              if (!Array.isArray(skills) || skills.length === 0) return sendJson(400, { success: false, error: 'Please select or add at least one technical skill.' });
+              if (!Array.isArray(roles) || roles.length === 0) return sendJson(400, { success: false, error: 'Please select at least one sprint role.' });
+
+              const cleanEmail = email.trim().toLowerCase();
+              const cleanName = name && typeof name === 'string' ? name.trim() : cleanEmail.split('@')[0];
+              const cleanExp = Number(experience) >= 0 ? Number(experience) : 1;
+              const cleanRoles = roles.map((r) => String(r).trim()).filter(Boolean);
+              const cleanInterests = Array.isArray(interests) ? interests : [];
+              const cleanProjects = Array.isArray(projects) ? projects : [];
+              const cleanSkills = skills.map((s) => {
+                if (typeof s === 'string') return { name: s.trim(), level: 'Strong' };
+                return { name: String(s.name || '').trim(), level: s.level || 'Strong' };
+              }).filter((s) => s.name.length > 0);
+
+              const serializedProjects = cleanProjects
+                .filter((p) => p && p.title && p.title.trim())
+                .map((p) => `${p.title}${p.role ? ` (${p.role})` : ''}: ${p.description || p.techStack || ''}`)
+                .join(' | ');
+
+              const profiles = readData(profilesFile);
+              const existingIndex = profiles.findIndex((p) => (p.email || '').toLowerCase() === cleanEmail);
+
+              const profileRecord = {
+                id: existingIndex >= 0 ? profiles[existingIndex].id : `prof-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                name: cleanName,
+                email: cleanEmail,
+                roles: cleanRoles,
+                role: cleanRoles.join(', '),
+                experience: cleanExp,
+                skills: cleanSkills,
+                interests: cleanInterests,
+                projects: cleanProjects,
+                previousProjects: serializedProjects || 'Engineered scalable full stack systems.',
+                isLocked: true,
+                updatedAt: new Date().toISOString()
+              };
+
+              if (existingIndex >= 0) {
+                profiles[existingIndex] = profileRecord;
+              } else {
+                profiles.unshift(profileRecord);
+              }
+              writeData(profilesFile, profiles);
+
+              return sendJson(200, {
+                success: true,
+                message: 'Profile and skills curated and locked successfully!',
+                profile: profileRecord
+              });
+            });
+          }
+        }
+
+        // 4. PROJECTS: /api/projects
+        if (url.startsWith('/api/projects')) {
+          if (req.method === 'GET') {
+            const projects = readData(projectsFile);
+            return sendJson(200, { success: true, count: projects.length, projects });
+          }
+
+          if (req.method === 'POST') {
+            return parseBody((err, data) => {
+              if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
+              if (!data.projectTitle || !data.projectTitle.trim()) return sendJson(400, { success: false, error: 'Project Title is required.' });
+              if (!data.teamSize || Number(data.teamSize) < 2) return sendJson(400, { success: false, error: 'Team Size must be at least 2 members.' });
+              if (!Array.isArray(data.requiredSkills) || data.requiredSkills.length === 0) return sendJson(400, { success: false, error: 'At least one required skill is required.' });
+              if (!Array.isArray(data.requiredRoles) || data.requiredRoles.length === 0) return sendJson(400, { success: false, error: 'At least one required role is required.' });
+
+              const projects = readData(projectsFile);
+              const newProject = {
+                id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                projectTitle: data.projectTitle.trim(),
+                description: data.description ? data.description.trim() : '',
+                teamSize: Number(data.teamSize),
+                requiredSkills: data.requiredSkills,
+                requiredRoles: data.requiredRoles,
+                skillWeights: data.skillWeights || {},
+                createdBy: data.createdBy || 'Admin Lead',
+                createdAt: new Date().toISOString(),
+                status: 'active'
+              };
+              projects.unshift(newProject);
+              writeData(projectsFile, projects);
+
+              return sendJson(201, { success: true, message: 'Project successfully created and configured.', project: newProject });
+            });
+          }
+        }
+
+        // 5. FEEDBACK: /api/feedback
+        if (url.startsWith('/api/feedback')) {
+          if (req.method === 'GET') {
+            const list = readData(feedbacksFile);
             return sendJson(200, { success: true, count: list.length, feedbacks: list });
           }
 
           if (req.method === 'POST') {
-            parseBody((err, data) => {
+            return parseBody((err, data) => {
               if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
               const { name, email, contactNo, role, problem } = data;
               if (!name || !name.trim()) return sendJson(400, { success: false, error: 'Full name is required.' });
@@ -300,18 +258,12 @@ function apiAuthAndFeedbackPlugin() {
                 status: 'open',
                 createdAt: new Date().toISOString()
               };
-              const feedbacks = readFeedbacks();
+              const feedbacks = readData(feedbacksFile);
               feedbacks.unshift(newFeedback);
-              writeFeedbacks(feedbacks);
+              writeData(feedbacksFile, feedbacks);
 
-              return sendJson(201, {
-                success: true,
-                message: 'Feedback received successfully!',
-                ticketId,
-                feedback: newFeedback
-              });
+              return sendJson(201, { success: true, message: 'Feedback received successfully!', ticketId, feedback: newFeedback });
             });
-            return;
           }
         }
 
@@ -321,18 +273,15 @@ function apiAuthAndFeedbackPlugin() {
   };
 }
 
-// https://vite.dev/config/
 export default defineConfig({
   server: {
     proxy: {
-      // Secure Gemini chat backend (server/gemini-chat/chatServer.js). The API key stays on the server.
       '/api/chat': 'http://localhost:5050'
     }
   },
   plugins: [
     tailwindcss(),
     react(),
-    apiProjectsPlugin(),
-    apiAuthAndFeedbackPlugin()
+    apiBackendPlugin()
   ],
 });
