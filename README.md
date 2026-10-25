@@ -14,13 +14,3 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
-## Supabase profile persistence and onboarding
-
-1. Copy `.env.example` to `.env` in the project root and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` with your Supabase project URL and publishable/anon key. Do not put a secret/service-role key in any `VITE_` variable.
-2. In Supabase Dashboard, open **SQL Editor**, paste and run `supabase/user_profiles.sql`. This creates the `user_profiles` table and owner-only Row Level Security policies.
-3. In **Authentication → URL Configuration**, keep your local redirect URL (for example `http://localhost:5173/`) in the allowed Redirect URLs.
-4. Install dependencies and start the app with `npm install` and `npm run dev`.
-5. Sign in with Google. Users without a completed profile are sent to onboarding; completed profiles are routed to the dashboard. Submitting onboarding saves the profile against the authenticated Supabase user ID.
-
-The frontend uses only the publishable/anon key. Any Supabase secret/service-role key must remain server-side and must never be committed or shared.

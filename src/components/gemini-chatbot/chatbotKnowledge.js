@@ -63,14 +63,14 @@ export const FALLBACK_RESPONSES = [
   },
   {
     keywords: ['hackathon', 'stack', 'tech stack', 'composition', 'team'],
-    response: `**Optimal 4-Person Hackathon Squad Composition:**\n\n- **Member 1 (Lead / Architect)**: Full Stack + API design (FastAPI / Next.js).\n- **Member 2 (Frontend Specialist)**: React / Tailwind / Motion for a breathtaking pitch demo.\n- **Member 3 (Core AI / Logic)**: Python / PyTorch / LangChain / Gemini API integration.\n- **Member 4 (Cloud & DevOps / Demo Prep)**: Docker, Supabase, Presentation slide deck & demo staging.\n\n*Tip: SyncSkills automatically balances these roles when recommending squads!*`
+    response: `**Optimal 4-Person Hackathon Squad Composition:**\n\n- **Member 1 (Lead / Architect)**: Full Stack + API design (FastAPI / Next.js).\n- **Member 2 (Frontend Specialist)**: React / Tailwind / Motion for a breathtaking pitch demo.\n- **Member 3 (Core AI / Logic)**: Python / PyTorch / LangChain / Gemini API integration.\n- **Member 4 (Cloud & DevOps / Demo Prep)**: Docker, Presentation slide deck & demo staging.\n\n*Tip: SyncSkills automatically balances these roles when recommending squads!*`
   },
   {
     keywords: ['project', 'explore', 'capstone', 'join', 'apply'],
     response: `**Finding and Joining Projects on SyncSkills.AI:**\n\n1. Click **Get Started** on the top navigation bar or hero section.\n2. Choose **"Join an Existing Project"**.\n3. Curate your profile with your skills (e.g., React, Python, Docker).\n4. Browse our catalog of vetted Capstone and Hackathon projects.\n5. Click **"Analyze My Fit"** to inspect your compatibility score and join the squad!`
   },
   {
-    keywords: ['google', 'auth', 'login', 'sign in', 'supabase'],
-    response: `**Google Sign-In & Authentication:**\n\n- You can sign in using the **"Continue with Google"** button on the Auth page.\n- For live Supabase OAuth, ensure \`VITE_SUPABASE_URL\` and \`VITE_SUPABASE_ANON_KEY\` are defined in your \`.env\` file.\n- If keys are not yet configured, our interactive Google Account Chooser allows one-click sandbox sign-in so your development never stops!`
+    keywords: ['google', 'auth', 'login', 'sign in', 'account'],
+    response: `**Account Access & Authentication:**\n\n- You can sign in using your credentials on the Auth page or use our one-click candidate preview.`
   }
 ];

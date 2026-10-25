@@ -92,9 +92,6 @@ function AppContent() {
       if (path.includes('/choose-purpose') || page === 'choose-purpose' || page === 'purpose') {
         return { view: 'purpose' };
       }
-      if (path.includes('/onboarding') || page === 'onboarding') {
-        return { view: 'onboarding' };
-      }
       if (path.includes('/auth') || page === 'auth') {
         const purpose = params.get('purpose') || (path.includes('create') ? 'create-project' : 'join-project');
         const mode = params.get('mode') || 'signin';
@@ -305,27 +302,6 @@ function AppContent() {
           }}
           onBackToHome={() => navigateTo('/')}
           onBackToPurpose={() => navigateTo('/choose-purpose')}
-        />
-      )}
-
-      {/* =========================================================================
-          SUPABASE ONBOARDING & DASHBOARD (from saksham-development)
-          ========================================================================= */}
-      {routeState.view === 'onboarding' && (
-        <ProfileCompletion
-          user={pendingAuthUser}
-          loading={profileLoading}
-          error={profileError}
-          onSubmit={handleProfileComplete}
-          onSignOut={handleSignOut}
-        />
-      )}
-
-      {routeState.view === 'dashboard' && (
-        <AuthSuccessDashboard
-          user={currentUser}
-          onSignOut={handleSignOut}
-          onBackToHome={() => navigateTo('/')}
         />
       )}
 

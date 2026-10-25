@@ -69,7 +69,7 @@ export default function TeamMatchSignInExperience({
 
   const isCreatorTrack = purpose === 'create-project';
 
-  // Handle Google OAuth Sign In (Supabase + Interactive Google Account Chooser)
+  // Handle Google Sign In
   const handleGoogleSignIn = () => {
     submitSignIn('alex.rivera@university.edu');
   };
@@ -382,7 +382,7 @@ export default function TeamMatchSignInExperience({
                 </div>
               )}
 
-              {/* Google Sign In Button (Supabase integration) */}
+              {/* Google Sign In Button */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
@@ -561,7 +561,7 @@ export default function TeamMatchSignInExperience({
                 </div>
               )}
 
-              {/* Google Sign In Button (Supabase integration) */}
+              {/* Google Sign In Button */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
