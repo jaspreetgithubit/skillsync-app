@@ -8,8 +8,7 @@ import {
   Building2,
   BrainCircuit,
   Sparkles,
-  UserPlus,
-  ShieldCheck
+  UserPlus
 } from 'lucide-react';
 import SignUpModal from './SignUpModal';
 
@@ -205,17 +204,6 @@ export default function Navbar({ onOpenAuth, onOpenAdmin }) {
             >
               Dummy Demo
             </a>
-
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider text-amber-400/90 hover:text-amber-300 hover:bg-amber-400/10 border border-amber-400/20 transition-all flex items-center space-x-1.5 cursor-pointer"
-                title="Admin Project Console"
-              >
-                <ShieldCheck className="h-3.5 w-3.5 text-[#F59E0B]" />
-                <span>Admin</span>
-              </button>
-            )}
           </div>
 
           {/* Right-Side Desktop Auth Action Buttons */}
@@ -279,22 +267,6 @@ export default function Navbar({ onOpenAuth, onOpenAdmin }) {
               >
                 Dummy Demo
               </a>
-
-              {onOpenAdmin && (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAdmin();
-                  }}
-                  className="w-full text-left flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/20 cursor-pointer"
-                >
-                  <span className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-[#F59E0B]" />
-                    <span>Admin Project Console</span>
-                  </span>
-                  <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-[#F59E0B]/20 text-[#F59E0B]">Create Project →</span>
-                </button>
-              )}
             </div>
 
             <div className="pt-3 grid grid-cols-2 gap-2">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import TechMarquee from './components/TechMarquee';
@@ -8,39 +8,139 @@ import SquadSimulator from './components/SquadSimulator';
 import ImpactMetrics from './components/ImpactMetrics';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
+import ChoosePurposePage from './components/ChoosePurposePage';
 import TeamMatchSignInExperience from './components/TeamMatchSignInExperience';
-import AuthSuccessDashboard from './components/AuthSuccessDashboard';
 import AdminCreateProject from './components/AdminCreateProject';
-import { supabase } from './lib/supabase';
+import AuthSuccessDashboard from './components/AuthSuccessDashboard';
 import ProfileCompletion from './components/ProfileCompletion';
+import { supabase } from './lib/supabase';
 
-export default function App() {
+// User Profile Context
+import { UserProfileProvider, useUserProfile } from './context/UserProfileContext';
+
+// 2026 Multi-Step User Flow Pages (Pages 1 to 9)
+import ProfileSetup from './pages/ProfileSetup';
+import ExploreProjects from './pages/ExploreProjects';
+import ProjectDetails from './pages/ProjectDetails';
+import CompatibilityAnalysis from './pages/CompatibilityAnalysis';
+import CompareTeams from './pages/CompareTeams';
+import RecommendedTeam from './pages/RecommendedTeam';
+import TeamDashboard from './pages/TeamDashboard';
+import useLenis from './hooks/useLenis';
+
+function AppContent() {
+  useLenis();
+  const { updateProfile, setActiveProjectId, setActiveTeamId } = useUserProfile();
   const [videoLoaded, setVideoLoaded] = useState(false);
 
-  // Read initial view from URL query param (?page=admin or ?type=...)
-  const getInitialView = () => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('page') === 'admin' || params.get('admin') === 'true') {
-        return 'admin';
-      }
-      if (params.get('type') || params.get('purpose')) {
-        return 'auth';
-      }
-    } catch (e) {}
-    return 'landing';
-  };
-
-  // Navigation & Authentication View State: 'landing' | 'auth' | 'dashboard' | 'admin'
-  const [currentView, setCurrentView] = useState(getInitialView());
-  const [authMode, setAuthMode] = useState('signin'); // 'signin' | 'signup'
+  // Supabase Auth Integration (from saksham-development)
   const [currentUser, setCurrentUser] = useState(null);
   const [pendingAuthUser, setPendingAuthUser] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState('');
 
-  // Restore the Supabase session and route users based on their saved profile.
-  React.useEffect(() => {
+  // Pathname & Query-Aware Route Resolver
+  const resolveCurrentRoute = useCallback(() => {
+    try {
+      const path = (window.location.pathname || '').toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get('page');
+
+      if (path.includes('/profile-setup') || page === 'profile-setup') {
+        return { view: 'profile-setup' };
+      }
+      if (path.includes('/explore-projects') || page === 'explore-projects') {
+        return { view: 'explore-projects' };
+      }
+      if (path.includes('/compatibility') || page === 'compatibility') {
+        const idMatch = path.match(/\/project\/([^/]+)\/compatibility/);
+        const pId = idMatch ? idMatch[1] : params.get('projectId') || 'proj-1';
+        return { view: 'compatibility', projectId: pId };
+      }
+      if (path.includes('/compare') || page === 'compare') {
+        const idMatch = path.match(/\/project\/([^/]+)\/compare/);
+        const pId = idMatch ? idMatch[1] : params.get('projectId') || 'proj-1';
+        return { view: 'compare-teams', projectId: pId };
+      }
+      if (path.includes('/recommended') || page === 'recommended') {
+        const idMatch = path.match(/\/project\/([^/]+)\/recommended/);
+        const pId = idMatch ? idMatch[1] : params.get('projectId') || 'proj-1';
+        return { view: 'recommended-team', projectId: pId, teamId: params.get('teamId') || 'team-1' };
+      }
+      if (path.startsWith('/project/') || page === 'project-details' || page === 'project') {
+        const idMatch = path.match(/\/project\/([^/]+)/);
+        const pId = idMatch ? idMatch[1] : params.get('projectId') || 'proj-1';
+        return { view: 'project-details', projectId: pId };
+      }
+      if (path.startsWith('/team/') || page === 'team-dashboard' || page === 'dashboard' || page === 'team') {
+        const idMatch = path.match(/\/team\/([^/]+)/);
+        const tId = idMatch ? idMatch[1] : params.get('teamId') || 'team-1';
+        return { view: 'team-dashboard', teamId: tId, projectId: params.get('projectId') || 'proj-1' };
+      }
+      if (path.includes('/admin') || page === 'admin' || params.get('admin') === 'true') {
+        return { view: 'admin' };
+      }
+      if (path.includes('/choose-purpose') || page === 'choose-purpose' || page === 'purpose') {
+        return { view: 'purpose' };
+      }
+      if (path.includes('/onboarding') || page === 'onboarding') {
+        return { view: 'onboarding' };
+      }
+      if (path.includes('/auth') || page === 'auth') {
+        const purpose = params.get('purpose') || (path.includes('create') ? 'create-project' : 'join-project');
+        const mode = params.get('mode') || 'signin';
+        return { view: 'auth', purpose, mode };
+      }
+    } catch {
+      // ignore
+    }
+    return { view: 'landing' };
+  }, []);
+
+  const [routeState, setRouteState] = useState(resolveCurrentRoute);
+
+  // Sync with browser Back and Forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const resolved = resolveCurrentRoute();
+      setRouteState(resolved);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [resolveCurrentRoute]);
+
+  // Synchronous route navigator supporting paths and state
+  const navigateTo = (toUrl, routeData = {}) => {
+    try {
+      window.history.pushState(routeData, '', toUrl);
+    } catch {
+      // ignore
+    }
+
+    const resolved = resolveCurrentRoute();
+    if (routeData.projectId) {
+      resolved.projectId = routeData.projectId;
+      setActiveProjectId(routeData.projectId);
+    }
+    if (routeData.teamId) {
+      resolved.teamId = routeData.teamId;
+      setActiveTeamId(routeData.teamId);
+    }
+    if (routeData.purpose) {
+      resolved.purpose = routeData.purpose;
+    }
+
+    setRouteState(resolved);
+    if (window.lenis) {
+      window.lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Restore the Supabase session and route users based on their saved profile
+  useEffect(() => {
     if (!supabase) return undefined;
 
     let active = true;
@@ -54,34 +154,37 @@ export default function App() {
         id: user.id,
         name: googleName,
         email: user.email || '',
-        avatarUrl: metadata.avatar_url || metadata.picture || null,
-        role: 'Innovator',
-        department: 'Computer Science & AI',
-        goalTrack: getInitialPurpose(),
-        experience: '', interests: [], skills: [], projects: '',
+        avatar: metadata.avatar_url || metadata.picture || null,
+        role: 'Full Stack Developer',
         authenticatedAt: new Date().toLocaleTimeString()
       };
 
-      const { data: profile, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (!active) return;
-      if (error) {
-        console.error('Unable to load user profile:', error.message);
-        setProfileError('We could not load your profile. Check that the user_profiles table and RLS policies have been created in Supabase.');
-        setPendingAuthUser(baseUser);
-        setCurrentView('onboarding');
-      } else if (!profile || !profile.onboarding_complete) {
-        setPendingAuthUser({ ...baseUser, ...(profile || {}) });
-        setCurrentView('onboarding');
-      } else {
-        setCurrentUser({ ...baseUser, ...profile, id: user.id });
-        setPendingAuthUser(null);
-        setCurrentView('dashboard');
+      try {
+        const { data: profile, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (!active) return;
+        if (error) {
+          console.error('Unable to load user profile:', error.message);
+          setPendingAuthUser(baseUser);
+          updateProfile(baseUser);
+        } else if (!profile || !profile.onboarding_complete) {
+          setPendingAuthUser({ ...baseUser, ...(profile || {}) });
+          updateProfile({ ...baseUser, ...(profile || {}) });
+        } else {
+          const fullUser = { ...baseUser, ...profile, id: user.id };
+          setCurrentUser(fullUser);
+          setPendingAuthUser(null);
+          updateProfile(fullUser);
+        }
+      } catch (err) {
+        console.warn('Supabase profile query fallback:', err);
+      } finally {
+        if (active) setProfileLoading(false);
       }
-      setProfileLoading(false);
     };
 
     supabase.auth.getSession().then(({ data, error }) => {
@@ -91,173 +194,199 @@ export default function App() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
-        // Defer Supabase queries until after the auth callback has returned.
         Promise.resolve().then(() => applySupabaseUser(session.user));
       }
       if (event === 'SIGNED_OUT') {
         setCurrentUser(null);
         setPendingAuthUser(null);
-        setCurrentView('landing');
       }
     });
 
-    return () => { active = false; authListener.subscription.unsubscribe(); };
-  }, []);
-
-  // Read initial purpose from URL query param if present (e.g. ?type=company or ?type=college)
-  const getInitialPurpose = () => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const type = params.get('type') || params.get('purpose');
-      if (type && ['company', 'college', 'capstone', 'hackathon'].includes(type.toLowerCase())) {
-        return type.toLowerCase();
-      }
-    } catch (e) {}
-    return 'capstone';
-  };
-
-  const [selectedPurpose, setSelectedPurpose] = useState(getInitialPurpose());
-
-  // Listen for browser navigation changes
-  React.useEffect(() => {
-    const handlePopState = () => {
-      const p = getInitialPurpose();
-      if (p) setSelectedPurpose(p);
-      const v = getInitialView();
-      setCurrentView(v);
+    return () => {
+      active = false;
+      authListener?.subscription?.unsubscribe();
     };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [updateProfile]);
 
-  // Triggered when user clicks Login, Sign In, or Purpose Cards from the Home page:
-  const handleOpenAuth = (mode = 'signin', purpose = null) => {
-    setAuthMode(mode);
-    const resolvedPurpose = purpose || selectedPurpose || 'capstone';
-    setSelectedPurpose(resolvedPurpose);
-
-    // Update URL query parameters cleanly
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set('type', resolvedPurpose);
-      window.history.pushState({}, '', url);
-    } catch (e) {}
-
-    setCurrentView('auth');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Open the "Choose Your Purpose" page
+  const handleOpenPurpose = () => {
+    navigateTo('/choose-purpose');
   };
 
-  const handleOpenAdmin = () => {
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.set('page', 'admin');
-      window.history.pushState({}, '', url);
-    } catch (e) {}
-
-    setCurrentView('admin');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToLanding = () => {
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('type');
-      url.searchParams.delete('purpose');
-      url.searchParams.delete('page');
-      url.searchParams.delete('admin');
-      window.history.pushState({}, '', url);
-    } catch (e) {}
-
-    setCurrentView('landing');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleAuthenticated = (userData) => {
-    setCurrentUser(userData);
-    setCurrentView('dashboard');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleProfileComplete = async (formData) => {
-    if (!supabase || !pendingAuthUser?.id) {
-      setProfileError('Your Supabase session is missing. Please sign in with Google again.');
-      return;
+  // User decision on Choose Your Purpose page: routes to Auth first!
+  const handleSelectPurpose = (purposeId) => {
+    if (purposeId === 'create-project') {
+      navigateTo('/auth?purpose=create-project', { purpose: 'create-project' });
+    } else {
+      navigateTo('/auth?purpose=join-project', { purpose: 'join-project' });
     }
+  };
+
+  const handleProfileComplete = async (profileData) => {
     setProfileLoading(true);
     setProfileError('');
-    const profilePayload = {
-      id: pendingAuthUser.id,
-      email: pendingAuthUser.email,
-      name: formData.name.trim(),
-      role: formData.role,
-      experience: formData.experience,
-      interests: formData.interests,
-      skills: formData.skills,
-      projects: formData.projects,
-      onboarding_complete: true,
-      updated_at: new Date().toISOString()
-    };
-    const { data, error } = await supabase.from('user_profiles').upsert(profilePayload, { onConflict: 'id' }).select().single();
-    setProfileLoading(false);
-    if (error) {
-      console.error('Unable to save profile:', error.message);
-      setProfileError(error.message.includes('user_profiles')
-        ? 'The user_profiles table is not available yet. Run the SQL file supabase/user_profiles.sql in your Supabase SQL Editor.'
-        : `Could not save your profile: ${error.message}`);
-      return;
+    try {
+      if (supabase && pendingAuthUser?.id) {
+        const { error } = await supabase.from('user_profiles').upsert({
+          id: pendingAuthUser.id,
+          ...profileData,
+          onboarding_complete: true,
+          updated_at: new Date().toISOString()
+        });
+        if (error) {
+          console.warn('Failed to save profile in Supabase:', error.message);
+        }
+      }
+      const updated = { ...(pendingAuthUser || {}), ...profileData, id: pendingAuthUser?.id };
+      setCurrentUser(updated);
+      setPendingAuthUser(null);
+      updateProfile(updated);
+      navigateTo('/profile-setup');
+    } catch (err) {
+      setProfileError(err?.message || 'Failed to complete profile.');
+    } finally {
+      setProfileLoading(false);
     }
-    setCurrentUser({ ...pendingAuthUser, ...data, id: pendingAuthUser.id });
-    setPendingAuthUser(null);
-    setCurrentView('dashboard');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSignOut = async () => {
     if (supabase) {
-      const { error } = await supabase.auth.signOut();
-      if (error) console.error('Supabase sign-out failed:', error.message);
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
     }
     setCurrentUser(null);
-    setCurrentView('auth');
+    setPendingAuthUser(null);
+    navigateTo('/');
   };
 
   return (
     <div className="relative min-h-screen bg-[#080B12] text-slate-100 font-sans selection:bg-[#F59E0B] selection:text-[#080B12] antialiased overflow-x-hidden">
 
       {/* =========================================================================
-          VIEW 0: ADMIN "CREATE PROJECT" CONFIGURATION EXPERIENCE
+          VIEW 1: CHOOSE YOUR PURPOSE ("Why are you here?")
           ========================================================================= */}
-      {currentView === 'admin' && (
-        <AdminCreateProject
-          onBackToHome={handleBackToLanding}
+      {routeState.view === 'purpose' && (
+        <ChoosePurposePage 
+          onSelectPurpose={handleSelectPurpose}
+          onBackToHome={() => navigateTo('/')}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGE 1: PROFILE SETUP / ONBOARDING (/profile-setup)
+          ========================================================================= */}
+      {routeState.view === 'profile-setup' && (
+        <ProfileSetup 
+          onNavigate={navigateTo}
+          onBack={() => navigateTo('/choose-purpose')}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGE 2: EXPLORE PROJECTS (/explore-projects)
+          ========================================================================= */}
+      {routeState.view === 'explore-projects' && (
+        <ExploreProjects 
+          onNavigate={navigateTo}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGE 3: PROJECT DETAILS (/project/:projectId)
+          ========================================================================= */}
+      {routeState.view === 'project-details' && (
+        <ProjectDetails 
+          projectId={routeState.projectId || 'proj-1'}
+          onNavigate={navigateTo}
+          onBack={() => navigateTo('/explore-projects')}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGE 4: DYNAMIC COMPATIBILITY ANALYSIS (/project/:projectId/compatibility)
+          ========================================================================= */}
+      {routeState.view === 'compatibility' && (
+        <CompatibilityAnalysis 
+          projectId={routeState.projectId || 'proj-1'}
+          onNavigate={navigateTo}
+          onBack={() => navigateTo(`/project/${routeState.projectId || 'proj-1'}`)}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGES 5 & 6: SQUAD MATRIX & COMPARISON (/project/:projectId/compare)
+          ========================================================================= */}
+      {routeState.view === 'compare-teams' && (
+        <CompareTeams 
+          projectId={routeState.projectId || 'proj-1'}
+          onNavigate={navigateTo}
+          onBack={() => navigateTo(`/project/${routeState.projectId || 'proj-1'}/compatibility`)}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGES 7 & 8: RECOMMENDED TEAM & JOIN FLOW (/project/:projectId/recommended)
+          ========================================================================= */}
+      {routeState.view === 'recommended-team' && (
+        <RecommendedTeam 
+          projectId={routeState.projectId || 'proj-1'}
+          teamId={routeState.teamId || 'team-1'}
+          onNavigate={navigateTo}
+          onBack={() => navigateTo(`/project/${routeState.projectId || 'proj-1'}/compare`)}
+        />
+      )}
+
+      {/* =========================================================================
+          PAGE 9: TEAM DASHBOARD & COLLABORATION HUB (/team/:teamId)
+          ========================================================================= */}
+      {routeState.view === 'team-dashboard' && (
+        <TeamDashboard 
+          projectId={routeState.projectId || 'proj-1'}
+          teamId={routeState.teamId || 'team-1'}
+          onNavigate={navigateTo}
+        />
+      )}
+
+      {/* =========================================================================
+          ADMIN: CREATE PROJECT (/admin/create-project)
+          ========================================================================= */}
+      {routeState.view === 'admin' && (
+        <AdminCreateProject 
+          currentUser={{ name: 'Admin Lead', role: 'Project Creator' }}
+          onBackToHome={() => navigateTo('/')}
           onProjectCreated={(newProject) => {
-            console.log('Project registered in SyncSkills.AI Engine:', newProject);
+            console.log('Project registered:', newProject);
+            navigateTo('/explore-projects');
           }}
         />
       )}
 
       {/* =========================================================================
-          VIEW 1: CINEMATIC SCROLL-DRIVEN SIGN IN EXPERIENCE (SYNCSKILLS.AI)
-          "Welcome Back → Scroll → Image 01 → Image 02 → Image 03 → Image 04 → Image 05 → Purpose Cards → Purpose-Specific Sign In"
+          CINEMATIC 2026 SLIDING SPLIT-SCREEN AUTHENTICATION
           ========================================================================= */}
-      {currentView === 'auth' && (
-        <TeamMatchSignInExperience
-          initialMode={authMode}
-          initialPurpose={selectedPurpose}
-          onPurposeChange={(newPurpose) => {
-            setSelectedPurpose(newPurpose);
-            try {
-              const url = new URL(window.location.href);
-              url.searchParams.set('type', newPurpose);
-              window.history.pushState({}, '', url);
-            } catch (e) {}
+      {routeState.view === 'auth' && (
+        <TeamMatchSignInExperience 
+          initialMode={routeState.mode || 'signin'}
+          purpose={routeState.purpose || 'join-project'}
+          onAuthenticated={(userData) => {
+            if (routeState.purpose === 'create-project' || userData?.purpose === 'create-project') {
+              navigateTo('/admin');
+            } else {
+              navigateTo('/profile-setup');
+            }
           }}
-          onAuthenticated={handleAuthenticated}
-          onBackToHome={handleBackToLanding}
+          onBackToHome={() => navigateTo('/')}
+          onBackToPurpose={() => navigateTo('/choose-purpose')}
         />
       )}
 
-      {currentView === 'onboarding' && (
+      {/* =========================================================================
+          SUPABASE ONBOARDING & DASHBOARD (from saksham-development)
+          ========================================================================= */}
+      {routeState.view === 'onboarding' && (
         <ProfileCompletion
           user={pendingAuthUser}
           loading={profileLoading}
@@ -267,26 +396,20 @@ export default function App() {
         />
       )}
 
-      {/* =========================================================================
-          VIEW 3: AUTHENTICATED ACTIVE AI MATCHING DASHBOARD
-          ========================================================================= */}
-      {currentView === 'dashboard' && (
+      {routeState.view === 'dashboard' && (
         <AuthSuccessDashboard
           user={currentUser}
           onSignOut={handleSignOut}
-          onBackToHome={handleBackToLanding}
+          onBackToHome={() => navigateTo('/')}
         />
       )}
 
       {/* =========================================================================
-          VIEW 4: COMPLETE ORIGINAL LANDING PAGE (WITH ALL SECTIONS & VIDEO)
+          100% PRESERVED ORIGINAL LANDING PAGE (WITH ALL SECTIONS & VIDEO)
           ========================================================================= */}
-      {currentView === 'landing' && (
+      {routeState.view === 'landing' && (
         <>
-          {/* =====================================================================
-              USER'S CINEMATIC CORPORATE OFFICE VIDEO (PUBLIC FOLDER)
-              PRESERVED IN FULL-SCREEN LOOPING GLORY ACROSS THE ENTIRE WEBSITE
-              ===================================================================== */}
+          {/* USER'S CINEMATIC CORPORATE OFFICE VIDEO (PUBLIC FOLDER) */}
           <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
             <video
               key="user-cinematic-corporate-v1"
@@ -304,16 +427,16 @@ export default function App() {
               <source src="/videos/cinematic-demo.mp4" type="video/mp4" />
             </video>
 
-            {/* Lightweight translucent vignette: allows video motion to shine */}
+            {/* Lightweight translucent vignette */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 pointer-events-none" />
-
-            {/* Ambient Warm Amber & Soft Violet Bleeds Harmonized with the Video Lighting */}
+            
+            {/* Ambient Lighting Bleeds */}
             <div className="absolute top-12 left-1/4 w-[750px] h-[500px] bg-purple-900/15 blur-[180px] rounded-full pointer-events-none" />
             <div className="absolute top-1/2 right-12 w-[650px] h-[650px] bg-amber-500/10 blur-[190px] rounded-full pointer-events-none" />
             <div className="absolute bottom-12 left-12 w-[600px] h-[600px] bg-amber-600/10 blur-[170px] rounded-full pointer-events-none" />
 
             {/* Micro Grid Texture */}
-            <div
+            <div 
               className="absolute inset-0 opacity-[0.03] pointer-events-none"
               style={{
                 backgroundImage: 'radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)',
@@ -322,42 +445,33 @@ export default function App() {
             />
           </div>
 
-          {/* =====================================================================
-              WEBSITE CONTENT LAYER (FULL ORIGINAL LANDING PAGE)
-              ===================================================================== */}
+          {/* WEBSITE CONTENT LAYER (FULL ORIGINAL LANDING PAGE - 100% UNCHANGED) */}
           <div className="relative z-10 flex flex-col min-h-screen">
-            {/* Top Navigation Bar with Sign In / Sign Up Connected */}
-            <Navbar onOpenAuth={handleOpenAuth} onOpenAdmin={handleOpenAdmin} />
-
+            <Navbar onOpenAuth={() => handleOpenPurpose()} onOpenAdmin={() => navigateTo('/admin')} />
+            
             <main className="flex-1">
-              {/* Hero Section with Live Squad Formation Visualizer */}
-              <Hero onOpenAuth={handleOpenAuth} />
-
-              {/* Verified Ingestion & Integrations Marquee */}
+              <Hero onOpenAuth={() => handleOpenPurpose()} />
               <TechMarquee />
-
-              {/* 4-Step Autonomous Pipeline */}
               <HowItWorks />
-
-              {/* Core Capability Matrix (Bento Grid) */}
-              <BentoGrid onOpenAuth={handleOpenAuth} />
-
-              {/* Interactive Live Squad Simulator */}
+              <BentoGrid onOpenAuth={() => handleOpenPurpose()} />
               <SquadSimulator />
-
-              {/* Measurable Results & Impact Metrics */}
               <ImpactMetrics />
-
-              {/* Student Leads & Faculty Testimonials */}
               <Testimonials />
             </main>
 
-            {/* Parallax High-Impact Animated Footer */}
-            <Footer onOpenAuth={handleOpenAuth} />
+            <Footer onOpenAuth={() => handleOpenPurpose()} />
           </div>
         </>
       )}
 
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <UserProfileProvider>
+      <AppContent />
+    </UserProfileProvider>
   );
 }

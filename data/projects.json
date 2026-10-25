@@ -28,6 +28,94 @@
     "status": "active"
   },
   {
+    "id": "proj-1789976523015-lgmes",
+    "projectTitle": "healthcare",
+    "description": "",
+    "teamSize": 5,
+    "requiredSkills": [
+      {
+        "name": "React",
+        "weight": 100
+      },
+      {
+        "name": "Node.js",
+        "weight": 50
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Frontend Developer",
+        "count": 1
+      },
+      {
+        "role": "Backend Developer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "React": 100,
+      "Node.js": 50
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-21T07:42:03.015Z",
+    "status": "active"
+  },
+  {
+    "id": "proj-1789965743358-av21j",
+    "projectTitle": "ai healthcare",
+    "description": "we want to make health website project",
+    "teamSize": 10,
+    "requiredSkills": [
+      {
+        "name": "Docker",
+        "weight": 100
+      },
+      {
+        "name": "React",
+        "weight": 50
+      },
+      {
+        "name": "Solana",
+        "weight": 33
+      },
+      {
+        "name": "TensorFlow",
+        "weight": 25
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Full Stack Developer",
+        "count": 1
+      },
+      {
+        "role": "Frontend Developer",
+        "count": 1
+      },
+      {
+        "role": "Backend Developer",
+        "count": 1
+      },
+      {
+        "role": "ML Engineer",
+        "count": 1
+      },
+      {
+        "role": "Product Manager",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Docker": 100,
+      "React": 50,
+      "Solana": 33,
+      "TensorFlow": 25
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-09-21T04:42:23.358Z",
+    "status": "active"
+  },
+  {
     "id": "proj-1789364567427-wctsp",
     "projectTitle": "DeFi Yield Optimizer",
     "description": "Algorithmic liquidity routing protocol maximizing vault yields across decentralized automated market makers.",

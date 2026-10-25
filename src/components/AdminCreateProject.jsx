@@ -1,25 +1,22 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
-import {
-  Sparkles,
-  Briefcase,
-  Users,
-  Layers,
-  CheckCircle2,
-  AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  Plus,
-  Trash2,
-  Search,
-  Zap,
-  X,
+import { 
+  Sparkles, 
+  Briefcase, 
+  Users, 
+  Layers, 
+  CheckCircle2, 
+  AlertCircle, 
+  ArrowLeft, 
+  ArrowRight, 
+  Trash2, 
+  Search, 
+  Zap, 
+  X, 
   FolderCheck,
   FolderOpen,
   BrainCircuit,
-  Minus,
-  Check,
-  FileText
+  ShieldCheck
 } from 'lucide-react';
 import AIGraphicCanvas from './AIGraphicCanvas';
 const API_BASE_URL = 'http://localhost:5000';
@@ -93,7 +90,12 @@ const TEMPLATE_INSPIRATIONS = [
   }
 ];
 
-export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
+export default function AdminCreateProject({ 
+  onBackToHome, 
+  onProjectCreated,
+  currentUser,
+  onRequireAuth
+}) {
   // Navigation View: 'create' | 'list'
   const [activeTab, setActiveTab] = useState('create');
   const [existingProjects, setExistingProjects] = useState([]);
@@ -112,7 +114,6 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
 
   // Role Search / Custom Input State
   const [roleSearch, setRoleSearch] = useState('');
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   // Submission & Validation States
   const [creationPhase, setCreationPhase] = useState('idle'); // 'idle' | 'creating' | 'validating' | 'saving' | 'complete'
@@ -143,8 +144,19 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
   }, []);
 
   useEffect(() => {
-    loadExistingProjects();
-  }, [loadExistingProjects]);
+    let isMounted = true;
+    fetch('/api/projects')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (isMounted && data?.projects) {
+          setExistingProjects(data.projects);
+        }
+      })
+      .catch(e => console.warn('Could not connect to /api/projects:', e));
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Kinetic Typography Reveal Animation on Mount
   useEffect(() => {
@@ -248,12 +260,10 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
     const clean = roleName.trim();
     if (requiredRoles.some(r => r.role.toLowerCase() === clean.toLowerCase())) {
       setRoleSearch('');
-      setShowRoleDropdown(false);
       return;
     }
     setRequiredRoles(prev => [...prev, { role: clean, count: 1 }]);
     setRoleSearch('');
-    setShowRoleDropdown(false);
   };
 
   const handleRemoveRole = (roleIndex) => {
@@ -379,6 +389,45 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
       setFormError(err.message || 'Failed to persist project. Please check backend connection.');
     }
   };
+
+  // Security & Authentication Role Authorization Check
+  if (!currentUser) {
+    return (
+      <div className="relative min-h-screen bg-[#080B12] text-slate-100 flex flex-col justify-center items-center px-4 select-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-purple-600/10 blur-[200px] rounded-full pointer-events-none" />
+        <div className="relative z-10 max-w-md w-full p-8 rounded-3xl bg-[#0D1220]/95 border border-purple-500/30 backdrop-blur-2xl text-center space-y-5 shadow-2xl">
+          <div className="h-14 w-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-400 shadow-lg shadow-purple-500/15">
+            <ShieldCheck className="h-7 w-7" />
+          </div>
+          <div>
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-[10px] font-mono uppercase tracking-widest mb-2">
+              <span>Security Check // Creator Authorization</span>
+            </div>
+            <h2 className="text-2xl font-black text-white">Project Creator Access Required</h2>
+            <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              Configuring project specifications and launching autonomous AI team assembly requires authenticated Project Lead or Creator credentials.
+            </p>
+          </div>
+          <div className="space-y-2 pt-2">
+            <button
+              type="button"
+              onClick={() => onRequireAuth ? onRequireAuth('create-project') : onBackToHome()}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white text-xs font-mono font-bold uppercase tracking-wider shadow-lg shadow-purple-500/25 transition-all cursor-pointer"
+            >
+              Sign In as Project Creator →
+            </button>
+            <button
+              type="button"
+              onClick={onBackToHome}
+              className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 text-xs font-mono font-semibold transition-all cursor-pointer"
+            >
+              Return to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -832,11 +881,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                         <input
                           type="text"
                           value={roleSearch}
-                          onFocus={() => setShowRoleDropdown(true)}
-                          onChange={(e) => {
-                            setRoleSearch(e.target.value);
-                            setShowRoleDropdown(true);
-                          }}
+                          onChange={(e) => setRoleSearch(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -1304,7 +1349,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                     )}
 
                     <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-500">
-                      <span>Created: {new Date(p.createdAt || Date.now()).toLocaleDateString()}</span>
+                      <span>Created: {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Active'}</span>
                       <span className="text-emerald-400">● Active</span>
                     </div>
                   </div>

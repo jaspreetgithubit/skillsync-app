@@ -13,6 +13,30 @@
 }
 
 /* =========================================================================
+   LENIS SMOOTH MOMENTUM SCROLL ENGINE
+   ========================================================================= */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+
+/* =========================================================================
    CINEMATIC CORPORATE TECH PALETTE (MATCHING USER'S 4K CORPORATE VIDEO)
    OBSIDIAN GLASS (#080B12) • WARM AMBER GOLD (#F59E0B) • VIOLET ACCENTS
    ========================================================================= */

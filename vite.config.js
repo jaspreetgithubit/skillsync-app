@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import fs from 'fs';
 import path from 'path';
+import process from 'node:process';
 
 // Vite Dev Server API Plugin for /api/projects
 function apiProjectsPlugin() {
@@ -112,6 +113,7 @@ function apiProjectsPlugin() {
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify({ success: true, message: 'Project successfully created and configured.', project: newProject }));
               } catch (err) {
+                console.error('Error handling project payload:', err);
                 res.statusCode = 500;
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify({ success: false, error: 'Internal Server Error parsing project payload.' }));
