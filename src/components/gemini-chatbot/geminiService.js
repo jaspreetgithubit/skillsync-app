@@ -17,8 +17,16 @@ export async function sendChatMessageToGemini(history, userMessage) {
   try {
     return await sendChat(conversation);
   } catch (err) {
-    console.warn('Secure chat backend unavailable, using offline answer:', err.message);
-    return getLocalKnowledgeOrMathResponse(userMessage);
+    console.error('Chat error from backend:', err.message);
+    // If backend returns an explicit error or is offline, propagate or provide meaningful message
+    if (err.message && err.message.includes('Cannot reach the chat server')) {
+      return `⚠️ **Backend Offline:** Cannot reach the chat server on port 5050.\n\nPlease start the server in your terminal:\n\`npm run chat-server\``;
+    }
+    if (err.message && (err.message.includes('GEMINI_API_KEY') || err.message.includes('key'))) {
+      return `⚠️ **Gemini Configuration Notice:** ${err.message}`;
+    }
+    // Return the backend error directly so user knows what went wrong
+    return `⚠️ **Gemini Service Notice:** ${err.message || 'An unexpected error occurred. Please try again.'}`;
   }
 }
 
