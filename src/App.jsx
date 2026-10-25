@@ -11,9 +11,9 @@ import Footer from './components/Footer';
 import ChoosePurposePage from './components/ChoosePurposePage';
 import TeamMatchSignInExperience from './components/TeamMatchSignInExperience';
 import AdminCreateProject from './components/AdminCreateProject';
-import AuthSuccessDashboard from './components/AuthSuccessDashboard';
-import ProfileCompletion from './components/ProfileCompletion';
-import { supabase } from './lib/supabase';
+
+
+
 
 // User Profile Context
 import { UserProfileProvider, useUserProfile } from './context/UserProfileContext';
@@ -38,11 +38,11 @@ function AppContent() {
   const { updateProfile, setActiveProjectId, setActiveTeamId } = useUserProfile();
   const [videoLoaded, setVideoLoaded] = useState(false);
 
-  // Supabase Auth Integration (from saksham-development)
-  const [currentUser, setCurrentUser] = useState(null);
-  const [pendingAuthUser, setPendingAuthUser] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [profileError, setProfileError] = useState('');
+
+
+
+
+
 
   // Pathname & Query-Aware Route Resolver
   const resolveCurrentRoute = useCallback(() => {
@@ -151,75 +151,7 @@ function AppContent() {
     }
   };
 
-  // Restore the Supabase session and route users based on their saved profile
-  useEffect(() => {
-    if (!supabase) return undefined;
-
-    let active = true;
-    const applySupabaseUser = async (user) => {
-      if (!user || !active) return;
-      setProfileLoading(true);
-      setProfileError('');
-      const metadata = user.user_metadata || {};
-      const googleName = metadata.full_name || metadata.name || user.email?.split('@')[0] || 'SyncSkills User';
-      const baseUser = {
-        id: user.id,
-        name: googleName,
-        email: user.email || '',
-        avatar: metadata.avatar_url || metadata.picture || null,
-        role: 'Full Stack Developer',
-        authenticatedAt: new Date().toLocaleTimeString()
-      };
-
-      try {
-        const { data: profile, error } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (!active) return;
-        if (error) {
-          console.error('Unable to load user profile:', error.message);
-          setPendingAuthUser(baseUser);
-          updateProfile(baseUser);
-        } else if (!profile || !profile.onboarding_complete) {
-          setPendingAuthUser({ ...baseUser, ...(profile || {}) });
-          updateProfile({ ...baseUser, ...(profile || {}) });
-        } else {
-          const fullUser = { ...baseUser, ...profile, id: user.id };
-          setCurrentUser(fullUser);
-          setPendingAuthUser(null);
-          updateProfile(fullUser);
-        }
-      } catch (err) {
-        console.warn('Supabase profile query fallback:', err);
-      } finally {
-        if (active) setProfileLoading(false);
-      }
-    };
-
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (error) console.error('Unable to restore Supabase session:', error.message);
-      if (data?.session?.user) applySupabaseUser(data.session.user);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
-        Promise.resolve().then(() => applySupabaseUser(session.user));
-      }
-      if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
-        setPendingAuthUser(null);
-      }
-    });
-
-    return () => {
-      active = false;
-      authListener?.subscription?.unsubscribe();
-    };
-  }, [updateProfile]);
-
+  
   // Open the "Choose Your Purpose" page
   const handleOpenAuth = (mode = 'signin', purpose = 'join-project') => {
     navigateTo('/auth?mode=' + mode + '&purpose=' + purpose, { mode, purpose });
@@ -234,43 +166,17 @@ function AppContent() {
     }
   };
 
-  const handleProfileComplete = async (profileData) => {
-    setProfileLoading(true);
-    setProfileError('');
-    try {
-      if (supabase && pendingAuthUser?.id) {
-        const { error } = await supabase.from('user_profiles').upsert({
-          id: pendingAuthUser.id,
-          ...profileData,
-          onboarding_complete: true,
-          updated_at: new Date().toISOString()
-        });
-        if (error) {
-          console.warn('Failed to save profile in Supabase:', error.message);
-        }
-      }
-      const updated = { ...(pendingAuthUser || {}), ...profileData, id: pendingAuthUser?.id };
-      setCurrentUser(updated);
-      setPendingAuthUser(null);
-      updateProfile(updated);
-      navigateTo('/profile-setup');
-    } catch (err) {
-      setProfileError(err?.message || 'Failed to complete profile.');
-    } finally {
-      setProfileLoading(false);
-    }
+  const handleProfileComplete = (profileData) => {
+    updateProfile(profileData);
+    navigateTo('/profile-setup');
   };
 
-  const handleSignOut = async () => {
-    if (supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        // ignore
-      }
-    }
-    setCurrentUser(null);
-    setPendingAuthUser(null);
+  const handleSignOut = () => {
+    updateProfile({
+      name: 'Alex Chen',
+      email: '',
+      role: 'Full Stack Developer'
+    });
     navigateTo('/');
   };
 

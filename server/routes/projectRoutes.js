@@ -1,174 +1,108 @@
+// server/routes/projectRoutes.js
+// Express API routes for TeamMatch AI Projects
 
 const express = require('express');
 const router = express.Router();
-const supabase = require('../supabase');
+const path = require('path');
+const fs = require('fs');
 
-// Convert database column names to your existing API field names.
-function formatProject(row) {
-  return {
-    id: row.id,
-    projectTitle: row.project_title,
-    description: row.description,
-    teamSize: row.team_size,
-    requiredSkills: row.required_skills,
-    requiredRoles: row.required_roles,
-    skillWeights: row.skill_weights,
-    createdBy: row.created_by,
-    status: row.status,
-    createdAt: row.created_at
-  };
+let Project;
+try {
+  Project = require('../models/Project');
+} catch (e) {
+  Project = null;
 }
+
+const dataFilePath = path.resolve(__dirname, '../../data/projects.json');
+
+const readLocalProjects = () => {
+  try {
+    if (!fs.existsSync(dataFilePath)) return [];
+    return JSON.parse(fs.readFileSync(dataFilePath, 'utf-8') || '[]');
+  } catch (e) {
+    return [];
+  }
+};
+
+const writeLocalProjects = (data) => {
+  try {
+    fs.mkdirSync(path.dirname(dataFilePath), { recursive: true });
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 // GET /api/projects - Retrieve all projects
 router.get('/', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    const projects = data.map(formatProject);
-
-    return res.status(200).json({
-      success: true,
-      count: projects.length,
-      projects
-    });
+    if (Project && Project.db && Project.db.readyState === 1) {
+      const projects = await Project.find().sort({ createdAt: -1 });
+      return res.status(200).json({ success: true, count: projects.length, projects });
+    }
+    const local = readLocalProjects();
+    return res.status(200).json({ success: true, count: local.length, projects: local });
   } catch (err) {
-    console.error('Fetch projects error:', err);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to fetch projects'
-    });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // POST /api/projects - Create a new project
 router.post('/', async (req, res) => {
   try {
-    const {
-      projectTitle,
-      description,
-      teamSize,
+    const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = req.body;
+
+    // Validation
+    if (!projectTitle || !projectTitle.trim()) {
+      return res.status(400).json({ success: false, error: 'Project Title is required' });
+    }
+    if (!teamSize || Number(teamSize) < 2) {
+      return res.status(400).json({ success: false, error: 'Team Size must be at least 2 members' });
+    }
+    if (!Array.isArray(requiredSkills) || requiredSkills.length === 0) {
+      return res.status(400).json({ success: false, error: 'At least one required skill is required' });
+    }
+    if (!Array.isArray(requiredRoles) || requiredRoles.length === 0) {
+      return res.status(400).json({ success: false, error: 'At least one required role is required' });
+    }
+
+    if (Project && Project.db && Project.db.readyState === 1) {
+      const newProj = await Project.create({
+        projectTitle: projectTitle.trim(),
+        description: description ? description.trim() : '',
+        teamSize: Number(teamSize),
+        requiredSkills,
+        requiredRoles,
+        skillWeights: skillWeights || {},
+        createdBy: createdBy || 'Admin Lead'
+      });
+      return res.status(201).json({ success: true, message: 'Project saved to MongoDB', project: newProj });
+    }
+
+    // Local JSON Database Fallback
+    const local = readLocalProjects();
+    const newProject = {
+      id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      projectTitle: projectTitle.trim(),
+      description: description ? description.trim() : '',
+      teamSize: Number(teamSize),
       requiredSkills,
       requiredRoles,
-      skillWeights,
-      createdBy
-    } = req.body;
-
-    if (
-      typeof projectTitle !== 'string' ||
-      !projectTitle.trim()
-    ) {
-      return res.status(400).json({
-        success: false,
-        error: 'Project Title is required'
-      });
-    }
-
-    if (projectTitle.trim().length > 120) {
-      return res.status(400).json({
-        success: false,
-        error: 'Project title cannot exceed 120 characters'
-      });
-    }
-
-    if (
-      teamSize === undefined ||
-      teamSize === null ||
-      teamSize === '' ||
-      !Number.isInteger(Number(teamSize)) ||
-      Number(teamSize) < 2 ||
-      Number(teamSize) > 25
-    ) {
-      return res.status(400).json({
-        success: false,
-        error: 'Team Size must be between 2 and 25'
-      });
-    }
-
-    if (
-      description !== undefined &&
-      description !== null &&
-      typeof description !== 'string'
-    ) {
-      return res.status(400).json({
-        success: false,
-        error: 'Description must be a string'
-      });
-    }
-
-    if (typeof description === 'string' && description.length > 1000) {
-      return res.status(400).json({
-        success: false,
-        error: 'Description cannot exceed 1000 characters'
-      });
-    }
-
-    if (!Array.isArray(requiredSkills) || requiredSkills.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'At least one required skill is required'
-      });
-    }
-
-    if (!Array.isArray(requiredRoles) || requiredRoles.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'At least one required role is required'
-      });
-    }
-
-    if (
-      skillWeights !== undefined &&
-      (
-        skillWeights === null ||
-        typeof skillWeights !== 'object' ||
-        Array.isArray(skillWeights)
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        error: 'Skill weights must be an object'
-      });
-    }
-
-    const newProject = {
-      project_title: projectTitle.trim(),
-      description: description ? description.trim() : '',
-      team_size: Number(teamSize),
-      required_skills: requiredSkills,
-      required_roles: requiredRoles,
-      skill_weights: skillWeights || {},
-      created_by:
-        typeof createdBy === 'string' && createdBy.trim()
-          ? createdBy.trim()
-          : 'Admin Lead',
+      skillWeights: skillWeights || {},
+      createdBy: createdBy || 'Admin Lead',
+      createdAt: new Date().toISOString(),
       status: 'active'
     };
 
-    const { data, error } = await supabase
-      .from('projects')
-      .insert(newProject)
-      .select()
-      .single();
+    local.unshift(newProject);
+    writeLocalProjects(local);
 
-    if (error) throw error;
-
-    return res.status(201).json({
-      success: true,
-      message: 'Project saved to Supabase',
-      project: formatProject(data)
-    });
+    return res.status(201).json({ success: true, message: 'Project saved to Local Store', project: newProject });
   } catch (err) {
-    console.error('Create project error:', err.message);
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to create project'
-    });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
 module.exports = router;
+
