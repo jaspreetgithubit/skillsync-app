@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const projectRoutes = require('./routes/projectRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,6 +17,7 @@ app.use(express.json());
 // API Routes
 app.use('/api/projects', projectRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

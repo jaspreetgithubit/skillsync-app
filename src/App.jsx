@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import TechMarquee from './components/TechMarquee';
@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import ChoosePurposePage from './components/ChoosePurposePage';
 import TeamMatchSignInExperience from './components/TeamMatchSignInExperience';
 import AdminCreateProject from './components/AdminCreateProject';
+import { supabase } from './lib/supabase';
 
 
 
@@ -37,6 +38,7 @@ function AppContent() {
   useLenis();
   const { updateProfile, setActiveProjectId, setActiveTeamId } = useUserProfile();
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const hasHandledOAuthRef = useRef(false);
 
 
 
@@ -141,14 +143,73 @@ function AppContent() {
     }
 
     setRouteState(resolved);
-    if (window.lenis) {
-      window.lenis.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      if (window.lenis) {
+        window.lenis.scrollTo(0, { immediate: true });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch {
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   };
 
   
+    // Restore Google Auth session and redirect to profile-setup
+  useEffect(() => {
+    if (!supabase) return undefined;
+
+    let active = true;
+    const applySupabaseUser = (user) => {
+      if (!user || !active) return;
+      const metadata = user.user_metadata || {};
+      const googleName = metadata.full_name || metadata.name || user.email?.split('@')[0] || 'SyncSkills User';
+      const baseUser = {
+        id: user.id,
+        name: googleName,
+        email: user.email || '',
+        avatar: metadata.avatar_url || metadata.picture || null,
+        role: 'Full Stack Developer',
+        authenticatedAt: new Date().toLocaleTimeString()
+      };
+
+      updateProfile(baseUser);
+
+      const currentPath = (window.location.pathname || '').toLowerCase();
+      const searchParams = new URLSearchParams(window.location.search);
+      const hasOAuthParams = window.location.hash.includes('access_token') || searchParams.has('code');
+
+      // Strip hash from address bar immediately so subsequent pages (like explore-projects) are never trapped
+      if (hasOAuthParams) {
+        try {
+          window.history.replaceState(null, '', window.location.pathname);
+        } catch {}
+      }
+
+      // Redirect to profile-setup only ONCE immediately upon OAuth completion
+      if (!hasHandledOAuthRef.current && (hasOAuthParams || currentPath === '/auth')) {
+        hasHandledOAuthRef.current = true;
+        navigateTo('/profile-setup');
+      }
+    };
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) console.error('Unable to restore Supabase session:', error.message);
+      if (data?.session?.user) applySupabaseUser(data.session.user);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+        Promise.resolve().then(() => applySupabaseUser(session.user));
+      }
+    });
+
+    return () => {
+      active = false;
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
   // Open the "Choose Your Purpose" page
   const handleOpenAuth = (mode = 'signin', purpose = 'join-project') => {
     navigateTo('/auth?mode=' + mode + '&purpose=' + purpose, { mode, purpose });
@@ -168,7 +229,14 @@ function AppContent() {
     navigateTo('/profile-setup');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
+    }
     updateProfile({
       name: 'Alex Chen',
       email: '',

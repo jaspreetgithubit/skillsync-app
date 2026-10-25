@@ -1,0 +1,26 @@
+[
+  {
+    "id": "usr-1792939894802-d00rt",
+    "name": "Jaspreet Tester",
+    "email": "test_1792939894794@example.com",
+    "role": "Backend & Cloud Lead",
+    "passwordHash": "6e659deaa85842cdabb5c6305fcc40033ba43772ec00d45c2a3c921741a5e377",
+    "createdAt": "2026-10-25T14:51:34.802Z"
+  },
+  {
+    "id": "usr-seed-01",
+    "name": "Alex Chen",
+    "email": "alex.chen@university.edu",
+    "role": "Full Stack Developer",
+    "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "createdAt": "2026-10-25T14:51:34.778Z"
+  },
+  {
+    "id": "usr-seed-02",
+    "name": "Sarah Connor",
+    "email": "sarah.connor@mit.edu",
+    "role": "AI / ML Researcher",
+    "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "createdAt": "2026-10-25T14:51:34.778Z"
+  }
+]

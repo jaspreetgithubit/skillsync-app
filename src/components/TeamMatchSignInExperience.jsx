@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useUserProfile } from '../context/UserProfileContext';
 import AIGraphicCanvas from './AIGraphicCanvas';
+import { supabase, getSupabaseConfigError } from '../lib/supabase';
 
 
 
@@ -70,15 +71,53 @@ export default function TeamMatchSignInExperience({
   const isCreatorTrack = purpose === 'create-project';
 
   // Handle Google Sign In
-  const handleGoogleSignIn = () => {
-    submitSignIn('alex.rivera@university.edu');
+  const handleGoogleSignIn = async () => {
+    setError('');
+    if (!supabase) {
+      const configErr = getSupabaseConfigError ? getSupabaseConfigError() : null;
+      if (configErr) setError(configErr);
+      return;
+    }
+    setIsGoogleLoading(true);
+    try {
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/profile-setup`
+        }
+      });
+      if (googleError) {
+        setError(googleError.message || 'Google sign-in could not be started.');
+        setIsGoogleLoading(false);
+      }
+    } catch (err) {
+      setError(err?.message || 'Google sign-in error.');
+      setIsGoogleLoading(false);
+    }
+  };
+
+  // Helper fetch with direct backend fallback
+  const callAuthApi = async (endpoint, payload) => {
+    try {
+      return await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch {
+      return await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
   };
 
   // Handle Quick Demo Login
   const handleQuickDemo = () => {
     setSignInEmail('alex.chen@university.edu');
     setSignInPassword('password123');
-    submitSignIn('alex.chen@university.edu');
+    submitSignIn('alex.chen@university.edu', 'password123');
   };
 
   // Submit Sign In
@@ -92,35 +131,54 @@ export default function TeamMatchSignInExperience({
       setError('Please enter your password.');
       return;
     }
-    submitSignIn(signInEmail);
+    submitSignIn(signInEmail, signInPassword);
   };
 
-  const submitSignIn = (email) => {
+  const submitSignIn = async (email, password = signInPassword) => {
     setError('');
     setIsSubmitting(true);
 
-    const resolvedName = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
-    updateProfile({
-      name: resolvedName || 'Alex Chen',
-      email: email,
-      role: isCreatorTrack ? 'Project Creator' : 'Full Stack Developer'
-    });
+    try {
+      const response = await callAuthApi('/api/auth/signin', {
+        email: email.trim(),
+        password: password
+      });
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Invalid email or password. Please verify your credentials.');
+      }
+
+      const resolvedUser = data.user || {
+        name: email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        email: email,
+        role: isCreatorTrack ? 'Project Creator' : 'Full Stack Developer'
+      };
+
+      updateProfile({
+        name: resolvedUser.name,
+        email: resolvedUser.email,
+        role: isCreatorTrack ? 'Project Creator' : (resolvedUser.role || 'Full Stack Developer')
+      });
+
       if (onAuthenticated) {
         onAuthenticated({
-          name: resolvedName || 'Alex Chen',
-          email: email,
-          role: isCreatorTrack ? 'Project Creator' : 'Full Stack Developer',
+          name: resolvedUser.name,
+          email: resolvedUser.email,
+          role: isCreatorTrack ? 'Project Creator' : (resolvedUser.role || 'Full Stack Developer'),
           purpose
         });
       }
-    }, 600);
+    } catch (err) {
+      setError(err.message || 'Unable to connect to authentication server. Please ensure the backend is running.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Submit Create Account
-  const handleSignUpSubmit = (e) => {
+  const handleSignUpSubmit = async (e) => {
     e.preventDefault();
     if (!signUpName.trim()) {
       setError('Please provide your full name.');
@@ -138,23 +196,45 @@ export default function TeamMatchSignInExperience({
     setError('');
     setIsSubmitting(true);
 
-    updateProfile({
-      name: signUpName.trim(),
-      email: signUpEmail.trim(),
-      role: signUpRole
-    });
+    try {
+      const response = await callAuthApi('/api/auth/signup', {
+        name: signUpName.trim(),
+        email: signUpEmail.trim(),
+        password: signUpPassword,
+        role: signUpRole
+      });
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Account creation failed. Please try again.');
+      }
+
+      const resolvedUser = data.user || {
+        name: signUpName.trim(),
+        email: signUpEmail.trim(),
+        role: signUpRole
+      };
+
+      updateProfile({
+        name: resolvedUser.name,
+        email: resolvedUser.email,
+        role: resolvedUser.role
+      });
+
       if (onAuthenticated) {
         onAuthenticated({
-          name: signUpName.trim(),
-          email: signUpEmail.trim(),
-          role: signUpRole,
+          name: resolvedUser.name,
+          email: resolvedUser.email,
+          role: resolvedUser.role,
           purpose
         });
       }
-    }, 600);
+    } catch (err) {
+      setError(err.message || 'Unable to connect to authentication server. Please ensure the backend is running.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

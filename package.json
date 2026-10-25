@@ -12,6 +12,7 @@
     "chat-server": "node --env-file=.env server/gemini-chat/chatServer.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
 
     "@tailwindcss/vite": "^4.3.3",
     "cors": "^2.8.6",

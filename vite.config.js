@@ -134,7 +134,9 @@ export default defineConfig({
   server: {
     proxy: {
       // Secure Gemini chat backend (server/gemini-chat/chatServer.js). The API key stays on the server.
-      '/api/chat': 'http://localhost:5050'
+      '/api/chat': 'http://localhost:5050',
+      '/api/auth': 'http://localhost:5000',
+      '/api/feedback': 'http://localhost:5000'
     }
   },
   plugins: [
