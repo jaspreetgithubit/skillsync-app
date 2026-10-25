@@ -6,29 +6,20 @@ import {
   X, 
   Minimize2, 
   Maximize2, 
-  Key, 
-  Trash2, 
-  Check, 
   ExternalLink,
   ShieldCheck,
   Zap,
   ArrowRight
 } from 'lucide-react';
-import { 
-  sendChatMessageToGemini, 
-  getStoredGeminiKey, 
-  saveStoredGeminiKey 
-} from './geminiService';
+import { sendChatMessageToGemini } from './geminiService';
+import { checkChatHealth } from '../chat-app/chatApi';
 import { STARTER_SUGGESTIONS } from './chatbotKnowledge';
 
 export default function GeminiChatbot({ onNavigate }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  
-  const [apiKey, setApiKey] = useState(getStoredGeminiKey());
-  const [tempApiKey, setTempApiKey] = useState(apiKey);
-  const [keySavedMessage, setKeySavedMessage] = useState(false);
+  // Live status comes from the secure backend; no API key is ever stored in the browser.
+  const [liveConnected, setLiveConnected] = useState(false);
 
   const [inputMessage, setInputMessage] = useState('');
   const [isThinking, setIsThinking] = useState(false);
@@ -49,6 +40,12 @@ export default function GeminiChatbot({ onNavigate }) {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      checkChatHealth().then((h) => setLiveConnected(Boolean(h.keyConfigured)));
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen && !isMinimized) {
@@ -88,29 +85,13 @@ export default function GeminiChatbot({ onNavigate }) {
         {
           id: `bot-err-${idCounter.current++}`,
           sender: 'bot',
-          text: "I couldn't reach the server right now. Feel free to ask another question or configure your Gemini API Key in settings ⚙️.",
+          text: "I couldn't reach the server right now. Please make sure the chat server is running (npm run chat-server).",
           time: 'Now'
         }
       ]);
     } finally {
       setIsThinking(false);
     }
-  };
-
-  const handleSaveKey = () => {
-    saveStoredGeminiKey(tempApiKey);
-    setApiKey(tempApiKey.trim());
-    setKeySavedMessage(true);
-    setTimeout(() => {
-      setKeySavedMessage(false);
-      setShowSettings(false);
-    }, 1200);
-  };
-
-  const handleClearKey = () => {
-    saveStoredGeminiKey('');
-    setApiKey('');
-    setTempApiKey('');
   };
 
   const handleClearHistory = () => {
@@ -160,8 +141,12 @@ export default function GeminiChatbot({ onNavigate }) {
     );
   };
 
+  const escapeHtml = (text) =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
   const formatInline = (text) => {
-    return text
+    // Escape first so AI output can never inject HTML/scripts.
+    return escapeHtml(text)
       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="text-amber-200">$1</em>')
       .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-white/10 text-amber-300 font-mono text-[11px]">$1</code>');
@@ -223,30 +208,31 @@ export default function GeminiChatbot({ onNavigate }) {
                     SyncSkills Gemini
                   </span>
                   <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-[#F59E0B] border border-amber-500/30">
-                    1.5 AI
+                    AI
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                  <span className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
-                  <span>{apiKey ? 'Live Gemini Connected' : 'SyncSkills Engine (Ready)'}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ${liveConnected ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`} />
+                  <span>{liveConnected ? 'Live Gemini Connected' : 'SyncSkills Engine (Offline Mode)'}</span>
                 </div>
               </div>
             </div>
 
             {/* Window Controls */}
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setShowSettings(!showSettings)}
-                title="Gemini API Key Settings"
-                className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                  showSettings 
-                    ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' 
-                    : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-white hover:border-amber-500/30'
-                }`}
-              >
-                <Key className="w-3.5 h-3.5" />
-              </button>
+              {onNavigate && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNavigate('/chat');
+                    setIsOpen(false);
+                  }}
+                  title="Open full-page chat with history"
+                  className="p-1.5 rounded-lg bg-white/[0.03] border border-white/10 text-slate-400 hover:text-white hover:border-amber-500/30 transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              )}
 
               <button
                 type="button"
@@ -270,63 +256,6 @@ export default function GeminiChatbot({ onNavigate }) {
 
           {!isMinimized && (
             <>
-              {/* SETTINGS DRAWER (API KEY CONFIGURATION) */}
-              {showSettings && (
-                <div className="p-4 bg-[#080B12]/95 border-b border-amber-500/20 space-y-3 shrink-0 animate-fade-in">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-[#F59E0B] font-bold flex items-center gap-1.5">
-                      <Key className="w-3.5 h-3.5" />
-                      <span>Google Gemini API Configuration</span>
-                    </span>
-                    <a
-                      href="https://aistudio.google.com/app/apikey"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-amber-300 transition-colors"
-                    >
-                      <span>Get Free Key</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
-                    </a>
-                  </div>
-
-                  <div className="relative">
-                    <input
-                      type="password"
-                      value={tempApiKey}
-                      onChange={(e) => setTempApiKey(e.target.value)}
-                      placeholder="Paste Gemini API key (AIzaSy...)"
-                      className="w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/15 focus:border-[#F59E0B] text-white text-xs font-mono outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={handleClearKey}
-                      className="text-[11px] font-mono text-slate-400 hover:text-rose-400 flex items-center gap-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      <span>Remove Key</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleSaveKey}
-                      className="px-3.5 py-1.5 rounded-lg bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-[#080B12] text-xs font-mono font-bold flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all cursor-pointer"
-                    >
-                      {keySavedMessage ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-black" />
-                          <span>Saved!</span>
-                        </>
-                      ) : (
-                        <span>Save Key</span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* MESSAGES THREAD AREA */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((msg) => (

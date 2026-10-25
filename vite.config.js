@@ -131,6 +131,12 @@ function apiProjectsPlugin() {
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      // Secure Gemini chat backend (server/gemini-chat/chatServer.js). The API key stays on the server.
+      '/api/chat': 'http://localhost:5050'
+    }
+  },
   plugins: [
     tailwindcss(),
     react(),

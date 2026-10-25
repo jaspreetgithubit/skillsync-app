@@ -30,6 +30,8 @@ import useLenis from './hooks/useLenis';
 
 // Google Gemini AI Assistant (Dedicated Feature Folder)
 import GeminiChatbot from './components/gemini-chatbot/GeminiChatbot';
+// Full-page secure Gemini chat app (route: /chat)
+import ChatApp from './components/chat-app/ChatApp';
 
 function AppContent() {
   useLenis();
@@ -48,6 +50,10 @@ function AppContent() {
       const path = (window.location.pathname || '').toLowerCase();
       const params = new URLSearchParams(window.location.search);
       const page = params.get('page');
+
+      if (path === '/chat' || path.startsWith('/chat/') || page === 'chat') {
+        return { view: 'chat' };
+      }
 
       if (path.includes('/profile-setup') || page === 'profile-setup') {
         return { view: 'profile-setup' };
@@ -271,6 +277,11 @@ function AppContent() {
       {/* =========================================================================
           VIEW 1: CHOOSE YOUR PURPOSE ("Why are you here?")
           ========================================================================= */}
+      {/* SECURE GEMINI CHAT APP (/chat) */}
+      {routeState.view === 'chat' && (
+        <ChatApp onBackToHome={() => navigateTo('/')} />
+      )}
+
       {routeState.view === 'purpose' && (
         <ChoosePurposePage 
           onSelectPurpose={handleSelectPurpose}

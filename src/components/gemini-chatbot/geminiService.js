@@ -1,103 +1,23 @@
-import { SYNCSKILLS_SYSTEM_PROMPT, FALLBACK_RESPONSES } from './chatbotKnowledge';
-
-const GEMINI_STORAGE_KEY = 'syncskills_gemini_api_key';
-
-export function getStoredGeminiKey() {
-  if (typeof window === 'undefined') return '';
-  return (
-    localStorage.getItem(GEMINI_STORAGE_KEY) ||
-    import.meta.env.VITE_GEMINI_API_KEY ||
-    ''
-  );
-}
-
-export function saveStoredGeminiKey(key) {
-  if (typeof window === 'undefined') return;
-  if (!key) {
-    localStorage.removeItem(GEMINI_STORAGE_KEY);
-  } else {
-    localStorage.setItem(GEMINI_STORAGE_KEY, key.trim());
-  }
-}
+import { FALLBACK_RESPONSES } from './chatbotKnowledge';
+import { sendChat } from '../chat-app/chatApi';
 
 /**
- * Sends a conversation to the Google Gemini API (gemini-1.5-flash)
- * Handles mathematics, general knowledge, code generation, and platform questions.
+ * Sends a conversation to Gemini through the SECURE local backend (/api/chat).
+ * The API key lives only in the server's .env file and is never in browser code.
+ * If the backend is offline or has no key, the built-in offline solver answers instead.
  */
 export async function sendChatMessageToGemini(history, userMessage) {
-  const apiKey = getStoredGeminiKey();
-
-  if (!apiKey) {
-    // Return intelligent multi-domain solver response
-    return getLocalKnowledgeOrMathResponse(userMessage);
-  }
-
-  // Format contents for Google Gemini API
-  const contents = [
-    {
-      role: 'user',
-      parts: [{ text: `SYSTEM INSTRUCTIONS:\n${SYNCSKILLS_SYSTEM_PROMPT}` }]
-    },
-    {
-      role: 'model',
-      parts: [{ text: "Understood! I am the SyncSkills Gemini AI Copilot. I can solve mathematical equations, write code, explain concepts, answer any general question, and guide users on SyncSkills.AI." }]
-    }
-  ];
-
-  // Add previous conversational turns (up to last 6 messages)
-  const recentHistory = history.slice(-6);
-  recentHistory.forEach((turn) => {
-    contents.push({
-      role: turn.sender === 'user' ? 'user' : 'model',
-      parts: [{ text: turn.text }]
-    });
-  });
-
-  // Add the current user query
-  contents.push({
-    role: 'user',
-    parts: [{ text: userMessage }]
-  });
+  // Convert the floating widget's message format into the backend format.
+  const conversation = history
+    .filter((turn) => !String(turn.id || '').startsWith('welcome'))
+    .slice(-20)
+    .map((turn) => ({ role: turn.sender === 'user' ? 'user' : 'assistant', text: turn.text }));
+  conversation.push({ role: 'user', text: userMessage });
 
   try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1000
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.warn('Gemini API returned status:', response.status, errorData);
-      
-      if (response.status === 400 || response.status === 403) {
-        return `⚠️ **Gemini API Key Notice (${response.status}):** The current API key was not accepted by Google.\n\n*Intelligent Offline Response:*\n\n${getLocalKnowledgeOrMathResponse(userMessage)}`;
-      }
-      return getLocalKnowledgeOrMathResponse(userMessage);
-    }
-
-    const data = await response.json();
-    const candidate = data.candidates?.[0];
-    const textPart = candidate?.content?.parts?.[0]?.text;
-
-    if (textPart) {
-      return textPart;
-    }
-
-    return getLocalKnowledgeOrMathResponse(userMessage);
+    return await sendChat(conversation);
   } catch (err) {
-    console.error('Failed to communicate with Gemini API:', err);
+    console.warn('Secure chat backend unavailable, using offline answer:', err.message);
     return getLocalKnowledgeOrMathResponse(userMessage);
   }
 }
@@ -195,5 +115,5 @@ def binary_search(arr, target):
   }
 
   // 6. General Fallback
-  return `I am your **SyncSkills Gemini Copilot**!\n\nI can solve **mathematical equations**, write & debug **code**, explain **science & logic**, and guide your **team formation** on SyncSkills.AI.\n\n💡 *Tip: Click the ⚙️ Settings gear at the top to connect your Google Gemini API key for unlimited live AI answers!*`;
+  return `I am your **SyncSkills Gemini Copilot**!\n\nI can solve **mathematical equations**, write & debug **code**, explain **science & logic**, and guide your **team formation** on SyncSkills.AI.\n\n💡 *Tip: Start the secure chat server (\`npm run chat-server\`) with your key in the local .env file for unlimited live Gemini answers!*`;
 }
