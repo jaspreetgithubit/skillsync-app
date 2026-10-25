@@ -560,61 +560,101 @@ export default function ProfileSetup({ onNavigate, onSignOut }) {
                   </span>
                 </div>
 
-                {/* Skill Search Input */}
+                {/* Skill Search & Custom Skill Input */}
                 <div className="relative">
                   <div className="relative">
                     <input
                       type="text"
                       value={skillInput}
                       onChange={(e) => {
-                        setSkillInput(e.target.value);
-                        setShowSkillSuggestions(true);
+                        const val = e.target.value;
+                        if (val.includes(',')) {
+                          const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+                          parts.forEach(p => handleAddSkill(p, 'Medium'));
+                          setSkillInput('');
+                        } else {
+                          setSkillInput(val);
+                          setShowSkillSuggestions(true);
+                        }
                       }}
                       onFocus={() => setShowSkillSuggestions(true)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === 'Enter' || e.key === ',') {
                           e.preventDefault();
                           if (skillInput.trim()) {
                             handleAddSkill(skillInput.trim(), 'Medium');
                           }
                         }
                       }}
-                      placeholder="Search technical skills or type custom skill and press Enter (e.g. PyTorch, React, Rust)..."
-                      className="w-full px-4 py-3 pl-10 pr-24 rounded-xl bg-black/35 border border-white/25 focus:border-amber-400 focus:bg-black/55 text-white text-xs sm:text-sm outline-none transition-colors placeholder:text-slate-300 backdrop-blur-sm"
+                      placeholder="Type any custom skill (e.g. C++, Solidity, OpenCV) and press Enter or click Add..."
+                      className="w-full px-4 py-3 pl-10 pr-24 rounded-xl bg-black/40 border border-white/25 focus:border-amber-400 focus:bg-black/60 text-white text-xs sm:text-sm outline-none transition-colors placeholder:text-slate-300 backdrop-blur-sm"
                     />
-                    <Search className="w-4 h-4 text-slate-300 absolute left-3.5 top-3.5" />
+                    <Search className="w-4 h-4 text-slate-300 absolute left-3.5 top-3.5 pointer-events-none" />
 
                     {skillInput.trim() && (
                       <button
                         type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleAddSkill(skillInput.trim(), 'Medium');
+                        }}
                         onClick={() => handleAddSkill(skillInput.trim(), 'Medium')}
-                        className="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-amber-500/30 hover:bg-amber-500/40 border border-amber-500/50 text-amber-300 text-xs font-mono font-medium cursor-pointer transition-colors flex items-center gap-1 backdrop-blur-sm"
+                        className="absolute right-2 top-2 z-20 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 border border-amber-400 text-black text-xs font-mono font-semibold cursor-pointer transition-all flex items-center gap-1 shadow-md hover:shadow-amber-500/30"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Add</span>
+                        <span>Add Skill</span>
                       </button>
                     )}
                   </div>
 
-                  {/* Autocomplete Suggestions Dropdown */}
-                  {showSkillSuggestions && skillInput.trim() && filteredSuggestions.length > 0 && (
-                    <div className="absolute left-0 right-0 top-full mt-2 p-3 bg-black/90 border border-amber-500/40 rounded-2xl shadow-2xl z-30 max-h-48 overflow-y-auto space-y-1.5 backdrop-blur-md">
-                      <div className="text-[10px] font-mono text-slate-300 px-2 uppercase tracking-wider">
-                        Suggested Technical Matches
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 p-1">
-                        {filteredSuggestions.map((skill) => (
-                          <button
-                            key={skill}
-                            type="button"
-                            onClick={() => handleAddSkill(skill, 'Medium')}
-                            className="px-2.5 py-1 rounded-lg bg-black/40 hover:bg-amber-500/30 hover:border-amber-500/50 border border-white/20 text-xs font-mono text-slate-100 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
-                          >
-                            <Plus className="w-3 h-3 text-amber-400" />
-                            <span>{skill}</span>
-                          </button>
-                        ))}
-                      </div>
+                  {/* Autocomplete & Custom Skill Dropdown */}
+                  {showSkillSuggestions && skillInput.trim() && (
+                    <div className="absolute left-0 right-0 top-full mt-2 p-3 bg-[#0c101b]/95 border border-amber-500/50 rounded-2xl shadow-2xl z-40 max-h-60 overflow-y-auto space-y-2.5 backdrop-blur-md">
+                      
+                      {/* 1. Explicit Custom Skill Add Action */}
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleAddSkill(skillInput.trim(), 'Medium');
+                        }}
+                        onClick={() => handleAddSkill(skillInput.trim(), 'Medium')}
+                        className="w-full text-left px-3.5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-mono flex items-center justify-between transition-colors cursor-pointer group"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Plus className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                          <span>Add custom skill: <strong className="text-white font-semibold">"{skillInput.trim()}"</strong></span>
+                        </span>
+                        <span className="text-[10px] font-mono text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/30">
+                          + Custom
+                        </span>
+                      </button>
+
+                      {/* 2. Suggested Matching Skills */}
+                      {filteredSuggestions.length > 0 && (
+                        <div className="pt-1 border-t border-white/10 space-y-1.5">
+                          <div className="text-[10px] font-mono text-slate-400 px-1 uppercase tracking-wider">
+                            Suggested Matches
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 p-1">
+                            {filteredSuggestions.map((skill) => (
+                              <button
+                                key={skill}
+                                type="button"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleAddSkill(skill, 'Medium');
+                                }}
+                                onClick={() => handleAddSkill(skill, 'Medium')}
+                                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-amber-500/20 hover:border-amber-500/50 border border-white/10 text-xs font-mono text-slate-200 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <Plus className="w-3 h-3 text-amber-400" />
+                                <span>{skill}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
