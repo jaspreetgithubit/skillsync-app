@@ -17,14 +17,22 @@ import SpotlightCard from '../components/common/SpotlightCard';
 import FloatingBadge from '../components/common/FloatingBadge';
 import NeuralConstellationBackground from '../components/common/NeuralConstellationBackground';
 
-export default function ProjectDetails({ projectId, onNavigate, onBack }) {
+export default function ProjectDetails({ projectId, project: passedProject, onNavigate, onBack }) {
   const { userProfile } = useUserProfile();
 
   const [currentProject, setCurrentProject] = useState(() => {
+    if (passedProject && (passedProject.id === projectId || !projectId)) {
+      return passedProject;
+    }
     return MOCK_PROJECTS.find(p => p.id === projectId) || null;
   });
 
   useEffect(() => {
+    if (passedProject && passedProject.id === projectId) {
+      setCurrentProject(passedProject);
+      return;
+    }
+
     let isMounted = true;
     const mock = MOCK_PROJECTS.find(p => p.id === projectId);
     if (mock) {

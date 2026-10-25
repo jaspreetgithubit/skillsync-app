@@ -1,5 +1,65 @@
 [
   {
+    "id": "prof-1792951298970-6rhym",
+    "name": "Alex Chen",
+    "email": "alex.chen@university.edu",
+    "roles": [
+      "Full Stack Developer"
+    ],
+    "role": "Full Stack Developer",
+    "experience": 3,
+    "skills": [
+      {
+        "name": "React",
+        "level": "Strong"
+      },
+      {
+        "name": "Node.js",
+        "level": "Strong"
+      },
+      {
+        "name": "TypeScript",
+        "level": "Medium"
+      },
+      {
+        "name": "Python",
+        "level": "Medium"
+      },
+      {
+        "name": "TailwindCSS",
+        "level": "Strong"
+      },
+      {
+        "name": "PostgreSQL",
+        "level": "Medium"
+      }
+    ],
+    "interests": [
+      "AI/ML",
+      "Web Development",
+      "Cloud"
+    ],
+    "projects": [
+      {
+        "id": "proj-1",
+        "title": "Bipartite Matching Engine",
+        "role": "Lead Backend & Algorithm Designer",
+        "techStack": "Python, FastAPI, Redis, Docker",
+        "description": "Engineered a bipartite graph matching pipeline for team formation reducing latency by 45%."
+      },
+      {
+        "id": "proj-2",
+        "title": "Collaborative Code Workspace",
+        "role": "Full Stack Engineer",
+        "techStack": "React, TypeScript, WebSockets, Node.js",
+        "description": "Real-time collaborative editing canvas with operational transform conflict resolution."
+      }
+    ],
+    "previousProjects": "Bipartite Matching Engine (Lead Backend & Algorithm Designer): Engineered a bipartite graph matching pipeline for team formation reducing latency by 45%. | Collaborative Code Workspace (Full Stack Engineer): Real-time collaborative editing canvas with operational transform conflict resolution.",
+    "isLocked": true,
+    "updatedAt": "2026-10-25T18:08:17.288Z"
+  },
+  {
     "id": "prof-1792942283393-2o85b",
     "name": "Jaspreet",
     "email": "jaspreetsaini4170@gmail.com",

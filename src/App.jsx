@@ -131,6 +131,9 @@ function AppContent() {
       resolved.projectId = routeData.projectId;
       setActiveProjectId(routeData.projectId);
     }
+    if (routeData.project) {
+      resolved.project = routeData.project;
+    }
     if (routeData.teamId) {
       resolved.teamId = routeData.teamId;
       setActiveTeamId(routeData.teamId);
@@ -147,7 +150,7 @@ function AppContent() {
       if (window.lenis) {
         window.lenis.scrollTo(0, { immediate: true });
       } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }
     } catch {
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -289,6 +292,7 @@ function AppContent() {
       {routeState.view === 'project-details' && (
         <ProjectDetails 
           projectId={routeState.projectId || 'proj-1'}
+          project={routeState.project}
           onNavigate={navigateTo}
           onBack={() => navigateTo('/explore-projects')}
         />

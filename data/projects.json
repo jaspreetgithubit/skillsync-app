@@ -1,5 +1,52 @@
 [
   {
+    "id": "proj-1792951270919-pm7zz",
+    "projectTitle": "skillssync",
+    "description": "students skills compare with project",
+    "teamSize": 5,
+    "requiredSkills": [
+      {
+        "name": "AWS",
+        "weight": 100
+      },
+      {
+        "name": "PostgreSQL",
+        "weight": 50
+      },
+      {
+        "name": "react",
+        "weight": 33
+      },
+      {
+        "name": "django",
+        "weight": 25
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Full Stack Developer",
+        "count": 1
+      },
+      {
+        "role": "Frontend Developer",
+        "count": 1
+      },
+      {
+        "role": "Backend Developer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "AWS": 100,
+      "PostgreSQL": 50,
+      "react": 33,
+      "django": 25
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-10-25T18:01:10.919Z",
+    "status": "active"
+  },
+  {
     "id": "proj-1792945518942-vtce4",
     "projectTitle": "skillssync",
     "description": "skills of the different people are compared to get perfect team",
