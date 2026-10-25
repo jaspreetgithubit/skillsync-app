@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { useUserProfile } from '../context/UserProfileContext';
 import AIGraphicCanvas from './AIGraphicCanvas';
-import { supabase, getSupabaseConfigError } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+import GoogleAccountModal from './google-auth/GoogleAccountModal';
 
 const ROLES = [
   'Full Stack Developer',
@@ -36,6 +37,7 @@ export default function TeamMatchSignInExperience({
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [error, setError] = useState('');
 
   // Sign In Form State
@@ -62,32 +64,31 @@ export default function TeamMatchSignInExperience({
 
   const isCreatorTrack = purpose === 'create-project';
 
-  // Handle Google OAuth Sign In (Supabase)
+  // Handle Google OAuth Sign In (Supabase + Interactive Google Account Chooser)
   const handleGoogleSignIn = async () => {
     setError('');
-    const configError = getSupabaseConfigError ? getSupabaseConfigError() : null;
-    if (!supabase) {
-      if (configError) setError(configError);
+    if (supabase) {
+      setIsGoogleLoading(true);
+      try {
+        const { error: googleError } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/`
+          }
+        });
+        if (googleError) {
+          console.warn('Supabase OAuth error, activating Google Chooser:', googleError.message);
+          setIsGoogleLoading(false);
+          setIsGoogleModalOpen(true);
+        }
+      } catch (err) {
+        console.warn('Supabase OAuth exception, activating Google Chooser:', err);
+        setIsGoogleLoading(false);
+        setIsGoogleModalOpen(true);
+      }
       return;
     }
-
-    setIsGoogleLoading(true);
-    try {
-      const { error: googleError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`
-        }
-      });
-
-      if (googleError) {
-        setError(googleError.message || 'Google sign-in could not be started.');
-        setIsGoogleLoading(false);
-      }
-    } catch (err) {
-      setError(err?.message || 'Google sign-in error.');
-      setIsGoogleLoading(false);
-    }
+    setIsGoogleModalOpen(true);
   };
 
   // Handle Quick Demo Login
@@ -721,6 +722,21 @@ export default function TeamMatchSignInExperience({
       <footer className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 py-6 text-center text-xs font-mono text-slate-500">
         <span>SyncSkills AI Engineering Engine · Encrypted SSL Authentication · Zero Data Leakage</span>
       </footer>
+
+      {/* Interactive Google OAuth Account Picker */}
+      <GoogleAccountModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
+        onAccountSelected={(selectedGoogleUser) => {
+          updateProfile(selectedGoogleUser);
+          if (onAuthenticated) {
+            onAuthenticated({
+              ...selectedGoogleUser,
+              purpose
+            });
+          }
+        }}
+      />
     </div>
   );
 }

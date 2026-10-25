@@ -28,6 +28,9 @@ import RecommendedTeam from './pages/RecommendedTeam';
 import TeamDashboard from './pages/TeamDashboard';
 import useLenis from './hooks/useLenis';
 
+// Google Gemini AI Assistant (Dedicated Feature Folder)
+import GeminiChatbot from './components/gemini-chatbot/GeminiChatbot';
+
 function AppContent() {
   useLenis();
   const { updateProfile, setActiveProjectId, setActiveTeamId } = useUserProfile();
@@ -460,6 +463,9 @@ function AppContent() {
             </main>
 
             <Footer onOpenAuth={() => handleOpenPurpose()} />
+
+            {/* Google Gemini AI Intelligent Copilot */}
+            <GeminiChatbot onNavigate={navigateTo} />
           </div>
         </>
       )}
