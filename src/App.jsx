@@ -212,8 +212,8 @@ function AppContent() {
   }, [updateProfile]);
 
   // Open the "Choose Your Purpose" page
-  const handleOpenPurpose = () => {
-    navigateTo('/choose-purpose');
+  const handleOpenAuth = (mode = 'signin', purpose = 'join-project') => {
+    navigateTo('/auth?mode=' + mode + '&purpose=' + purpose, { mode, purpose });
   };
 
   // User decision on Choose Your Purpose page: routes to Auth first!
@@ -422,7 +422,7 @@ function AppContent() {
               playsInline
               onLoadedData={() => setVideoLoaded(true)}
               className={`absolute inset-0 w-full h-full object-cover filter contrast-105 brightness-105 transition-opacity duration-1000 ${
-                videoLoaded ? 'opacity-100' : 'opacity-70'
+                videoLoaded ? 'opacity-35' : 'opacity-20'
               }`}
             >
               <source src="/videos/Cinematic_K_corporate_office.mp4" type="video/mp4" />
@@ -431,7 +431,9 @@ function AppContent() {
             </video>
 
             {/* Lightweight translucent vignette */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 pointer-events-none" />
+            {/* High-Contrast Scrim Layer for Maximum Text Visibility */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#080B12]/85 via-[#080B12]/65 to-[#080B12]/90 pointer-events-none backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-[#080B12]/40 pointer-events-none" />
             
             {/* Ambient Lighting Bleeds */}
             <div className="absolute top-12 left-1/4 w-[750px] h-[500px] bg-purple-900/15 blur-[180px] rounded-full pointer-events-none" />
@@ -450,19 +452,19 @@ function AppContent() {
 
           {/* WEBSITE CONTENT LAYER (FULL ORIGINAL LANDING PAGE - 100% UNCHANGED) */}
           <div className="relative z-10 flex flex-col min-h-screen">
-            <Navbar onOpenAuth={() => handleOpenPurpose()} onOpenAdmin={() => navigateTo('/admin')} />
+            <Navbar onOpenAuth={() => handleOpenAuth('signin', 'join-project')} onOpenAdmin={() => navigateTo('/admin')} />
             
             <main className="flex-1">
-              <Hero onOpenAuth={() => handleOpenPurpose()} />
+              <Hero onOpenAuth={() => handleOpenAuth('signin', 'join-project')} />
               <TechMarquee />
               <HowItWorks />
-              <BentoGrid onOpenAuth={() => handleOpenPurpose()} />
+              <BentoGrid onOpenAuth={() => handleOpenAuth('signin', 'join-project')} />
               <SquadSimulator />
               <ImpactMetrics />
               <Testimonials />
             </main>
 
-            <Footer onOpenAuth={() => handleOpenPurpose()} />
+            <Footer onOpenAuth={() => handleOpenAuth('signin', 'join-project')} />
 
             {/* Google Gemini AI Intelligent Copilot */}
             <GeminiChatbot onNavigate={navigateTo} />

@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  Sparkles,
   ArrowRight,
   CheckCircle2,
   RefreshCw,
@@ -9,9 +8,7 @@ import {
   Rocket,
   Building2,
   Cpu,
-  Activity,
   Zap,
-  Layers,
   ShieldCheck,
   Flame
 } from 'lucide-react';
@@ -309,13 +306,7 @@ export default function Hero() {
             <div
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              style={{
-                transform: tilt.active
-                  ? `perspective(1000px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg) scale3d(1.015, 1.015, 1.015)`
-                  : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-                transition: tilt.active ? 'transform 0.08s ease-out' : 'transform 0.5s ease-out',
-                transformStyle: 'preserve-3d'
-              }}
+              style={{ transform: 'none' }}
               className="relative rounded-3xl p-5 sm:p-6 border border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.7)] backdrop-blur-md bg-black/25 overflow-hidden"
             >
 

@@ -1,50 +1,58 @@
 // System knowledge and prompts for SyncSkills.AI Gemini Assistant
 
 export const SYNCSKILLS_SYSTEM_PROMPT = `
-You are the official SyncSkills.AI intelligent copilot, powered by Google Gemini.
-SyncSkills.AI is an elite AI-driven project team formation and skill compatibility matching platform for universities, capstone projects, hackathons, and corporate engineering pods.
+You are the official SyncSkills Gemini Copilot, powered by Google Gemini.
+You have unrestricted intelligence and can answer ANY question the user asks, including:
 
-Key Features of SyncSkills.AI:
-1. NLP Skill Extraction: Analyzes project briefs, syllabi, and resumes to automatically extract technical skills (e.g., PyTorch, React, FastAPI, Rust, Docker) and weights them dynamically.
-2. Zero-Bias Algorithmic Matching: Compares skill vectors, role requirements, experience, and timezone alignment to produce high-synergy squads.
-3. 9-Stage Collaborative Workflow:
-   - Step 1: Profile Setup & Skill Curation (/profile-setup)
-   - Step 2: Explore Live Projects (/explore-projects)
-   - Step 3: Project Deep Dive (/project/:id)
-   - Step 4: Multi-Vector Compatibility Analysis (/project/:id/compatibility)
-   - Steps 5 & 6: Side-by-Side Team Comparison Matrix (/project/:id/compare)
-   - Step 7: AI Recommended 4-Person Squad Breakdown (/project/:id/recommended)
-   - Step 8: Interactive Team Chat & Sprint Collaboration Hub (/team/:id)
-   - Step 9: Project Creator & Lead Admin Portal (/admin)
-4. Split-Screen Authentication: Secure Google OAuth and email login with customizable student/creator roles.
+1. Mathematics & Science:
+   - Solve algebraic equations, calculus, arithmetic, geometry, matrices, and discrete math step-by-step with clear derivations.
+   - Answer physics, science, and engineering questions with precise formulas and explanations.
 
-Tone & Style:
-- Professional, futuristic, helpful, and concise.
-- Use formatting (bullet points, bold text, code tags) for readability.
-- Guide users on how to find projects, assemble teams, or choose tech stacks.
-- If asked how to navigate, mention the buttons or routes (e.g., Click "Get Started", "Explore Projects", or "Choose Purpose").
+2. Software Engineering & Programming:
+   - Write, debug, and explain code in Python, JavaScript, TypeScript, Rust, Go, C++, SQL, HTML/CSS, etc.
+   - Explain algorithms, system design, data structures, and best practices.
+
+3. SyncSkills.AI Platform Guidance:
+   - Explain our zero-bias algorithmic team formation and Hungarian bipartite matching.
+   - Explain NLP-based skill extraction from project briefs and resumes.
+   - Guide users through the 9-stage workflow:
+     * Step 1: Profile Setup & Skill Curation (/profile-setup)
+     * Step 2: Explore Live Projects (/explore-projects)
+     * Step 3: Project Deep Dive (/project/:id)
+     * Step 4: Multi-Vector Compatibility Analysis (/project/:id/compatibility)
+     * Steps 5 & 6: Side-by-Side Team Comparison Matrix (/project/:id/compare)
+     * Step 7: AI Recommended 4-Person Squad Breakdown (/project/:id/recommended)
+     * Step 8: Interactive Team Chat & Sprint Collaboration Hub (/team/:id)
+     * Step 9: Project Creator & Lead Admin Portal (/admin)
+
+4. General Knowledge & Everyday Queries:
+   - Answer general knowledge, logic puzzles, summaries, and creative questions politely and thoroughly.
+
+Formatting Rules:
+- Use bolding, bullet points, and code formatting (\`code\` or code blocks) for clean readability.
+- When solving equations, show the step-by-step resolution clearly.
 `;
 
 export const STARTER_SUGGESTIONS = [
+  {
+    icon: '📐',
+    label: 'Solve a Math Equation',
+    prompt: 'Solve this equation step-by-step: 4x + 12 = 36'
+  },
   {
     icon: '⚡',
     label: 'How does AI team matching work?',
     prompt: 'How does SyncSkills.AI match team members using AI and NLP?'
   },
   {
+    icon: '💻',
+    label: 'Write a Python QuickSort',
+    prompt: 'Write an optimized QuickSort algorithm in Python with an explanation.'
+  },
+  {
     icon: '🚀',
-    label: 'Best tech stack for a 48h hackathon',
+    label: 'Optimal Hackathon Squad Stack',
     prompt: 'What is the optimal 4-person team composition and tech stack for a 48-hour FinTech hackathon?'
-  },
-  {
-    icon: '🎯',
-    label: 'Explore active capstone projects',
-    prompt: 'What kinds of projects can I join on SyncSkills.AI, and how do I apply?'
-  },
-  {
-    icon: '🔑',
-    label: 'Configure Gemini API Key',
-    prompt: 'How do I add my Google Gemini API key to this chatbot?'
   }
 ];
 
@@ -62,12 +70,7 @@ export const FALLBACK_RESPONSES = [
     response: `**Finding and Joining Projects on SyncSkills.AI:**\n\n1. Click **Get Started** on the top navigation bar or hero section.\n2. Choose **"Join an Existing Project"**.\n3. Curate your profile with your skills (e.g., React, Python, Docker).\n4. Browse our catalog of vetted Capstone and Hackathon projects.\n5. Click **"Analyze My Fit"** to inspect your compatibility score and join the squad!`
   },
   {
-    keywords: ['key', 'api key', 'gemini', 'configure', 'setup'],
-    response: `**Configuring Your Google Gemini API Key:**\n\n1. Get your free Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).\n2. Click the **⚙️ Settings icon** at the top of this chat window and paste your key.\n3. Alternatively, add \`VITE_GEMINI_API_KEY=your_key_here\` into your \`.env\` file in \`skillsync-app\` and restart the server.\n\n*Note: Even without a key, this assistant provides built-in answers about SyncSkills.AI!*`
-  },
-  {
     keywords: ['google', 'auth', 'login', 'sign in', 'supabase'],
     response: `**Google Sign-In & Authentication:**\n\n- You can sign in using the **"Continue with Google"** button on the Auth page.\n- For live Supabase OAuth, ensure \`VITE_SUPABASE_URL\` and \`VITE_SUPABASE_ANON_KEY\` are defined in your \`.env\` file.\n- If keys are not yet configured, our interactive Google Account Chooser allows one-click sandbox sign-in so your development never stops!`
   }
 ];
-

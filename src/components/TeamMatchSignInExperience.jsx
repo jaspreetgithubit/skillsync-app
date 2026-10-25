@@ -27,7 +27,6 @@ const ROLES = [
 export default function TeamMatchSignInExperience({
   onAuthenticated,
   onBackToHome,
-  onBackToPurpose,
   initialMode = 'signin',
   purpose = 'join-project'
 }) {
@@ -177,7 +176,7 @@ export default function TeamMatchSignInExperience({
   return (
     <div 
       onMouseMove={handleMouseMove}
-      className="relative min-h-screen bg-[#080B12] text-slate-100 font-sans selection:bg-[#F59E0B] selection:text-[#080B12] flex flex-col justify-between overflow-x-hidden"
+      className="relative h-screen max-h-screen bg-[#080B12] text-slate-100 font-sans selection:bg-[#F59E0B] selection:text-[#080B12] flex flex-col justify-between overflow-hidden"
     >
       {/* =========================================================================
           BACKGROUND LAYERS
@@ -213,15 +212,15 @@ export default function TeamMatchSignInExperience({
       />
 
       {/* Top Header Bar */}
-      <header className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex items-center justify-between">
+      <header className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-1 sm:pb-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={onBackToPurpose || onBackToHome}
+            onClick={onBackToHome}
             className="inline-flex items-center gap-2 text-xs font-mono font-medium text-slate-400 hover:text-white px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/10 hover:border-amber-500/40 transition-all cursor-pointer backdrop-blur-md"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#F59E0B]" />
-            <span>Back to Purpose</span>
+            <span>Back to Home</span>
           </button>
 
           <span className="text-white/20 hidden sm:inline">|</span>
@@ -243,8 +242,8 @@ export default function TeamMatchSignInExperience({
       </header>
 
       {/* Main Workspace Split Container */}
-      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex-1 flex items-center justify-center">
-        <div className="relative w-full rounded-3xl bg-[#0B0F19]/90 border border-white/15 shadow-[0_20px_70px_rgba(0,0,0,0.6)] backdrop-blur-2xl overflow-hidden flex flex-col lg:flex-row min-h-[580px] lg:min-h-[620px]">
+      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex-1 flex items-center justify-center min-h-0">
+        <div className="relative w-full rounded-3xl bg-[#0B0F19]/90 border border-white/15 shadow-[0_20px_70px_rgba(0,0,0,0.6)] backdrop-blur-2xl overflow-hidden flex flex-col lg:flex-row max-h-[84vh] max-w-5xl">
           
           {/* =========================================================================
               SLIDING CINEMATIC 4K VIDEO DOOR (DESKTOP)
@@ -278,7 +277,7 @@ export default function TeamMatchSignInExperience({
             <div className="absolute inset-0 bg-radial-gradient pointer-events-none opacity-60" />
 
             {/* Video Interior Content */}
-            <div className="relative h-full flex flex-col justify-between p-8 sm:p-10 select-none">
+            <div className="relative h-full flex flex-col justify-between p-5 sm:p-7 select-none">
               
               {/* Top Badge */}
               <div className="flex items-center justify-between">
@@ -296,7 +295,7 @@ export default function TeamMatchSignInExperience({
                 <div className="text-xs font-mono text-amber-400 uppercase tracking-widest font-bold">
                   {mode === 'signin' ? '// RETURN TO WORKSPACE' : '// JOIN THE TALENT MATRIX'}
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight leading-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight leading-tight">
                   {mode === 'signin' ? (
                     <>
                       Form The Perfect{' '}
@@ -369,7 +368,7 @@ export default function TeamMatchSignInExperience({
               LEFT COLUMN: CREATE ACCOUNT FORM
               ========================================================================= */}
           <div 
-            className={`w-full lg:w-1/2 p-6 sm:p-12 flex flex-col justify-center transition-all duration-500 ${
+            className={`w-full lg:w-1/2 p-4 sm:p-6 lg:p-7 flex flex-col justify-center overflow-y-auto transition-all duration-500 ${
               mode === 'signup'
                 ? 'opacity-100 pointer-events-auto z-10'
                 : 'lg:opacity-0 lg:pointer-events-none lg:translate-x-4 hidden lg:flex'
@@ -719,7 +718,7 @@ export default function TeamMatchSignInExperience({
       </main>
 
       {/* Footer Branding */}
-      <footer className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 py-6 text-center text-xs font-mono text-slate-500">
+      <footer className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 py-2 text-center text-[10px] sm:text-xs font-mono text-slate-500">
         <span>SyncSkills AI Engineering Engine · Encrypted SSL Authentication · Zero Data Leakage</span>
       </footer>
 

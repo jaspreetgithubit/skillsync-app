@@ -14,7 +14,13 @@ import {
   CheckCircle2, 
   FolderGit2, 
   ShieldCheck, 
-  Search
+  Search,
+  Target,
+  FolderPlus,
+  Layers,
+  BrainCircuit,
+  Users,
+  ChevronRight
 } from 'lucide-react';
 import { useUserProfile } from '../context/UserProfileContext';
 import BorderBeam from '../components/common/BorderBeam';
@@ -820,8 +826,136 @@ export default function ProfileSetup({ onNavigate }) {
             </form>
           </div>
 
-        </div>
+                </div>
 
+        {/* =========================================================================
+            "WANT TO CREATE A PROJECT?" DEDICATED SECTION
+            Transferred directly from Why Are You Here with zero re-authentication
+            ========================================================================= */}
+        <div className="pt-12 border-t border-white/10 max-w-4xl mx-auto space-y-6">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[#F59E0B] text-xs font-mono uppercase tracking-wider shadow-lg shadow-amber-500/10">
+              <Target className="w-3.5 h-3.5" />
+              <span className="font-bold">Project Creator & Founder Track</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
+              Want to Create Your Own Project?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+              Define your project brief, configure role weights, and assemble an autonomous high-synergy 4-person engineering pod.
+            </p>
+          </div>
+
+          {/* Pinterest Pin Style Card from Why Are You Here */}
+          <div 
+            onClick={() => onNavigate && onNavigate('/admin')}
+            className="group relative rounded-3xl border border-white/20 hover:border-amber-500/60 bg-[#0D121E]/95 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden cursor-pointer transition-colors"
+          >
+            {/* Top Visual Image Header */}
+            <div className="relative h-52 sm:h-60 w-full overflow-hidden border-b border-white/10">
+              <img 
+                src="/images/step2_project.jpg" 
+                alt="Create a Project" 
+                className="w-full h-full object-cover filter contrast-105 brightness-110 saturate-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0D121E] via-transparent to-transparent pointer-events-none" />
+
+              {/* Floating Pill Badges on Image */}
+              <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between">
+                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[#F59E0B] text-[11px] font-mono font-bold uppercase tracking-wider shadow-xl">
+                  <Target className="h-3 w-3 text-[#F59E0B]" />
+                  <span>Project Creator & Lead</span>
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[10px] font-mono text-slate-200 shadow-md">
+                  DIRECT ACCESS
+                </span>
+              </div>
+
+              {/* Live Metric Overlay */}
+              <div className="absolute bottom-3 left-3.5 flex items-center space-x-1.5 text-xs font-mono text-amber-400 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-amber-500/40 shadow-xl">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#F59E0B] animate-ping" />
+                <span>Autonomous AI Squad Assembly</span>
+              </div>
+            </div>
+
+            {/* Card Content Body */}
+            <div className="p-6 sm:p-8 space-y-5">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-white group-hover:text-amber-200 transition-colors">
+                  I want to create a project
+                </h3>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mt-1.5">
+                  Define your project requirements and build your ideal team.
+                </p>
+
+                {/* Visual Pipeline: Project → Specs → AI → Team */}
+                <div className="mt-4 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 group-hover:border-amber-500/30 transition-colors">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#F59E0B] font-bold mb-2 flex items-center justify-between">
+                    <span>Assembly Pipeline</span>
+                    <span className="text-slate-400 font-normal">NLP Requirement Matrix</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-center gap-1.5 text-[11px] font-mono">
+                    <div className="flex-1 py-1.5 px-1 rounded-lg bg-white/[0.04] border border-white/10">
+                      <FolderPlus className="h-4 w-4 text-[#F59E0B] mx-auto mb-1" />
+                      <div className="font-bold text-white text-[10px]">Project</div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-amber-500/60 shrink-0" />
+                    <div className="flex-1 py-1.5 px-1 rounded-lg bg-white/[0.04] border border-white/10">
+                      <Layers className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+                      <div className="font-bold text-white text-[10px]">Specs</div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-amber-500/60 shrink-0" />
+                    <div className="flex-1 py-1.5 px-1 rounded-lg bg-white/[0.04] border border-white/10">
+                      <BrainCircuit className="h-4 w-4 text-[#F59E0B] mx-auto mb-1" />
+                      <div className="font-bold text-white text-[10px]">AI</div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-amber-500/60 shrink-0" />
+                    <div className="flex-1 py-1.5 px-1 rounded-lg bg-amber-500/20 border border-amber-500/40">
+                      <Users className="h-4 w-4 text-amber-300 mx-auto mb-1" />
+                      <div className="font-bold text-amber-200 text-[10px]">Team</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Value Checkpoints */}
+                <ul className="mt-4 space-y-2 text-xs text-slate-300">
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#F59E0B] shrink-0" />
+                    <span>Set project title, specs & desired team size</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#F59E0B] shrink-0" />
+                    <span>Configure skill weights (e.g. Python 40%, React 30%)</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#F59E0B] shrink-0" />
+                    <span>Allocate specific roles for optimal coverage</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Bottom Action CTA Button */}
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[11px] font-mono text-slate-400">
+                  Authenticated Lead Mode · Direct Studio Access
+                </span>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onNavigate) onNavigate('/admin');
+                  }}
+                  className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl btn-amber-gold text-xs uppercase tracking-wider font-extrabold shadow-lg shadow-amber-500/25 cursor-pointer"
+                >
+                  <span>Create Project & Assemble Pod</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
