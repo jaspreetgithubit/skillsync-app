@@ -37,23 +37,39 @@ export default function ExploreProjects({ onNavigate }) {
         if (res.ok) {
           const data = await res.json();
           if (isMounted && Array.isArray(data.projects) && data.projects.length > 0) {
-            const normalizedBackend = data.projects.map((p, idx) => ({
-              id: p.id || `proj-backend-${idx}`,
-              title: p.projectTitle || p.title || 'Untitled Project',
-              shortDescription: p.description || '',
-              description: p.description || 'Collaborative engineering squad.',
-              domain: p.domain || 'AI/ML',
-              requiredSkills: (p.requiredSkills || []).map(s => typeof s === 'string' ? { name: s, weight: 20 } : s),
-              requiredRoles: (p.requiredRoles || []).map(r => typeof r === 'string' ? r : (r.role || 'Full Stack Developer')),
-              teamSize: Number(p.teamSize) || 4,
-              openSlots: p.openSlots ?? Math.max(1, (Number(p.teamSize) || 4) - 2),
-              status: p.status === 'active' ? 'Open' : (p.status || 'Open'),
-              bannerImage: p.bannerImage || '/images/usecase_hackathon.jpg',
-              leadName: p.leadName || p.createdBy || 'Admin Lead',
-              leadAvatar: p.leadAvatar || '/images/avatars/aditya.jpg',
-              leadRole: p.leadRole || 'Project Creator',
-              milestones: p.milestones || ['Phase 1: Architecture Ingestion', 'Phase 2: Sprint Execution', 'Phase 3: Production Delivery']
-            }));
+            const normalizedBackend = data.projects.map((p, idx) => {
+              const mock = MOCK_PROJECTS.find(m => m.id === p.id);
+              if (mock) return mock;
+
+              const template = MOCK_PROJECTS[idx % MOCK_PROJECTS.length];
+              return {
+                ...template,
+                ...p,
+                id: p.id || `proj-backend-${idx}`,
+                title: p.projectTitle || p.title || template.title,
+                shortDescription: p.description || template.shortDescription,
+                description: p.description || template.description,
+                domain: p.domain || template.domain,
+                requiredSkills: (p.requiredSkills && p.requiredSkills.length > 0)
+                  ? p.requiredSkills.map(s => ({
+                      name: typeof s === 'string' ? s : (s.name || ''),
+                      weight: s.weight || 25,
+                      minLevel: s.minLevel || 'Medium'
+                    }))
+                  : template.requiredSkills,
+                requiredRoles: (p.requiredRoles && p.requiredRoles.length > 0)
+                  ? p.requiredRoles.map(r => typeof r === 'string' ? r : (r.role || 'Full Stack Developer'))
+                  : template.requiredRoles,
+                teamSize: Number(p.teamSize) || template.teamSize,
+                openSlots: p.openSlots ?? Math.max(1, (Number(p.teamSize) || template.teamSize) - 2),
+                status: p.status === 'active' ? 'Open' : (p.status || 'Open'),
+                bannerImage: p.bannerImage || template.bannerImage,
+                leadName: p.leadName || p.createdBy || template.leadName,
+                leadAvatar: p.leadAvatar || template.leadAvatar,
+                leadRole: p.leadRole || template.leadRole,
+                milestones: (p.milestones && p.milestones.length > 0) ? p.milestones : template.milestones
+              };
+            });
 
             // Backend projects first!
             const backendIds = new Set(normalizedBackend.map(p => p.id));

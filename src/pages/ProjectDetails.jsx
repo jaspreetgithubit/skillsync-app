@@ -17,51 +17,77 @@ import SpotlightCard from '../components/common/SpotlightCard';
 import FloatingBadge from '../components/common/FloatingBadge';
 import NeuralConstellationBackground from '../components/common/NeuralConstellationBackground';
 
+
+// Helper to guarantee 100% rich project data (preserves all original dummy fields)
+function getRichProject(projectId, passedProject) {
+  // 1. Check if it's one of the original rich mock projects
+  const mockMatch = MOCK_PROJECTS.find(p => p.id === projectId);
+  if (mockMatch) {
+    return mockMatch;
+  }
+
+  // 2. If it's a passed project or created project, blend rich template defaults
+  const base = passedProject || {};
+  const template = MOCK_PROJECTS[0];
+
+  return {
+    ...template,
+    ...base,
+    id: base.id || projectId || template.id,
+    title: base.projectTitle || base.title || template.title,
+    description: base.description || template.description,
+    domain: base.domain || template.domain,
+    teamSize: Number(base.teamSize) || template.teamSize,
+    openSlots: base.openSlots ?? Math.max(1, (Number(base.teamSize) || template.teamSize) - 2),
+    duration: base.duration || '8-10 weeks',
+    status: base.status === 'active' ? 'Open' : (base.status || 'Open'),
+    bannerImage: base.bannerImage || template.bannerImage,
+    leadName: base.leadName || base.createdBy || template.leadName,
+    leadAvatar: base.leadAvatar || template.leadAvatar,
+    leadRole: base.leadRole || template.leadRole,
+    requiredSkills: (base.requiredSkills && base.requiredSkills.length > 0)
+      ? base.requiredSkills.map(s => ({
+          name: typeof s === 'string' ? s : (s.name || ''),
+          weight: s.weight || 25,
+          minLevel: s.minLevel || 'Medium'
+        }))
+      : template.requiredSkills,
+    requiredRoles: (base.requiredRoles && base.requiredRoles.length > 0)
+      ? base.requiredRoles.map(r => typeof r === 'string' ? r : (r.role || 'Full Stack Developer'))
+      : template.requiredRoles,
+    milestones: (base.milestones && base.milestones.length > 0)
+      ? base.milestones
+      : template.milestones
+  };
+}
+
 export default function ProjectDetails({ projectId, project: passedProject, onNavigate, onBack }) {
   const { userProfile } = useUserProfile();
 
   const [currentProject, setCurrentProject] = useState(() => {
-    if (passedProject && (passedProject.id === projectId || !projectId)) {
-      return passedProject;
-    }
-    return MOCK_PROJECTS.find(p => p.id === projectId) || null;
+    return getRichProject(projectId, passedProject);
   });
 
   useEffect(() => {
-    if (passedProject && passedProject.id === projectId) {
-      setCurrentProject(passedProject);
-      return;
-    }
-
-    let isMounted = true;
+    // If mock match, use instantly
     const mock = MOCK_PROJECTS.find(p => p.id === projectId);
     if (mock) {
       setCurrentProject(mock);
       return;
     }
 
+    if (passedProject && (passedProject.id === projectId || !projectId)) {
+      setCurrentProject(getRichProject(projectId, passedProject));
+      return;
+    }
+
+    let isMounted = true;
     fetch(`/api/projects/${projectId}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (!isMounted) return;
         if (data?.project) {
-          const p = data.project;
-          setCurrentProject({
-            id: p.id,
-            title: p.projectTitle || p.title || 'Untitled Project',
-            description: p.description || '',
-            domain: p.domain || 'AI/ML',
-            requiredSkills: (p.requiredSkills || []).map(s => typeof s === 'string' ? { name: s, weight: 20 } : s),
-            requiredRoles: (p.requiredRoles || []).map(r => typeof r === 'string' ? r : (r.role || 'Full Stack Developer')),
-            teamSize: Number(p.teamSize) || 4,
-            openSlots: p.openSlots ?? Math.max(1, (Number(p.teamSize) || 4) - 2),
-            status: p.status === 'active' ? 'Open' : (p.status || 'Open'),
-            bannerImage: p.bannerImage || '/images/usecase_hackathon.jpg',
-            leadName: p.leadName || p.createdBy || 'Admin Lead',
-            leadAvatar: p.leadAvatar || '/images/avatars/aditya.jpg',
-            leadRole: p.leadRole || 'Project Creator',
-            milestones: p.milestones || ['Phase 1: Architecture Ingestion', 'Phase 2: Sprint Execution', 'Phase 3: Production Delivery']
-          });
+          setCurrentProject(getRichProject(projectId, data.project));
         } else {
           setCurrentProject(MOCK_PROJECTS[0]);
         }
@@ -71,7 +97,7 @@ export default function ProjectDetails({ projectId, project: passedProject, onNa
       });
 
     return () => { isMounted = false; };
-  }, [projectId]);
+  }, [projectId, passedProject]);
 
   const project = currentProject || MOCK_PROJECTS[0];
 
