@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "server": "node server/server.js",
     "chat-server": "node --env-file=.env server/gemini-chat/chatServer.js"
   },
   "dependencies": {

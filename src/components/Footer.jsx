@@ -75,6 +75,7 @@ export default function Footer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [ticketId, setTicketId] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedTicket, setCopiedTicket] = useState(false);
   const [activeField, setActiveField] = useState(null);

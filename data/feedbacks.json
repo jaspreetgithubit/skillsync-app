@@ -1,0 +1,12 @@
+[
+  {
+    "ticketId": "SS-162110",
+    "name": "Jaspreet Saini",
+    "email": "jaspreet@university.edu",
+    "contactNo": "+91 9876543210",
+    "role": "Student",
+    "problem": "Need ML / PyTorch Lead for Capstone matching",
+    "status": "open",
+    "createdAt": "2026-10-25T13:57:53.937Z"
+  }
+]
