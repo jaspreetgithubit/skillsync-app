@@ -11,10 +11,17 @@ const SYSTEM_INSTRUCTION =
   '(use fenced code blocks), science, general knowledge, and questions about forming ' +
   'balanced project teams. Use concise Markdown formatting.';
 
+const CANDIDATE_MODELS = [
+  process.env.GEMINI_MODEL || 'gemini-3.5-flash',
+  'gemini-3.8-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-latest'
+];
+
 function getConfig() {
   return {
     apiKey: (process.env.GEMINI_API_KEY || '').trim(),
-    model: (process.env.GEMINI_MODEL || 'gemini-2.5-flash').trim()
+    model: (process.env.GEMINI_MODEL || 'gemini-3.5-flash').trim()
   };
 }
 
@@ -27,7 +34,7 @@ function isConfigured() {
  * @returns {Promise<string>} assistant reply text
  */
 async function generateReply(messages) {
-  const { apiKey, model } = getConfig();
+  const { apiKey } = getConfig();
   if (!apiKey) {
     const err = new Error('GEMINI_API_KEY is not set in the local .env file.');
     err.status = 503;
@@ -39,58 +46,68 @@ async function generateReply(messages) {
     parts: [{ text: m.text }]
   }));
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  // Try configured primary model first, with automatic fallback if Google servers are busy (503)
+  const modelsToTry = Array.from(new Set(CANDIDATE_MODELS));
+  let lastError = null;
 
-  try {
-    const response = await fetch(`${GEMINI_BASE_URL}/${encodeURIComponent(model)}:generateContent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Sent as a header (not in the URL) so the key never appears in logs.
-        'x-goog-api-key': apiKey
-      },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-        contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
-      }),
-      signal: controller.signal
-    });
+  for (const currentModel of modelsToTry) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    const data = await response.json().catch(() => ({}));
+    try {
+      const response = await fetch(`${GEMINI_BASE_URL}/${encodeURIComponent(currentModel)}:generateContent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          contents,
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        }),
+        signal: controller.signal
+      });
 
-    if (!response.ok) {
-      const err = new Error(data?.error?.message || `Gemini API error (HTTP ${response.status})`);
-      err.status = response.status === 429 ? 429 : 502;
-      if (response.status === 400 || response.status === 401 || response.status === 403) {
-        err.message = 'Gemini rejected the request. Check that GEMINI_API_KEY in your .env is valid.';
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        // If 503 (high demand) or 404 (model unavailable), attempt next model
+        if (response.status === 503 || response.status === 404) {
+          lastError = new Error(data?.error?.message || `HTTP ${response.status}`);
+          continue;
+        }
+        const err = new Error(data?.error?.message || `Gemini API error (HTTP ${response.status})`);
+        err.status = response.status === 429 ? 429 : 502;
+        if (response.status === 400 || response.status === 401 || response.status === 403) {
+          err.message = 'Gemini rejected the request. Check that GEMINI_API_KEY in your .env is valid.';
+        }
+        throw err;
       }
-      throw err;
-    }
 
-    const text = (data.candidates?.[0]?.content?.parts || [])
-      .map((p) => p.text || '')
-      .join('')
-      .trim();
+      const text = (data.candidates?.[0]?.content?.parts || [])
+        .map((p) => p.text || '')
+        .join('')
+        .trim();
 
-    if (!text) {
-      const reason = data.candidates?.[0]?.finishReason || data.promptFeedback?.blockReason;
-      return reason
-        ? `I couldn't generate a reply for that message (reason: ${reason}). Please try rephrasing.`
-        : 'I could not generate a reply. Please try again.';
+      if (text) {
+        return text;
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        lastError = new Error('Gemini took too long to respond.');
+        continue;
+      }
+      if (err.status && err.status !== 503) {
+        throw err;
+      }
+      lastError = err;
+    } finally {
+      clearTimeout(timer);
     }
-    return text;
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      const timeoutErr = new Error('Gemini took too long to respond. Please try again.');
-      timeoutErr.status = 504;
-      throw timeoutErr;
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
   }
+
+  throw lastError || new Error('Gemini is currently unavailable. Please try again in a moment.');
 }
 
 module.exports = { generateReply, isConfigured, getConfig };
