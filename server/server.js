@@ -8,7 +8,6 @@ const projectRoutes = require('./routes/projectRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-const matchRoutes = require('./routes/matchRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,7 +20,6 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/match', matchRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {

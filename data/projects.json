@@ -1,5 +1,60 @@
 [
   {
+    "id": "proj-1792945518942-vtce4",
+    "projectTitle": "skillssync",
+    "description": "skills of the different people are compared to get perfect team",
+    "teamSize": 5,
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "weight": 100
+      },
+      {
+        "name": "Machine Learning",
+        "weight": 50
+      },
+      {
+        "name": "React",
+        "weight": 62
+      },
+      {
+        "name": "Node.js",
+        "weight": 64
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Frontend Developer",
+        "count": 1
+      },
+      {
+        "role": "Backend Developer",
+        "count": 1
+      },
+      {
+        "role": "ML Engineer",
+        "count": 1
+      },
+      {
+        "role": "Data Scientist",
+        "count": 1
+      },
+      {
+        "role": "UI/UX Designer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Python": 100,
+      "Machine Learning": 50,
+      "React": 62,
+      "Node.js": 64
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-10-25T16:25:18.942Z",
+    "status": "active"
+  },
+  {
     "id": "proj-1792944687009-efzaz",
     "projectTitle": "ai healthcare",
     "description": "sdfghjkl;,mnbvcdxfghjkl;.,mnbv",

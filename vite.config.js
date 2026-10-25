@@ -281,41 +281,6 @@ function apiBackendPlugin() {
             });
           }
         }
-
-        
-        // 6. MATCH: /api/match
-        if (url.startsWith('/api/match') && req.method === 'POST') {
-          return parseBody((err, data) => {
-            if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
-            const { userProfile, project } = data;
-            
-            const userSkills = new Set((userProfile?.skills || []).map(s => (typeof s === 'string' ? s : (s.name || '')).toLowerCase()));
-            const projectSkills = (project?.requiredSkills || []).map(s => (typeof s === 'string' ? s : (s.name || '')).toLowerCase());
-            
-            let matched = 0;
-            projectSkills.forEach(s => {
-              if (userSkills.has(s)) matched++;
-            });
-
-            const skillMatch = projectSkills.length ? Math.round((matched / projectSkills.length) * 100) : 85;
-            const overallScore = Math.min(99, Math.max(70, Math.round(skillMatch * 0.7 + 25)));
-
-            return sendJson(200, {
-              success: true,
-              compatibility: {
-                overallScore,
-                skillMatch,
-                roleMatch: 92,
-                experienceMatch: 90,
-                explainableAI: [
-                  `✓ Matched ${matched} of ${projectSkills.length} requested technical skills.`,
-                  '✓ Role alignment matches squad roadmap velocity.'
-                ]
-              }
-            });
-          });
-        }
-
         next();
       });
     }
