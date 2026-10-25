@@ -1,5 +1,29 @@
 [
   {
+    "id": "proj-1792944687009-efzaz",
+    "projectTitle": "ai healthcare",
+    "description": "sdfghjkl;,mnbvcdxfghjkl;.,mnbv",
+    "teamSize": 5,
+    "requiredSkills": [
+      {
+        "name": "React",
+        "weight": 100
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Frontend Developer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "React": 100
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-10-25T16:11:27.010Z",
+    "status": "active"
+  },
+  {
     "id": "proj-1792271759419-ni45t",
     "projectTitle": "Smart Cafeteria Management Platform",
     "description": "Built a scalable cafeteria platform with multi-role Admin and Employee workflows. \n Implemented JWT authentication and role-based access control for secure system access. \nEngineered Spring Boot REST APIs with a normalized PostgreSQL schema and DTO validation.",
