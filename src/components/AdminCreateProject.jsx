@@ -19,7 +19,14 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import AIGraphicCanvas from './AIGraphicCanvas';
-const API_BASE_URL = 'http://localhost:5000';
+// Robust API caller with dev server & standalone backend fallback
+const callApi = async (url, options = {}) => {
+  try {
+    return await fetch(url, options);
+  } catch {
+    return await fetch(`http://localhost:5000${url}`, options);
+  }
+};
 
 // Standard library of popular tech skills for autocomplete & recommendations
 const SKILL_SUGGESTIONS = [
@@ -131,7 +138,7 @@ export default function AdminCreateProject({
   const loadExistingProjects = useCallback(async () => {
     setIsLoadingProjects(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/projects`);
+      const res = await callApi('/api/projects');
       if (res.ok) {
         const data = await res.json();
         setExistingProjects(data.projects || []);
@@ -349,7 +356,7 @@ export default function AdminCreateProject({
     setCreationPhase('creating');
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/projects`, {
+      const res = await callApi('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

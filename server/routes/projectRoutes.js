@@ -27,7 +27,7 @@ const writeLocalProjects = (data) => {
   }
 };
 
-// GET /api/projects - Retrieve all projects
+// 1. GET /api/projects - Retrieve all projects
 router.get('/', (req, res) => {
   try {
     const local = readLocalProjects();
@@ -37,7 +37,22 @@ router.get('/', (req, res) => {
   }
 });
 
-// POST /api/projects - Create a new project
+// 2. GET /api/projects/:id - Retrieve specific project by ID
+router.get('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const local = readLocalProjects();
+    const project = local.find(p => p.id === id);
+    if (!project) {
+      return res.status(404).json({ success: false, error: 'Project not found' });
+    }
+    return res.status(200).json({ success: true, project });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 3. POST /api/projects - Create a new project
 router.post('/', (req, res) => {
   try {
     const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = req.body;
@@ -77,6 +92,26 @@ router.post('/', (req, res) => {
     console.log(`[Node.js Backend] New Project registered: ${newProject.projectTitle} (${newProject.id})`);
 
     return res.status(201).json({ success: true, message: 'Project saved successfully', project: newProject });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 4. DELETE /api/projects/:id - Delete a project
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const local = readLocalProjects();
+    const initialLen = local.length;
+    const filtered = local.filter(p => p.id !== id);
+
+    if (filtered.length === initialLen) {
+      return res.status(404).json({ success: false, error: 'Project not found' });
+    }
+
+    writeLocalProjects(filtered);
+    console.log(`[Node.js Backend] Project deleted: ${id}`);
+    return res.status(200).json({ success: true, message: 'Project deleted successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }

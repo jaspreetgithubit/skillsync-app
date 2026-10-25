@@ -200,7 +200,22 @@ function apiBackendPlugin() {
         if (url.startsWith('/api/projects')) {
           if (req.method === 'GET') {
             const projects = readData(projectsFile);
+            const subPath = url.replace('/api/projects', '').replace('/', '').split('?')[0];
+            if (subPath) {
+              const item = projects.find(p => p.id === subPath);
+              if (item) return sendJson(200, { success: true, project: item });
+              return sendJson(404, { success: false, error: 'Project not found' });
+            }
             return sendJson(200, { success: true, count: projects.length, projects });
+          }
+
+          if (req.method === 'DELETE') {
+            const subPath = url.replace('/api/projects', '').replace('/', '').split('?')[0];
+            if (!subPath) return sendJson(400, { success: false, error: 'Project ID required' });
+            const projects = readData(projectsFile);
+            const filtered = projects.filter(p => p.id !== subPath);
+            writeData(projectsFile, filtered);
+            return sendJson(200, { success: true, message: 'Project deleted successfully' });
           }
 
           if (req.method === 'POST') {
