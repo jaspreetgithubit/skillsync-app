@@ -24,9 +24,56 @@ export default function ExploreProjects({ onNavigate }) {
   const [selectedSize, setSelectedSize] = useState('All Sizes');
   const [selectedStatus, setSelectedStatus] = useState('All Statuses');
 
+  const [projectsList, setProjectsList] = useState(MOCK_PROJECTS);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch Live Projects from Backend API
+  useEffect(() => {
+    let isMounted = true;
+    const loadProjects = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/projects');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && Array.isArray(data.projects) && data.projects.length > 0) {
+            const normalizedBackend = data.projects.map((p, idx) => ({
+              id: p.id || `proj-backend-${idx}`,
+              title: p.projectTitle || p.title || 'Untitled Project',
+              shortDescription: p.description || '',
+              description: p.description || 'Collaborative engineering squad.',
+              domain: p.domain || 'AI/ML',
+              requiredSkills: (p.requiredSkills || []).map(s => typeof s === 'string' ? { name: s, weight: 20 } : s),
+              requiredRoles: (p.requiredRoles || []).map(r => typeof r === 'string' ? r : (r.role || 'Full Stack Developer')),
+              teamSize: Number(p.teamSize) || 4,
+              openSlots: p.openSlots ?? Math.max(1, (Number(p.teamSize) || 4) - 2),
+              status: p.status === 'active' ? 'Open' : (p.status || 'Open'),
+              bannerImage: p.bannerImage || '/images/usecase_hackathon.jpg',
+              leadName: p.leadName || p.createdBy || 'Admin Lead',
+              leadAvatar: p.leadAvatar || '/images/avatars/aditya.jpg',
+              leadRole: p.leadRole || 'Project Creator',
+              milestones: p.milestones || ['Phase 1: Architecture Ingestion', 'Phase 2: Sprint Execution', 'Phase 3: Production Delivery']
+            }));
+
+            // Backend projects first!
+            const backendIds = new Set(normalizedBackend.map(p => p.id));
+            const remainingMocks = MOCK_PROJECTS.filter(m => !backendIds.has(m.id));
+            setProjectsList([...normalizedBackend, ...remainingMocks]);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch /api/projects:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+    loadProjects();
+    return () => { isMounted = false; };
+  }, []);
+
   // Multi-facet filtering logic
   const filteredProjects = useMemo(() => {
-    return MOCK_PROJECTS.filter((proj) => {
+    return projectsList.filter((proj) => {
       // Search query (title, description, skills, domain, roles)
       const q = searchQuery.toLowerCase().trim();
       if (q) {

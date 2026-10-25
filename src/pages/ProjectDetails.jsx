@@ -20,7 +20,52 @@ import NeuralConstellationBackground from '../components/common/NeuralConstellat
 export default function ProjectDetails({ projectId, onNavigate, onBack }) {
   const { userProfile } = useUserProfile();
 
-  const project = MOCK_PROJECTS.find(p => p.id === projectId) || MOCK_PROJECTS[0];
+  const [currentProject, setCurrentProject] = useState(() => {
+    return MOCK_PROJECTS.find(p => p.id === projectId) || null;
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    const mock = MOCK_PROJECTS.find(p => p.id === projectId);
+    if (mock) {
+      setCurrentProject(mock);
+      return;
+    }
+
+    fetch(`/api/projects/${projectId}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!isMounted) return;
+        if (data?.project) {
+          const p = data.project;
+          setCurrentProject({
+            id: p.id,
+            title: p.projectTitle || p.title || 'Untitled Project',
+            description: p.description || '',
+            domain: p.domain || 'AI/ML',
+            requiredSkills: (p.requiredSkills || []).map(s => typeof s === 'string' ? { name: s, weight: 20 } : s),
+            requiredRoles: (p.requiredRoles || []).map(r => typeof r === 'string' ? r : (r.role || 'Full Stack Developer')),
+            teamSize: Number(p.teamSize) || 4,
+            openSlots: p.openSlots ?? Math.max(1, (Number(p.teamSize) || 4) - 2),
+            status: p.status === 'active' ? 'Open' : (p.status || 'Open'),
+            bannerImage: p.bannerImage || '/images/usecase_hackathon.jpg',
+            leadName: p.leadName || p.createdBy || 'Admin Lead',
+            leadAvatar: p.leadAvatar || '/images/avatars/aditya.jpg',
+            leadRole: p.leadRole || 'Project Creator',
+            milestones: p.milestones || ['Phase 1: Architecture Ingestion', 'Phase 2: Sprint Execution', 'Phase 3: Production Delivery']
+          });
+        } else {
+          setCurrentProject(MOCK_PROJECTS[0]);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setCurrentProject(MOCK_PROJECTS[0]);
+      });
+
+    return () => { isMounted = false; };
+  }, [projectId]);
+
+  const project = currentProject || MOCK_PROJECTS[0];
 
   const handleCheckCompatibility = () => {
     if (onNavigate) {
