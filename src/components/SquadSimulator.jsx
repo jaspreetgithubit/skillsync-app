@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   BrainCircuit, 
   CheckCircle2, 
@@ -19,6 +19,7 @@ import {
   Clock,
   Check
 } from 'lucide-react';
+import SkillMatchDemo from './SkillMatchDemo';
 
 const DUMMY_PROJECTS = [
   {
@@ -237,25 +238,20 @@ export default function SquadSimulator() {
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-950/20 blur-[160px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* =========================================================================
-            HEADER: "LIVE AI TEAM FORMATION & PROJECT ROSTER"
-            HEADER: "DUMMY AI FORMATION & PROJECT ROSTER"
-            ========================================================================= */}
+        <SkillMatchDemo />
+
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] text-xs font-mono text-[#F59E0B]">
             <BrainCircuit className="h-3.5 w-3.5 text-[#F59E0B]" />
-            <span>REAL-TIME LIVE AI LAB</span>
-            <span>DUMMY AI FORMATION LAB</span>
+            <span>ILLUSTRATIVE TEAM FORMATION PREVIEW</span>
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-            Live AI Team Formation & Project Roster
-            Dummy AI Formation & Project Roster
+            Sample Squad Preview
           </h2>
           
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
-            A step-by-step interactive simulation: Provide project title, observe Step 1 NLP analysis, Step 2 student pool matching, and Step 3 inference completion with the synthesized group of people.
+            The animation below uses hard-coded sample profiles and simulated timing. It is a visual concept preview, not a live team-matching result.
           </p>
         </div>
 

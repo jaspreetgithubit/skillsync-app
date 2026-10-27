@@ -1,5 +1,48 @@
 [
   {
+    "id": "proj-1792947824749-2k4cn",
+    "projectTitle": "Mukul Project-1",
+    "description": "This is a project created by Mukul",
+    "teamSize": 4,
+    "requiredSkills": [
+      {
+        "name": "Python",
+        "weight": 100
+      },
+      {
+        "name": "Machine Learning",
+        "weight": 78
+      },
+      {
+        "name": "React",
+        "weight": 64
+      },
+      {
+        "name": "Node.js",
+        "weight": 59
+      }
+    ],
+    "requiredRoles": [
+      {
+        "role": "Full Stack Developer",
+        "count": 1
+      },
+      {
+        "role": "Backend Developer",
+        "count": 1
+      }
+    ],
+    "skillWeights": {
+      "Python": 100,
+      "Machine Learning": 78,
+      "React": 64,
+      "Node.js": 59
+    },
+    "createdBy": "Admin Lead",
+    "createdAt": "2026-10-25T17:03:44.749Z",
+    "status": "active"
+  },
+  {
     "id": "proj-1789364567427-wctsp",
     "projectTitle": "DeFi Yield Optimizer",
     "description": "Algorithmic liquidity routing protocol maximizing vault yields across decentralized automated market makers.",
