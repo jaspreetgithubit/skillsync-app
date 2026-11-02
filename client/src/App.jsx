@@ -33,6 +33,8 @@ export default function App() {
   const [currentView, setCurrentView] = useState(getInitialView());
   const [authMode, setAuthMode] = useState('signin'); // 'signin' | 'signup'
   const [currentUser, setCurrentUser] = useState(null);
+  const [isSessionReady, setIsSessionReady] = useState(false);
+  const [sessionError, setSessionError] = useState('');
 
   // Read initial purpose from URL query param if present (e.g. ?type=company or ?type=college)
   const getInitialPurpose = () => {
@@ -47,6 +49,32 @@ export default function App() {
   };
 
   const [selectedPurpose, setSelectedPurpose] = useState(getInitialPurpose());
+
+  React.useEffect(() => {
+    let active = true;
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(async (response) => {
+        if (response.status === 401) return;
+        const result = await response.json();
+        if (!response.ok || !result.success || !result.data?.user) {
+          throw new Error(result.error?.message || 'Could not verify the account session.');
+        }
+        if (active) {
+          setCurrentUser(result.data.user);
+          if (getInitialView() !== 'admin') {
+            setSelectedPurpose(result.data.user.goalTrack || 'capstone');
+            setCurrentView('dashboard');
+          }
+        }
+      })
+      .catch(() => {
+        if (active) setSessionError('Account session could not be checked. Sign-in requires the API and MongoDB to be available.');
+      })
+      .finally(() => {
+        if (active) setIsSessionReady(true);
+      });
+    return () => { active = false; };
+  }, []);
 
   // Listen for browser navigation changes
   React.useEffect(() => {
@@ -103,19 +131,44 @@ export default function App() {
   };
 
   const handleAuthenticated = (userData) => {
+    setSessionError('');
     setCurrentUser(userData);
+    setSelectedPurpose(userData.goalTrack || selectedPurpose);
     setCurrentView('dashboard');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSignOut = () => {
-    setCurrentUser(null);
-    setCurrentView('auth');
+  const handleSignOut = async () => {
+    setSessionError('');
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error?.message || 'Could not end the account session. Please retry.');
+      }
+      setCurrentUser(null);
+      setCurrentView('auth');
+    } catch (error) {
+      setSessionError(error.message || 'Could not end the account session. Please retry.');
+    }
   };
 
   return (
     <div className="relative min-h-screen bg-[#080B12] text-slate-100 font-sans selection:bg-[#F59E0B] selection:text-[#080B12] antialiased overflow-x-hidden">
-      
+      {!isSessionReady ? (
+        <main className="flex min-h-screen items-center justify-center text-sm text-slate-300">
+          Checking your account session…
+        </main>
+      ) : (
+      <>
+      {sessionError && (
+        <div role="alert" className="fixed left-4 right-4 top-4 z-[100] mx-auto max-w-2xl rounded-xl border border-rose-500/30 bg-slate-950 p-3 text-sm text-rose-200 shadow-xl">
+          {sessionError}
+        </div>
+      )}
       {/* =========================================================================
           VIEW 0: ADMIN "CREATE PROJECT" CONFIGURATION EXPERIENCE
           ========================================================================= */}
@@ -238,6 +291,8 @@ export default function App() {
             <Footer onOpenAuth={handleOpenAuth} />
           </div>
         </>
+      )}
+      </>
       )}
 
     </div>

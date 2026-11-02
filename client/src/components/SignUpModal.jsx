@@ -1,15 +1,13 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { 
   User, 
   Mail, 
   Lock, 
-  BookOpen, 
   Sparkles, 
   CheckCircle2, 
   X, 
   ArrowRight, 
   ShieldCheck, 
-  Cpu, 
   GraduationCap,
   Eye,
   EyeOff,
@@ -18,7 +16,6 @@ import {
   FileText,
   Trash2,
   Plus,
-  Activity,
   Briefcase,
   FolderGit2
 } from 'lucide-react';
@@ -85,14 +82,12 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
     fullName: '',
     email: '',
     studentId: '',
-    department: 'Computer Science & Engineering',
-    rolePreference: 'AI / Machine Learning Lead',
-    experience: 'Junior Engineer (1-2 yrs)',
-    interests: ['AI / Machine Learning', 'Distributed Systems'],
-    previousProjects: [
-      { title: 'Neural Hungarian Matcher', desc: 'Bipartite graph matching for student teams', tech: 'Python, FastAPI, Redis' }
-    ],
-    selectedSkills: ['Python', 'React', 'FastAPI'],
+    department: '',
+    rolePreference: '',
+    experience: '',
+    interests: [],
+    previousProjects: [],
+    selectedSkills: [],
     password: ''
   });
 
@@ -248,29 +243,6 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsProcessing(true);
-
-    if (mode === 'signin') {
-      const emailUser = formData.email ? formData.email.split('@')[0].replace(/[\._]/g, ' ') : 'Alex Chen';
-      const formatted = emailUser.charAt(0).toUpperCase() + emailUser.slice(1);
-      setFormData(prev => ({
-        ...prev,
-        fullName: formatted || 'Alex Chen',
-        rolePreference: prev.rolePreference || 'Full-Stack Developer',
-        experience: prev.experience || 'Mid-Level Specialist (3-5 yrs)',
-        selectedSkills: prev.selectedSkills.length > 0 
-          ? prev.selectedSkills 
-          : ['React', 'Node.js', 'Python', 'Vector DBs', 'Distributed Systems'],
-        interests: prev.interests.length > 0 
-          ? prev.interests 
-          : ['Distributed Systems', 'Cloud Architecture', 'FinTech & High Velocity'],
-        previousProjects: prev.previousProjects.length > 0 
-          ? prev.previousProjects 
-          : [
-              { title: 'High-Frequency Matching Engine', desc: 'Sub-millisecond order & sprint routing system', tech: 'Go, Rust, Kafka' },
-              { title: 'Interactive WebGL Canvas Hub', desc: 'Spatial collaborative ideation board', tech: 'React, Three.js, WebSockets' }
-            ]
-      }));
-    }
 
     // Simulate AI vector embedding generation
     setTimeout(() => {
@@ -481,7 +453,7 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
                           required
                           value={formData.fullName}
                           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                          placeholder="Aryan Sharma"
+                          placeholder="Your full name"
                           className="w-full bg-white/[0.04] border border-white/15 rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#F59E0B] transition-colors"
                         />
                       </div>
@@ -496,7 +468,7 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
                           required
                           value={formData.studentId}
                           onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                          placeholder="2024CS0891"
+                          placeholder="Your student ID"
                           className="w-full bg-white/[0.04] border border-white/15 rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#F59E0B] transition-colors"
                         />
                       </div>
@@ -512,6 +484,7 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
                         onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                         className="w-full bg-black/60 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-[#F59E0B] cursor-pointer"
                       >
+                        <option value="" disabled>Select department</option>
                         <option value="Computer Science & Engineering">CS & Eng</option>
                         <option value="AI & Data Science">AI & Data</option>
                         <option value="Information Technology">IT</option>
@@ -527,6 +500,7 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
                         onChange={(e) => setFormData({ ...formData, rolePreference: e.target.value })}
                         className="w-full bg-black/60 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-[#F59E0B] cursor-pointer"
                       >
+                        <option value="" disabled>Select a role</option>
                         {PREFERRED_ROLES.map((r) => (
                           <option key={r} value={r}>{r}</option>
                         ))}
@@ -540,6 +514,7 @@ export default function SignUpModal({ isOpen, onClose, initialMode = 'signup' })
                         onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
                         className="w-full bg-black/60 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-[#F59E0B] cursor-pointer"
                       >
+                        <option value="" disabled>Select experience</option>
                         {EXPERIENCE_LEVELS.map((exp) => (
                           <option key={exp} value={exp}>{exp}</option>
                         ))}

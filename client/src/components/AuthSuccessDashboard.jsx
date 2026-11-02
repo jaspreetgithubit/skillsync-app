@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -16,34 +16,19 @@ import {
 } from 'lucide-react';
 
 export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) {
-  // Local editable state populated with user's verified employee details upon sign-in
+  // Local editable state populated from the authenticated account profile.
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'experience' | 'projects' | 'interests' | 'squad'
   
   const [profileData, setProfileData] = useState({
-    name: user?.name || 'Alex Chen',
-    email: user?.email || 'alex.chen@university.edu',
-    role: user?.role || 'Full-Stack Developer & ML Specialist',
-    experience: user?.experience || 'Mid-Level Specialist (3-5 yrs)',
-    department: user?.department || (user?.goalTrack === 'company' ? 'Enterprise Talent Mobility' : 'Computer Science & AI'),
+    name: user?.name || '',
+    email: user?.email || '',
+    role: user?.role || '',
+    experience: user?.experience || '',
+    department: user?.department || '',
     goalTrack: user?.goalTrack || 'capstone',
-    interests: user?.interests && user.interests.length > 0 
-      ? [...user.interests] 
-      : ['Distributed Systems', 'Cloud Architecture', 'FinTech & High Velocity', 'AST Code Parsing'],
-    previousProjects: user?.previousProjects && user.previousProjects.length > 0 
-      ? [...user.previousProjects] 
-      : [
-          { title: 'High-Frequency Matching Engine', desc: 'Sub-millisecond bipartite order & sprint routing system', tech: 'Go, Rust, Kafka' },
-          { title: 'Interactive WebGL Canvas Hub', desc: 'Spatial collaborative ideation board with real-time state synchronization', tech: 'React, Three.js, WebSockets' }
-        ],
-    skills: user?.skills && user.skills.length > 0 
-      ? [...user.skills] 
-      : [
-          { name: 'React', level: 'Expert' },
-          { name: 'Python', level: 'Advanced' },
-          { name: 'Node.js', level: 'Advanced' },
-          { name: 'Vector DBs', level: 'Intermediate' },
-          { name: 'Docker', level: 'Advanced' }
-        ],
+    interests: user?.interests ? [...user.interests] : [],
+    previousProjects: user?.previousProjects ? [...user.previousProjects] : [],
+    skills: user?.skills ? [...user.skills] : [],
     cvName: user?.cvName || null
   });
 
@@ -63,8 +48,8 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
         ...prev.previousProjects,
         {
           title: newProject.title.trim(),
-          desc: newProject.desc.trim() || 'Verified project delivery in sprint arena',
-          tech: newProject.tech.trim() || 'Full-Stack'
+          desc: newProject.desc.trim() || 'Project details added to your profile.',
+          tech: newProject.tech.trim() || 'Not specified'
         }
       ]
     }));
@@ -139,7 +124,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                 <span className="text-lg font-black text-[#F59E0B]">.AI</span>
               </div>
               <div className="text-[10px] font-mono text-slate-400">
-                Employee Profile Session • Zero Skill Mismatch Engine
+                Secure account session
               </div>
             </div>
           </div>
@@ -178,21 +163,27 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
             <div className="space-y-1.5 text-left">
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-400 font-bold">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>EMPLOYEE PROFILE OPENED UPON SIGN IN</span>
+                <span>ACCOUNT SESSION</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Welcome back, {profileData.name}!
+                {`Welcome${profileData.name ? ` back, ${profileData.name}` : ' back'}!`}
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 font-mono">
-                {profileData.email} • {profileData.department}
+                {profileData.email}{profileData.department ? ` • ${profileData.department}` : ''}
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-right font-mono shrink-0">
-                <div className="text-[10px] text-amber-300 uppercase font-bold">AI Vector Profile</div>
-                <div className="text-lg font-black text-white">768-D Indexed</div>
-                <div className="text-[10px] text-emerald-400 font-semibold">✓ Zero Skill Mismatch</div>
+                <div className="text-[10px] text-amber-300 uppercase font-bold">
+                  Account status
+                </div>
+                <div className="text-lg font-black text-white">
+                  Active
+                </div>
+                <div className="text-[10px] text-emerald-400 font-semibold">
+                  Server-managed and revocable
+                </div>
               </div>
             </div>
           </div>
@@ -252,7 +243,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Squad Match (98.4%)
+              Team Matching
             </button>
           </div>
 
@@ -264,7 +255,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="flex items-center gap-1.5 text-amber-300 font-bold uppercase tracking-wider text-[11px]">
                   <Briefcase className="h-3.5 w-3.5 text-[#F59E0B]" />
-                  <span>Employee Preferred Role & Experience Level</span>
+                  <span>Account Role & Experience</span>
                 </span>
                 <button
                   type="button"
@@ -331,7 +322,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                       {profileData.role}
                     </div>
                     <div className="text-[10px] font-mono text-amber-300">
-                      Primary sprint allocation
+                      Account profile
                     </div>
                   </div>
 
@@ -344,7 +335,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                       {profileData.experience}
                     </div>
                     <div className="text-[10px] font-mono text-purple-400">
-                      Verified competency tier
+                      Profile details
                     </div>
                   </div>
 
@@ -463,7 +454,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                     )}
                     <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 pt-1 border-t border-white/5">
                       <CheckCircle2 className="w-3 h-3" />
-                      <span>Verified Sprint Production Delivery</span>
+                      <span>Profile project</span>
                     </div>
                   </div>
                 ))}
@@ -484,7 +475,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                     <Sparkles className="h-4 w-4 text-purple-400" />
                     <span>Technical & Domain Interests ({profileData.interests.length})</span>
                   </span>
-                  <span className="text-purple-400 text-[10px]">Cognitive Fit ✓</span>
+                  <span className="text-purple-400 text-[10px]">Account profile</span>
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -526,20 +517,20 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                 </div>
               </div>
 
-              {/* Verified Extracted Skills Card */}
+              {/* Account skills */}
               <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="flex items-center gap-1.5 text-amber-300 font-bold uppercase tracking-wider text-[11px]">
                     <Zap className="h-4 w-4 text-[#F59E0B]" />
-                    <span>Verified Skills Portfolio ({profileData.skills.length})</span>
+                    <span>Skills Portfolio ({profileData.skills.length})</span>
                   </span>
-                  <span className="text-emerald-400 text-[10px]">AI Synced ✓</span>
+                  <span className="text-slate-400 text-[10px]">Account profile</span>
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-1">
                   {profileData.skills.map((skill, idx) => {
                     const skillName = typeof skill === 'string' ? skill : skill.name;
-                    const skillLevel = typeof skill === 'object' && skill.level ? skill.level : 'Verified';
+                    const skillLevel = typeof skill === 'object' && skill.level ? skill.level : 'Not specified';
                     return (
                       <span 
                         key={idx}
@@ -554,8 +545,7 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
                 </div>
 
                 <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-400">
-                  <span>Extracted from verified profile AST & CV repository</span>
-                  <span className="text-[#F59E0B] font-bold">100% Vector Fit</span>
+                  <span>Resume-extracted or entered at signup</span>
                 </div>
               </div>
 
@@ -563,63 +553,24 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
           )}
 
           {/* =========================================================================
-              4. ACTIVE AI SQUAD MATCHING MATRIX
+              4. TEAM MATCHING STATUS
               ========================================================================= */}
           {(activeTab === 'all' || activeTab === 'squad') && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono text-slate-400">
-                  <span>Assigned Role</span>
-                  <Sparkles className="h-4 w-4 text-[#F59E0B]" />
-                </div>
-                <div className="text-sm font-bold text-white">
-                  {profileData.role}
-                </div>
-                <div className="text-[10px] font-mono text-[#F59E0B]">
-                  High-demand sprint specialization
-                </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left">
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <Users className="h-4 w-4 text-purple-400" />
+                <span>Team matching is not enabled yet</span>
               </div>
-
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono text-slate-400">
-                  <span>Active Squad Match</span>
-                  <Users className="h-4 w-4 text-purple-400" />
-                </div>
-                <div className="text-sm font-bold text-white">
-                  {profileData.goalTrack === 'company' 
-                    ? 'Distributed Core Mesh Pod' 
-                    : profileData.goalTrack === 'college'
-                    ? 'AI Peer Innovation Squad'
-                    : profileData.goalTrack === 'hackathon'
-                    ? 'Sub-Second DeFi Velocity Pod'
-                    : 'Capstone Distributed Ledger Pod'}
-                </div>
-                <div className="text-[10px] font-mono text-purple-400">
-                  4/4 Complementary engineers found
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono text-slate-400">
-                  <span>Team Compatibility</span>
-                  <Zap className="h-4 w-4 text-emerald-400" />
-                </div>
-                <div className="text-sm font-bold text-emerald-400">
-                  98.4% Match Score
-                </div>
-                <div className="text-[10px] font-mono text-slate-400">
-                  Balanced tech stack & velocity
-                </div>
-              </div>
-
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                Your account and profile are saved. Team recommendations will appear here when matching is available.
+              </p>
             </div>
           )}
 
           {/* Bottom Action Bar */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 text-xs font-mono">
             <span className="text-slate-400">
-              Authentication active across all SyncSkills.AI institutional nodes.
+              Signed in as {profileData.email}.
             </span>
             <div className="flex items-center gap-2.5 w-full sm:w-auto">
               <button

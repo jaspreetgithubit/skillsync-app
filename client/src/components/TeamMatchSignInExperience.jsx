@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 import Lenis from 'lenis';
 import { 
@@ -11,12 +11,10 @@ import {
   ArrowLeft, 
   User, 
   CheckCircle2, 
-  ShieldCheck, 
   BrainCircuit, 
   Brain, 
   ChevronDown, 
   Zap, 
-  Keyboard, 
   Activity, 
   GraduationCap, 
   Rocket, 
@@ -33,6 +31,7 @@ import {
   FolderGit2
 } from 'lucide-react';
 import AIGraphicCanvas from './AIGraphicCanvas';
+import ResumeProfileReview from './ResumeProfileReview';
 
 /**
  * 6 APPROVED STORY SECTIONS (PRESERVED 100%)
@@ -299,62 +298,6 @@ const PURPOSE_CONFIGS = {
   }
 };
 
-const KNOWN_TECH_SKILLS = [
-  'Python', 'Machine Learning', 'Deep Learning', 'PyTorch', 'TensorFlow',
-  'React', 'Node.js', 'FastAPI', 'TypeScript', 'JavaScript', 'Docker',
-  'Kubernetes', 'AWS', 'PostgreSQL', 'MongoDB', 'GraphQL', 'Go', 'Rust',
-  'C++', 'Java', 'Solidity', 'TailwindCSS', 'Next.js', 'NLP',
-  'Computer Vision', 'Redis', 'CI/CD', 'Git', 'Linux', 'Figma'
-];
-
-function getTrackDefaultSkills(track, filename = '') {
-  const lowerFile = (filename || '').toLowerCase();
-  const detected = [];
-  KNOWN_TECH_SKILLS.forEach(s => {
-    if (lowerFile.includes(s.toLowerCase())) {
-      detected.push({ name: s, level: 'Advanced' });
-    }
-  });
-
-  let base = [];
-  if (track === 'company') {
-    base = [
-      { name: 'Python', level: 'Advanced' },
-      { name: 'React', level: 'Advanced' },
-      { name: 'AWS', level: 'Advanced' },
-      { name: 'Docker', level: 'Intermediate' },
-      { name: 'PostgreSQL', level: 'Intermediate' },
-      { name: 'TypeScript', level: 'Intermediate' }
-    ];
-  } else if (track === 'hackathon') {
-    base = [
-      { name: 'TypeScript', level: 'Advanced' },
-      { name: 'Next.js', level: 'Advanced' },
-      { name: 'FastAPI', level: 'Intermediate' },
-      { name: 'TailwindCSS', level: 'Advanced' },
-      { name: 'GraphQL', level: 'Intermediate' },
-      { name: 'Docker', level: 'Intermediate' }
-    ];
-  } else {
-    // capstone or college
-    base = [
-      { name: 'Python', level: 'Advanced' },
-      { name: 'Machine Learning', level: 'Advanced' },
-      { name: 'FastAPI', level: 'Intermediate' },
-      { name: 'PyTorch', level: 'Intermediate' },
-      { name: 'React', level: 'Intermediate' },
-      { name: 'PostgreSQL', level: 'Intermediate' }
-    ];
-  }
-
-  const skillMap = new Map();
-  detected.forEach(s => skillMap.set(s.name, s));
-  base.forEach(s => {
-    if (!skillMap.has(s.name)) skillMap.set(s.name, s);
-  });
-  return Array.from(skillMap.values());
-}
-
 const POPULAR_INTERESTS = [
   'AI / Machine Learning',
   'Distributed Systems',
@@ -386,108 +329,6 @@ const PREFERRED_ROLES = [
   'Sprint / Product Lead'
 ];
 
-function getTrackDefaultProjects(track, filename = '') {
-  if (track === 'company') {
-    return [
-      { title: 'Enterprise Event Pipeline', desc: 'Real-time Kafka event streaming with microservices', tech: 'Go, Kafka, Kubernetes' },
-      { title: 'Cloud Infrastructure Automation', desc: 'Terraform multi-cloud IaC provisioning engine', tech: 'AWS, Terraform, Python' }
-    ];
-  } else if (track === 'hackathon') {
-    return [
-      { title: 'SpeedMatch DeFi Escrow', desc: '48-hour prototype with automated settlement escrow', tech: 'Solana, Rust, Next.js' },
-      { title: 'Voice AI Meeting Summarizer', desc: 'Whisper + Claude real-time sprint action tracker', tech: 'FastAPI, WebSockets, React' }
-    ];
-  } else {
-    return [
-      { title: 'Neural Hungarian Matcher', desc: 'Bipartite graph optimization for collaborative pods', tech: 'Python, PyTorch, FastAPI' },
-      { title: 'Distributed AST Code Analyzer', desc: 'Syntax-tree dependency extraction engine', tech: 'TypeScript, Babel, Redis' }
-    ];
-  }
-}
-
-function getTrackEmployeeProfile(track, email) {
-  const emailName = email ? email.split('@')[0].replace(/[\._]/g, ' ') : 'Alex Chen';
-  const formattedName = emailName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Alex Chen';
-
-  if (track === 'company') {
-    return {
-      name: formattedName.includes('Alex') ? 'Alex Chen' : formattedName,
-      role: 'Staff Systems Architect & Pod Lead',
-      experience: 'Senior Architect (5+ yrs)',
-      department: 'Enterprise Talent Mobility',
-      interests: ['Distributed Systems', 'Cloud Architecture', 'Zero-Trust Security', 'Microservices', 'High-Velocity Sprints'],
-      previousProjects: [
-        { title: 'Enterprise Event Streaming Fabric', desc: 'Sub-3ms distributed event mesh across 40+ Kubernetes microservices', tech: 'Go, Kafka, Kubernetes' },
-        { title: 'Zero-Trust Identity & Access Mesh', desc: 'Automated mTLS and ephemeral role-based token minting infrastructure', tech: 'Rust, OAuth2, HashiCorp Vault' }
-      ],
-      skills: [
-        { name: 'Go / Golang', level: 'Staff Expert' },
-        { name: 'Kubernetes', level: 'Lead' },
-        { name: 'Distributed Systems', level: 'Architect' },
-        { name: 'Microservices', level: 'Advanced' },
-        { name: 'Kafka', level: 'Expert' }
-      ]
-    };
-  }
-  if (track === 'college') {
-    return {
-      name: formattedName.includes('Alex') ? 'Priya Sharma' : formattedName,
-      role: 'Machine Learning & Research Lead',
-      experience: 'Junior Engineer (1-2 yrs)',
-      department: 'Computer Science & AI Innovation Lab',
-      interests: ['AI / Machine Learning', 'Computer Vision', 'Data Structures & Algorithms', 'Research AI', 'Peer Matching'],
-      previousProjects: [
-        { title: 'Multi-Agent Campus Synergy Lab', desc: 'Autonomous agent cohort simulator for multidisciplinary coursework research', tech: 'Python, PyTorch, Ray' },
-        { title: 'Real-Time Academic Peer Matcher', desc: 'Bipartite matching algorithm matching students for university project cohorts', tech: 'FastAPI, React, PostgreSQL' }
-      ],
-      skills: [
-        { name: 'Python', level: 'Expert' },
-        { name: 'PyTorch', level: 'Advanced' },
-        { name: 'Data Structures', level: 'Advanced' },
-        { name: 'React', level: 'Intermediate' }
-      ]
-    };
-  }
-  if (track === 'hackathon') {
-    return {
-      name: formattedName.includes('Alex') ? 'Dev Patel' : formattedName,
-      role: 'Rapid Prototyper & Systems Hacker',
-      experience: 'High-Velocity Builder (2-4 yrs)',
-      department: 'Competitive Hackathon Sprint Arena',
-      interests: ['Web3 & Protocols', 'WASM', 'Real-Time Systems', 'LLM Agents', 'Rapid 60s Deployment'],
-      previousProjects: [
-        { title: 'Sub-Second Solana DeFi Matcher', desc: 'Competitive hackathon 1st place liquidity routing engine built in 36 hours', tech: 'Rust, Solana, Anchor' },
-        { title: 'Generative Multi-Modal Agent Canvas', desc: 'Speech-to-code prototype generator deployed in under 60 seconds', tech: 'Next.js, Tailwind, Claude API' }
-      ],
-      skills: [
-        { name: 'Rust', level: 'Expert' },
-        { name: 'Next.js', level: 'Advanced' },
-        { name: 'Solana / WASM', level: 'Advanced' },
-        { name: 'TypeScript', level: 'Expert' }
-      ]
-    };
-  }
-  // Default: Capstone Project Track
-  return {
-    name: formattedName.includes('Alex') ? 'Alex Chen' : formattedName,
-    role: 'Full-Stack Developer & ML Specialist',
-    experience: 'Mid-Level Specialist (3-5 yrs)',
-    department: 'University Capstone Projects Core',
-    interests: ['Distributed Systems', 'Cloud Architecture', 'FinTech & High Velocity', 'AST Code Parsing'],
-    previousProjects: [
-      { title: 'High-Frequency Matching Engine', desc: 'Sub-millisecond bipartite order & sprint routing system', tech: 'Go, Rust, Kafka' },
-      { title: 'Interactive WebGL Canvas Hub', desc: 'Spatial collaborative ideation board with real-time state synchronization', tech: 'React, Three.js, WebSockets' }
-    ],
-    skills: [
-      { name: 'React', level: 'Expert' },
-      { name: 'Python', level: 'Advanced' },
-      { name: 'Node.js', level: 'Advanced' },
-      { name: 'Vector DBs', level: 'Intermediate' },
-      { name: 'Docker', level: 'Advanced' }
-    ]
-  };
-}
-
 export default function TeamMatchSignInExperience({
   onAuthenticated,
   onBackToHome,
@@ -507,7 +348,6 @@ export default function TeamMatchSignInExperience({
    * 7: Final Sign-In Scene (3D Glass Vault + Floating HUD + Magnetic CTA)
    */
   const [currentStage, setCurrentStage] = useState(0);
-  const [scrollDirection, setScrollDirection] = useState('down');
 
   // Track / Purpose State
   const resolvedInitialPurpose = PURPOSE_CONFIGS[initialPurpose] ? initialPurpose : 'capstone';
@@ -522,36 +362,23 @@ export default function TeamMatchSignInExperience({
 
   // Mouse & 3D Parallax Tracking
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [focusedField, setFocusedField] = useState(null);
-  const [showKeyboard, setShowKeyboard] = useState(false);
-  const [pressedKey, setPressedKey] = useState(null);
 
   // Form Fields
   // Form Fields (Sign In: strictly email and password; Profile is retrieved upon sign in)
   const [signInData, setSignInData] = useState({
-    email: 'alex.chen@university.edu',
-    password: '••••••••••••',
-    role: 'Full-Stack Developer',
-    experience: 'Mid-Level Specialist (3-5 yrs)',
-    interests: ['Distributed Systems', 'Cloud Architecture', 'FinTech & High Velocity'],
-    previousProjects: [
-      { title: 'High-Frequency Matching Engine', desc: 'Sub-millisecond order & sprint routing system', tech: 'Go, Rust, Kafka' },
-      { title: 'Interactive WebGL Canvas Hub', desc: 'Spatial collaborative ideation board', tech: 'React, Three.js, WebSockets' }
-    ],
-    rememberMe: true
+    email: '',
+    password: '',
+    rememberMe: false
   });
 
   const [signUpData, setSignUpData] = useState({
     fullName: '',
     email: '',
     password: '',
-    role: 'Full-Stack Developer',
-    experience: 'Junior Engineer (1-2 yrs)',
-    interests: ['AI / Machine Learning', 'Distributed Systems'],
-    previousProjects: [
-      { title: 'Neural Hungarian Matcher', desc: 'Real-time bipartite matchmaking engine', tech: 'Python, FastAPI, Redis' }
-    ],
-    agreeTerms: true
+    role: '',
+    experience: '',
+    interests: [],
+    previousProjects: []
   });
 
   // Additional Profile Customization States (Interests & Projects)
@@ -603,122 +430,148 @@ export default function TeamMatchSignInExperience({
     }));
   };
 
-  // Sign-In Profile Customization States (Interests & Projects)
-  const [signInCustomInterestInput, setSignInCustomInterestInput] = useState('');
-  const [showSignInAddProject, setShowSignInAddProject] = useState(false);
-  const [newSignInProject, setNewSignInProject] = useState({ title: '', desc: '', tech: '' });
-
-  const handleToggleSignInInterest = (interest) => {
-    setSignInData(prev => {
-      const exists = prev.interests.includes(interest);
-      if (exists) {
-        return { ...prev, interests: prev.interests.filter(i => i !== interest) };
-      } else {
-        return { ...prev, interests: [...prev.interests, interest] };
-      }
-    });
-  };
-
-  const handleAddSignInCustomInterest = () => {
-    if (!signInCustomInterestInput.trim()) return;
-    const clean = signInCustomInterestInput.trim();
-    if (!signInData.interests.includes(clean)) {
-      setSignInData(prev => ({ ...prev, interests: [...prev.interests, clean] }));
-    }
-    setSignInCustomInterestInput('');
-  };
-
-  const handleAddSignInProject = () => {
-    if (!newSignInProject.title.trim()) return;
-    setSignInData(prev => ({
-      ...prev,
-      previousProjects: [
-        ...prev.previousProjects,
-        {
-          title: newSignInProject.title.trim(),
-          desc: newSignInProject.desc.trim() || 'Technical implementation & sprint delivery',
-          tech: newSignInProject.tech.trim() || 'Modern Tech Stack'
-        }
-      ]
-    }));
-    setNewSignInProject({ title: '', desc: '', tech: '' });
-    setShowSignInAddProject(false);
-  };
-
-  const handleRemoveSignInProject = (projIndex) => {
-    setSignInData(prev => ({
-      ...prev,
-      previousProjects: prev.previousProjects.filter((_, idx) => idx !== projIndex)
-    }));
-  };
-
   // CV Upload & AI Skill Extraction State
   const [cvFile, setCvFile] = useState(null);
-  const [cvUploadPhase, setCvUploadPhase] = useState('idle'); // 'idle' | 'analyzing' | 'extracted'
+  const [cvUploadPhase, setCvUploadPhase] = useState('idle');
   const [cvAnalysisStep, setCvAnalysisStep] = useState('');
   const [extractedSkills, setExtractedSkills] = useState([]);
+  const [resumeProfile, setResumeProfile] = useState(null);
+  const [resumeDraftToken, setResumeDraftToken] = useState(null);
+  const [resumeConsent, setResumeConsent] = useState(false);
+  const [resumeConfig, setResumeConfig] = useState(null);
+  const [resumeError, setResumeError] = useState('');
+  const [resumeWarnings, setResumeWarnings] = useState([]);
+  const [resumeConfigError, setResumeConfigError] = useState('');
   const [customSkillInput, setCustomSkillInput] = useState('');
   const [isCvDragOver, setIsCvDragOver] = useState(false);
   const cvFileInputRef = useRef(null);
 
+  useEffect(() => {
+    let active = true;
+    fetch('/api/resumes/config')
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error('Resume parser configuration is unavailable.');
+        if (active) setResumeConfig(result.data);
+      })
+      .catch(() => {
+        if (active) setResumeConfigError('Could not check resume analysis availability. You can still continue with manual entry.');
+      });
+    return () => { active = false; };
+  }, []);
+
+  const handleProfileChange = (nextProfile) => {
+    setResumeProfile(nextProfile);
+    setExtractedSkills(nextProfile.skills.map((skill) => ({
+      name: skill.name,
+      level: skill.proficiency || 'Not specified'
+    })));
+    setSignUpData((previous) => ({
+      ...previous,
+      fullName: nextProfile.personalInformation.fullName || previous.fullName,
+      email: previous.email.trim() || nextProfile.personalInformation.email || ''
+    }));
+    setResumeWarnings([
+      ...(!nextProfile.personalInformation.fullName ? ['Add your full name before saving.'] : []),
+      ...(nextProfile.skills.length === 0 ? ['No skills were found; add any skills you want to include.'] : []),
+      ...(nextProfile.projects.length === 0 ? ['No projects were found; add them if applicable.'] : [])
+    ]);
+  };
+
+  const cancelResumeDraft = async (token) => {
+    if (!token) return true;
+    try {
+      const response = await fetch(`/api/onboarding/drafts/${encodeURIComponent(token)}`, { method: 'DELETE' });
+      if (response.ok || response.status === 404) return true;
+      setResumeError('The previous temporary draft could not be removed and will expire automatically.');
+      return false;
+    } catch {
+      setResumeError('The previous temporary draft could not be removed and will expire automatically.');
+      return false;
+    }
+  };
+
   const handleProcessCvFile = (file) => {
     if (!file) return;
+    const extension = file.name.split('.').pop().toLowerCase();
+    const maxFileSizeBytes = resumeConfig?.maxFileSizeBytes || 5 * 1024 * 1024;
+    if (!['pdf', 'docx'].includes(extension)) {
+      setResumeError('Choose a PDF or DOCX resume.');
+      setCvUploadPhase('error');
+      return;
+    }
+    if (file.size === 0 || file.size > maxFileSizeBytes) {
+      setResumeError(file.size === 0 ? 'The selected file is empty.' : `Choose a file smaller than ${(maxFileSizeBytes / (1024 * 1024)).toFixed(0)} MB.`);
+      setCvUploadPhase('error');
+      return;
+    }
+    if (resumeDraftToken) cancelResumeDraft(resumeDraftToken);
     setCvFile(file);
-    setCvUploadPhase('analyzing');
-    setCvAnalysisStep('Scanning document structure & AST metadata...');
+    setCvUploadPhase('selected');
+    setResumeConsent(false);
+    setResumeError('');
+    setResumeWarnings([]);
+    if (resumeProfile) setExtractedSkills([]);
+    setResumeProfile(null);
+    setResumeDraftToken(null);
+  };
 
-    if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = (e.target.result || '').toLowerCase();
-        setTimeout(() => {
-          setCvAnalysisStep('Parsing technical keywords & repositories...');
-          setTimeout(() => {
-            setCvAnalysisStep('Synthesizing competency profile...');
-            setTimeout(() => {
-              const matched = [];
-              KNOWN_TECH_SKILLS.forEach(k => {
-                if (text.includes(k.toLowerCase())) matched.push({ name: k, level: 'Verified' });
-              });
-              const finalSkills = matched.length >= 3 
-                ? matched 
-                : getTrackDefaultSkills(selectedPurpose, file.name);
-              setExtractedSkills(finalSkills);
-              setCvUploadPhase('extracted');
+  const handleExtractResume = async () => {
+    if (!cvFile) return;
+    if (!resumeConsent) {
+      setResumeError('Please consent before sending resume text to the selected AI provider.');
+      return;
+    }
+    setResumeError('');
+    setCvUploadPhase('uploading');
+    setCvAnalysisStep('Uploading your resume securely…');
+    const formData = new FormData();
+    formData.append('resume', cvFile);
+    formData.append('consent', 'true');
 
-              // Auto-detect candidate projects from CV if empty
-              if (signUpData.previousProjects.length === 0) {
-                const defProjects = getTrackDefaultProjects(selectedPurpose, file.name);
-                setSignUpData(prev => ({ ...prev, previousProjects: defProjects }));
-              }
-            }, 600);
-          }, 600);
-        }, 500);
-      };
-      reader.readAsText(file);
-    } else {
-      setTimeout(() => {
-        setCvAnalysisStep('Extracting project contributions & frameworks...');
-        setTimeout(() => {
-          setCvAnalysisStep('Synthesizing competency vectors & proficiencies...');
-          setTimeout(() => {
-            const skills = getTrackDefaultSkills(selectedPurpose, file.name);
-            setExtractedSkills(skills);
-            setCvUploadPhase('extracted');
+    try {
+      const result = await new Promise((resolve, reject) => {
+        const request = new XMLHttpRequest();
+        request.open('POST', '/api/resumes/parse');
+        request.responseType = 'json';
+        request.timeout = 45000;
+        request.upload.addEventListener('load', () => {
+          setCvUploadPhase('extracting');
+          setCvAnalysisStep('Resume received. Extracting profile details with the selected AI provider…');
+        });
+        request.addEventListener('load', () => {
+          if (!request.response) {
+            reject(new Error('The server returned an unreadable response. Please retry.'));
+            return;
+          }
+          resolve({ status: request.status, body: request.response });
+        });
+        request.addEventListener('error', () => reject(new Error('Could not reach the resume service. Check your connection and retry.')));
+        request.addEventListener('timeout', () => reject(new Error('Resume analysis took too long. Retry or continue with manual entry.')));
+        request.send(formData);
+      });
 
-            // Auto-detect candidate projects from CV if empty
-            if (signUpData.previousProjects.length === 0) {
-              const defProjects = getTrackDefaultProjects(selectedPurpose, file.name);
-              setSignUpData(prev => ({ ...prev, previousProjects: defProjects }));
-            }
-          }, 600);
-        }, 650);
-      }, 500);
+      if (result.status < 200 || result.status >= 300 || !result.body.success) {
+        throw new Error(result.body.error?.message || 'Resume analysis failed. Please retry or continue manually.');
+      }
+
+      const { profileDraft, draftToken, warnings } = result.body.data;
+      setResumeDraftToken(draftToken);
+      handleProfileChange(profileDraft);
+      setCvUploadPhase('extracted');
+      setCvAnalysisStep(`${result.body.data.sectionsExtracted.length} profile sections are ready for review.`);
+      setResumeWarnings(warnings);
+    } catch (error) {
+      setCvUploadPhase('error');
+      setResumeError(error.message || 'Resume analysis failed. Please retry or continue manually.');
     }
   };
 
   const handleRemoveExtractedSkill = (skillIndex) => {
     setExtractedSkills(prev => prev.filter((_, idx) => idx !== skillIndex));
+    setResumeProfile((prev) => prev
+      ? { ...prev, skills: prev.skills.filter((_, index) => index !== skillIndex) }
+      : prev);
   };
 
   const handleAddCustomSkill = () => {
@@ -726,22 +579,40 @@ export default function TeamMatchSignInExperience({
     const clean = customSkillInput.trim();
     if (!extractedSkills.some(s => s.name.toLowerCase() === clean.toLowerCase())) {
       setExtractedSkills(prev => [...prev, { name: clean, level: 'User Added' }]);
+      setResumeProfile((prev) => prev
+        ? {
+            ...prev,
+            skills: [...prev.skills, {
+              name: clean,
+              category: null,
+              proficiency: null,
+              evidence: null,
+              confidence: null,
+              originalName: null
+            }]
+          }
+        : prev);
     }
     setCustomSkillInput('');
   };
 
   const handleRemoveCvFile = () => {
+    cancelResumeDraft(resumeDraftToken);
     setCvFile(null);
     setCvUploadPhase('idle');
-    setExtractedSkills([]);
+    if (resumeProfile) setExtractedSkills([]);
+    setResumeProfile(null);
+    setResumeDraftToken(null);
+    setResumeConsent(false);
+    setResumeError('');
+    setResumeWarnings([]);
+    if (cvFileInputRef.current) cvFileInputRef.current.value = '';
   };
 
-  // DOM & Animation Refs
+  // DOM & Experience Refs
   const experienceContainerRef = useRef(null);
   const scene6ContainerRef = useRef(null);
   const signInContainerRef = useRef(null);
-  const magneticBtnRef = useRef(null);
-  const card3DRef = useRef(null);
   const kineticTextRef = useRef(null);
   const isTransitioningRef = useRef(false);
   const lenisRef = useRef(null);
@@ -791,7 +662,6 @@ export default function TeamMatchSignInExperience({
     if (isTransitioningRef.current) return;
     setCurrentStage((prev) => {
       if (prev < 7) {
-        setScrollDirection('down');
         isTransitioningRef.current = true;
         setTimeout(() => { isTransitioningRef.current = false; }, 600);
         return prev + 1;
@@ -804,7 +674,6 @@ export default function TeamMatchSignInExperience({
     if (isTransitioningRef.current) return;
     setCurrentStage((prev) => {
       if (prev > 0) {
-        setScrollDirection('up');
         isTransitioningRef.current = true;
         setTimeout(() => { isTransitioningRef.current = false; }, 600);
         return prev - 1;
@@ -919,35 +788,13 @@ export default function TeamMatchSignInExperience({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [advanceStage, retreatStage]);
 
-  // Physical keyboard tracking for Virtual Deck lighting
-  useEffect(() => {
-    const handleKeyLight = (e) => {
-      setPressedKey(e.key.toUpperCase());
-      const timer = setTimeout(() => setPressedKey(null), 250);
-      return () => clearTimeout(timer);
-    };
-
-    window.addEventListener('keydown', handleKeyLight);
-    return () => window.removeEventListener('keydown', handleKeyLight);
-  }, []);
-
   // Smooth Mouse Position Tracking
   const handleMouseMove = useCallback((e) => {
+    if (currentStage === 7) return;
     const { innerWidth, innerHeight } = window;
     const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
     const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
     setMousePos({ x, y });
-
-    // 3D Card Tilt in Stage 7
-    if (card3DRef.current && currentStage === 7) {
-      gsap.to(card3DRef.current, {
-        rotateX: -y * 6,
-        rotateY: x * 6,
-        transformPerspective: 1200,
-        ease: 'power2.out',
-        duration: 0.4
-      });
-    }
   }, [currentStage]);
 
   // Magnetic Button Physics (JerryTheWebDev signature interaction)
@@ -997,143 +844,129 @@ export default function TeamMatchSignInExperience({
   const getPasswordStrength = (pass) => {
     if (!pass || pass.length === 0) return { score: 0, label: '', color: 'bg-slate-700', text: 'text-slate-400', percent: '0%' };
     let score = 0;
-    if (pass.length >= 6) score++;
-    if (pass.length >= 10 && /[A-Z]/.test(pass) && /[0-9]/.test(pass)) score++;
-    if (pass.length >= 12 && /[^A-Za-z0-9]/.test(pass)) score++;
+    if (pass.length >= 12) score++;
+    if (pass.length >= 14 && /[A-Z]/.test(pass) && /[0-9]/.test(pass)) score++;
+    if (pass.length >= 16 && /[^A-Za-z0-9]/.test(pass)) score++;
     if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-rose-500', text: 'text-rose-400', percent: '33%' };
     if (score === 2) return { score: 2, label: 'Medium', color: 'bg-[#F59E0B]', text: 'text-[#F59E0B]', percent: '66%' };
-    return { score: 3, label: 'Strong // 256-Bit Encrypted', color: 'bg-emerald-400', text: 'text-emerald-400', percent: '100%' };
+    return { score: 3, label: 'Strong', color: 'bg-emerald-400', text: 'text-emerald-400', percent: '100%' };
   };
 
   const currentPassword = authMode === 'signin' ? signInData.password : signUpData.password;
   const currentEmail = authMode === 'signin' ? signInData.email : signUpData.email;
   const passwordStrength = getPasswordStrength(currentPassword);
 
-  // Virtual Keyboard Input Handling
-  const handleVirtualKeyPress = (char) => {
-    setPressedKey(char);
-    setTimeout(() => setPressedKey(null), 200);
-
-    if (focusedField === 'email' || (!focusedField && authMode === 'signin')) {
-      if (char === '⌫') {
-        setSignInData(prev => ({ ...prev, email: prev.email.slice(0, -1) }));
-      } else if (char === 'SPACE') {
-        setSignInData(prev => ({ ...prev, email: prev.email + ' ' }));
-      } else {
-        setSignInData(prev => ({ ...prev, email: prev.email + char.toLowerCase() }));
-      }
-    } else if (focusedField === 'password') {
-      if (char === '⌫') {
-        setSignInData(prev => ({ ...prev, password: prev.password.slice(0, -1) }));
-      } else if (char === 'SPACE') {
-        setSignInData(prev => ({ ...prev, password: prev.password + ' ' }));
-      } else {
-        setSignInData(prev => ({ ...prev, password: prev.password + char.toLowerCase() }));
-      }
-    } else if (focusedField === 'fullName') {
-      if (char === '⌫') {
-        setSignUpData(prev => ({ ...prev, fullName: prev.fullName.slice(0, -1) }));
-      } else if (char === 'SPACE') {
-        setSignUpData(prev => ({ ...prev, fullName: prev.fullName + ' ' }));
-      } else {
-        setSignUpData(prev => ({ ...prev, fullName: prev.fullName + char }));
-      }
-    }
+  const createProfileDraft = () => {
+    const emptyProfile = {
+      personalInformation: {
+        fullName: null,
+        email: null,
+        phone: null,
+        location: null,
+        headline: null,
+        professionalSummary: null
+      },
+      skills: [],
+      education: [],
+      experience: [],
+      projects: [],
+      certifications: [],
+      achievements: [],
+      languages: [],
+      interests: []
+    };
+    const profile = resumeProfile || emptyProfile;
+    return {
+      ...profile,
+      personalInformation: {
+        ...profile.personalInformation,
+        fullName: signUpData.fullName.trim() || profile.personalInformation.fullName || null,
+        headline: profile.personalInformation.headline || signUpData.role
+      },
+      skills: resumeProfile
+        ? profile.skills
+        : extractedSkills.map((skill) => ({
+            name: skill.name,
+            category: null,
+            proficiency: null,
+            evidence: null,
+            confidence: null,
+            originalName: null
+          })),
+      projects: resumeProfile
+        ? profile.projects
+        : signUpData.previousProjects.map((project) => ({
+            title: project.title,
+            description: project.desc || null,
+            technologies: (project.tech || '').split(',').map((technology) => technology.trim()).filter(Boolean),
+            category: null,
+            role: null,
+            startDate: null,
+            endDate: null,
+            achievements: [],
+            evidence: null
+          })),
+      interests: resumeProfile ? profile.interests : [...signUpData.interests]
+    };
   };
 
-  // Real 4-Phase Live Authentication Flow
-  const handleExecuteAuth = (e) => {
+  const handleExecuteAuth = async (e) => {
     if (e) e.preventDefault();
     setAuthError('');
 
     if (!currentEmail || !isEmailValid(currentEmail)) {
-      setAuthError('Please provide a valid institutional or work email.');
+      setAuthError('Please enter a valid email address.');
       return;
     }
 
-    if (!currentPassword || currentPassword.length < 4) {
-      setAuthError('Please enter your secure access key/password.');
+    if (!currentPassword || currentPassword.length > 128) {
+      setAuthError('Please enter a password no longer than 128 characters.');
       return;
     }
 
-    // Phase 1: Authenticating
     setAuthPhase('authenticating');
+    try {
+      if (authMode === 'signup' && !signUpData.fullName.trim()) {
+        throw new Error('Please enter your full name.');
+      }
+      if (authMode === 'signup' && signUpData.password.length < 12) {
+        throw new Error('Choose a password with at least 12 characters.');
+      }
+      if (authMode === 'signup' && cvFile && cvUploadPhase !== 'extracted') {
+        throw new Error('Extract the selected resume or remove it before continuing.');
+      }
 
-    setTimeout(() => {
-      // Phase 2: Verifying Profile & Goal Track
-      // Phase 2: Verifying Profile & Retrieving Employee Credentials
-      setAuthPhase('verifying');
+      const requestBody = authMode === 'signin'
+        ? { email: currentEmail, password: currentPassword, rememberMe: signInData.rememberMe }
+        : {
+            name: signUpData.fullName.trim(),
+            email: currentEmail,
+            password: currentPassword,
+            role: signUpData.role,
+            experience: signUpData.experience,
+            goalTrack: selectedPurpose,
+            profileDraft: createProfileDraft(),
+            ...(cvFile && resumeDraftToken ? { resumeDraftToken } : {})
+          };
+      const response = await fetch(`/api/auth/${authMode === 'signin' ? 'login' : 'register'}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success || !result.data?.user) {
+        throw new Error(result.error?.message || 'The account request could not be completed. Please try again.');
+      }
 
-      setTimeout(() => {
-        // Phase 3: AI Authentication Complete
-        setAuthPhase('complete');
-
-        setTimeout(() => {
-          // Hand off to Dashboard with resolved credentials & active goalTrack
-          // Hand off to Dashboard with resolved employee credentials & active goalTrack
-          if (onAuthenticated) {
-            onAuthenticated({
-              name: authMode === 'signin' ? 'Alex Chen' : signUpData.fullName || 'New Innovator',
-              email: currentEmail,
-              role: authMode === 'signin' ? signInData.role : signUpData.role,
-              department: selectedPurpose === 'company' ? 'Enterprise Engineering' : 'Computer Science & AI',
-              goalTrack: selectedPurpose,
-              experience: authMode === 'signin' ? signInData.experience : signUpData.experience,
-              interests: authMode === 'signin' ? signInData.interests : signUpData.interests,
-              previousProjects: authMode === 'signin' ? signInData.previousProjects : signUpData.previousProjects,
-              skills: extractedSkills.length > 0 
-                ? extractedSkills 
-                : (authMode === 'signin' 
-                    ? [{ name: 'React', level: 'Expert' }, { name: 'Node.js', level: 'Advanced' }, { name: 'Python', level: 'Advanced' }, { name: 'Vector DBs', level: 'Intermediate' }] 
-                    : getTrackDefaultSkills(selectedPurpose)),
-              cvName: cvFile ? cvFile.name : null,
-              authenticatedAt: new Date().toLocaleTimeString()
-            });
-            if (authMode === 'signin') {
-              const employeeProfile = getTrackEmployeeProfile(selectedPurpose, currentEmail);
-              onAuthenticated({
-                name: employeeProfile.name,
-                email: currentEmail,
-                role: employeeProfile.role,
-                department: employeeProfile.department,
-                goalTrack: selectedPurpose,
-                experience: employeeProfile.experience,
-                interests: employeeProfile.interests,
-                previousProjects: employeeProfile.previousProjects,
-                skills: employeeProfile.skills,
-                cvName: null,
-                authenticatedAt: new Date().toLocaleTimeString()
-              });
-            } else {
-              onAuthenticated({
-                name: signUpData.fullName || 'New Innovator',
-                email: currentEmail,
-                role: signUpData.role,
-                department: selectedPurpose === 'company' ? 'Enterprise Engineering' : 'Computer Science & AI',
-                goalTrack: selectedPurpose,
-                experience: signUpData.experience,
-                interests: signUpData.interests,
-                previousProjects: signUpData.previousProjects,
-                skills: extractedSkills.length > 0 
-                  ? extractedSkills 
-                  : getTrackDefaultSkills(selectedPurpose),
-                cvName: cvFile ? cvFile.name : null,
-                authenticatedAt: new Date().toLocaleTimeString()
-              });
-            }
-          }
-        }, 650);
-      }, 700);
-    }, 600);
+      setResumeDraftToken(null);
+      setAuthPhase('complete');
+      onAuthenticated?.(result.data.user);
+    } catch (error) {
+      setAuthPhase('idle');
+      setAuthError(error.message || 'The account request could not be completed. Please try again.');
+    }
   };
-
-  // Holographic Keycap Layout
-  const KEYBOARD_ROWS = [
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
-    ['SPACE', '@', '.EDU', '.COM']
-  ];
 
   return (
     <div 
@@ -1148,19 +981,23 @@ export default function TeamMatchSignInExperience({
           LAYER 1 & 2: DYNAMIC GRADIENT BLEEDS (OBSIDIAN & WARM AMBER GOLD)
           ========================================================================= */}
       <div 
-        className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
+        className={`absolute inset-0 pointer-events-none ${currentStage === 7 ? '' : 'transition-opacity duration-1000'}`}
         style={{
-          background: `radial-gradient(circle at ${50 + mousePos.x * 20}% ${40 + mousePos.y * 20}%, rgba(245, 158, 11, 0.15) 0%, rgba(124, 58, 237, 0.08) 45%, #080B12 85%)`
+          background: currentStage === 7
+            ? 'radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.08) 0%, #080B12 62%)'
+            : `radial-gradient(circle at ${50 + mousePos.x * 20}% ${40 + mousePos.y * 20}%, rgba(245, 158, 11, 0.15) 0%, rgba(124, 58, 237, 0.08) 45%, #080B12 85%)`
         }}
       />
 
       {/* WebGL Three.js Particle & AI Neural Network (Amber Gold & Violet) */}
-      <AIGraphicCanvas 
-        stage={currentStage} 
-        mousePos={mousePos} 
-        accentColor="#F59E0B"
-        className="opacity-70"
-      />
+      {currentStage !== 7 && (
+        <AIGraphicCanvas
+          stage={currentStage}
+          mousePos={mousePos}
+          accentColor="#F59E0B"
+          className="opacity-70"
+        />
+      )}
 
       {/* Micro Grid Overlay for High-Tech Awwwards Aesthetic */}
       <div 
@@ -1172,13 +1009,15 @@ export default function TeamMatchSignInExperience({
       />
 
       {/* Cursor-Following Ambient Warm Amber Glow */}
-      <div 
-        className="absolute w-[450px] h-[450px] rounded-full pointer-events-none blur-[140px] opacity-20 transition-transform duration-300 ease-out hidden md:block"
-        style={{
-          backgroundColor: '#F59E0B',
-          transform: `translate(${mousePos.x * 180 + window.innerWidth / 2 - 225}px, ${mousePos.y * 180 + window.innerHeight / 2 - 225}px)`
-        }}
-      />
+      {currentStage !== 7 && (
+        <div
+          className="absolute w-[450px] h-[450px] rounded-full pointer-events-none blur-[140px] opacity-20 transition-transform duration-300 ease-out hidden md:block"
+          style={{
+            backgroundColor: '#F59E0B',
+            transform: `translate(${mousePos.x * 180 + window.innerWidth / 2 - 225}px, ${mousePos.y * 180 + window.innerHeight / 2 - 225}px)`
+          }}
+        />
+      )}
 
       {/* =========================================================================
           TOP NAVIGATION HUD (BACK TO HOME & STAGE PROGRESS)
@@ -1188,8 +1027,8 @@ export default function TeamMatchSignInExperience({
         {/* Back to Home Button */}
         <button
           onClick={onBackToHome}
-          onMouseMove={handleMagneticMove}
-          onMouseLeave={handleMagneticLeave}
+          onMouseMove={currentStage === 7 ? undefined : handleMagneticMove}
+          onMouseLeave={currentStage === 7 ? undefined : handleMagneticLeave}
           className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[11px] uppercase tracking-widest text-slate-300 hover:text-white transition-all duration-300 cursor-pointer"
           title="Return to Home Page"
         >
@@ -1241,7 +1080,7 @@ export default function TeamMatchSignInExperience({
       {/* =========================================================================
           MAIN INTERACTIVE STAGE CHOREOGRAPHY (PULLED UPWARD FOR FULL VISIBILITY)
           ========================================================================= */}
-      <main className="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center px-4 sm:px-6">
+      <main className={`relative flex-1 w-full min-h-0 overflow-hidden flex ${currentStage === 7 ? 'items-stretch' : 'items-center justify-center'} px-4 sm:px-6`}>
         
         {/* -----------------------------------------------------------------------
             SCENE 0: WELCOME BACK (KINETIC EDITORIAL TYPOGRAPHY REVEAL)
@@ -1743,106 +1582,45 @@ export default function TeamMatchSignInExperience({
           <div 
             ref={signInContainerRef}
             data-lenis-prevent="true"
-            className="relative z-20 w-full h-full overflow-y-auto px-4 sm:px-6 py-3 sm:py-5 flex flex-col items-center justify-start"
+            className="relative z-20 w-full h-full min-h-0 overflow-y-auto px-4 py-5 sm:px-6 sm:py-8 flex flex-col items-center justify-start"
             style={{ overscrollBehavior: 'contain' }}
             onWheel={(e) => e.stopPropagation()}
           >
-            <div className={`relative w-full mx-auto flex flex-col items-center transition-all duration-300 ${authMode === 'signup' ? 'max-w-4xl -mt-1 sm:-mt-2' : 'max-w-4xl -mt-2 sm:-mt-6'}`}>
+            <div className={`relative w-full mx-auto flex flex-col items-center ${authMode === 'signup' ? 'max-w-3xl' : 'max-w-lg'}`}>
               
-              {/* Context-Aware Editorial Headline (Compact) */}
-              <div className={`text-center max-w-xl transition-all ${authMode === 'signup' ? 'mb-2 sm:mb-2.5' : 'mb-3 sm:mb-4'}`}>
-                <div className="inline-flex flex-wrap items-center justify-center gap-2 mb-1.5">
-                  <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[10px] font-mono tracking-widest uppercase">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-ping" />
-                    <span>AI Authentication Gateway</span>
-                  </div>
+              <div className="mb-5 w-full text-center">
+                <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
                   <button
                     type="button"
                     onClick={() => setCurrentStage(6)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-white/10 hover:border-amber-500/40 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-amber-300 text-[10px] font-mono tracking-wider transition-all cursor-pointer group"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300 hover:border-amber-500/40 hover:text-amber-300 cursor-pointer"
                     title="Change building objective track"
                   >
-                    <span>Track: <strong className="text-white group-hover:text-amber-300">{currentConfig.label}</strong></span>
-                    <span className="text-amber-400 font-bold">⇄ Change</span>
+                    <span>Track: <strong className="text-white">{currentConfig.label}</strong></span>
+                    <span className="text-amber-400">Change</span>
                   </button>
                 </div>
-                <h1 className="text-xl sm:text-3xl md:text-4xl font-black tracking-tight text-white uppercase mb-1">
+                <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   {currentConfig.welcomeHeading}
                 </h1>
-                {authMode === 'signin' && (
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-                    {currentConfig.welcomeSubheadline}
-                  </p>
-                )}
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                  {authMode === 'signup' ? 'Create your profile and find teammates with complementary skills.' : currentConfig.welcomeSubheadline}
+                </p>
               </div>
 
-              {/* Contextual Flow Diagram (Only in signin to prioritize vertical space in signup) */}
-              {authMode === 'signin' && (
-                <div className="hidden sm:flex items-center gap-3 mb-4 px-4 py-1.5 rounded-full border border-white/10 bg-[#080B12]/80 backdrop-blur-md">
-                  {currentConfig.networkNodes.map((node, i) => {
-                    const NodeIcon = node.icon;
-                    return (
-                      <React.Fragment key={i}>
-                        <div className="flex items-center gap-1.5">
-                          <NodeIcon className="w-3.5 h-3.5 text-[#F59E0B]" />
-                          <span className="text-xs font-mono font-medium text-slate-200">{node.name}</span>
-                        </div>
-                        {i < currentConfig.networkNodes.length - 1 && (
-                          <span className="text-white/20 font-mono text-xs">→</span>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Main 3D Perspective Glass Card + Floating HUD Container */}
-              <div className={`relative w-full transition-all duration-500 ${authMode === 'signup' ? 'max-w-4xl' : 'max-w-lg'}`}>
-                
-                {/* Floating HUD Cards (Active in signin mode) */}
-                {authMode === 'signin' && (
-                  <>
-                    <div className="hidden xl:block absolute -left-44 top-6 w-40 p-3 rounded-xl backdrop-blur-2xl bg-[#080B12]/80 border border-amber-500/30 shadow-2xl pointer-events-none transform -rotate-2 hover:rotate-0 transition-transform">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <Brain className="w-3.5 h-3.5 text-[#F59E0B]" />
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300">
-                          {currentConfig.floatingCards[0].title}
-                        </span>
-                      </div>
-                      <div className="text-xs font-bold text-white">{currentConfig.floatingCards[0].stat}</div>
-                      <div className="text-[10px] text-amber-300 font-mono mt-0.5">{currentConfig.floatingCards[0].sub}</div>
-                    </div>
-
-                    <div className="hidden xl:block absolute -right-44 bottom-8 w-40 p-3 rounded-xl backdrop-blur-2xl bg-[#080B12]/80 border border-emerald-500/30 shadow-2xl pointer-events-none transform rotate-2 hover:rotate-0 transition-transform">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300">
-                          {currentConfig.floatingCards[1].title}
-                        </span>
-                      </div>
-                      <div className="text-xs font-bold text-white">{currentConfig.floatingCards[1].stat}</div>
-                      <div className="text-[10px] text-emerald-400 font-mono mt-0.5">{currentConfig.floatingCards[1].sub}</div>
-                    </div>
-                  </>
-                )}
-
-                {/* THE 3D GLASS CARD */}
+              <div className="relative w-full">
                 <div 
-                  ref={card3DRef}
                   data-lenis-prevent="true"
-                  className={`relative rounded-2xl backdrop-blur-2xl bg-[#080B12]/95 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-300 ${authMode === 'signup' ? 'p-4 sm:p-5' : 'p-5 sm:p-6'}`}
+                  className="relative rounded-2xl border border-white/10 bg-slate-950/95 p-5 shadow-xl sm:p-7"
                 >
-                  {/* Top Glowing Laser Border in Amber Gold */}
-                  <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-[#F59E0B] to-transparent" />
-
                   {/* Auth Mode Toggle (Sign In / Sign Up) */}
-                  <div className={`flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/10 ${authMode === 'signup' ? 'mb-3.5 max-w-xs mx-auto' : 'mb-4'}`}>
+                  <div className="mx-auto mb-6 flex w-full max-w-sm items-center rounded-xl border border-white/10 bg-white/[0.03] p-1">
                     <button
                       type="button"
                       onClick={() => setAuthMode('signin')}
                       className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                         authMode === 'signin' 
-                          ? 'bg-[#F59E0B]/20 border border-[#F59E0B]/40 text-[#F59E0B] font-bold shadow-md' 
+                          ? 'bg-amber-400 text-slate-950 font-semibold'
                           : 'text-slate-400 hover:text-white'
                       }`}
                     >
@@ -1853,7 +1631,7 @@ export default function TeamMatchSignInExperience({
                       onClick={() => setAuthMode('signup')}
                       className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                         authMode === 'signup' 
-                          ? 'bg-[#F59E0B]/20 border border-[#F59E0B]/40 text-[#F59E0B] font-bold shadow-md' 
+                          ? 'bg-amber-400 text-slate-950 font-semibold'
                           : 'text-slate-400 hover:text-white'
                       }`}
                     >
@@ -1869,21 +1647,25 @@ export default function TeamMatchSignInExperience({
                     </div>
                   )}
 
+                  {authMode === 'signup' && (
+                    <p className="mb-4 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs leading-relaxed text-amber-100/80">
+                      Your account and profile are saved to the database. Passwords are stored as salted scrypt hashes, and sign-in uses a secure server-managed session.
+                    </p>
+                  )}
+
                   {/* Form Component */}
-                  <form onSubmit={handleExecuteAuth} className="space-y-3.5">
+                  <form key={authMode} onSubmit={handleExecuteAuth} className="space-y-3.5">
                     
                     {authMode === 'signup' ? (
                       /* =======================================================
-                         2-COLUMN RESPONSIVE LAYOUT FOR CREATE ACCOUNT
-                         Column 1: Credentials & Sprint Role
-                         Column 2: CV Upload Dropzone & Extracted Skills
+                         Single-column create-account layout
                          ======================================================= */
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="grid grid-cols-1 gap-5">
                         {/* LEFT COLUMN: Identity & Credentials */}
-                        <div className="space-y-2.5">
-                          <div className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-1">
+                        <div className="space-y-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+                          <div className="flex items-center gap-2 border-b border-white/10 pb-3 text-sm font-semibold text-white">
                             <User className="w-3 h-3 text-[#F59E0B]" />
-                            <span>1. Profile & Access Key</span>
+                            <span>Account details</span>
                           </div>
 
                           {/* Full Name */}
@@ -1894,11 +1676,21 @@ export default function TeamMatchSignInExperience({
                             <div className="relative">
                               <input
                                 type="text"
+                                required
+                                autoComplete="name"
                                 value={signUpData.fullName}
-                                onFocus={() => setFocusedField('fullName')}
-                                onChange={(e) => setSignUpData({ ...signUpData, fullName: e.target.value })}
-                                placeholder="Alex Chen"
-                                className="w-full px-3 py-2 pl-8 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#F59E0B] focus:bg-white/[0.07] text-white text-xs outline-none transition-all"
+                                onChange={(e) => {
+                                  const fullName = e.target.value;
+                                  setSignUpData({ ...signUpData, fullName });
+                                  if (resumeProfile) {
+                                    setResumeProfile((previous) => ({
+                                      ...previous,
+                                      personalInformation: { ...previous.personalInformation, fullName }
+                                    }));
+                                  }
+                                }}
+                                placeholder="Your full name"
+                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 pl-9 text-sm text-white outline-none focus:border-amber-400"
                               />
                               <User className="w-3 h-3 text-slate-400 absolute left-2.5 top-2.5" />
                             </div>
@@ -1910,18 +1702,19 @@ export default function TeamMatchSignInExperience({
                               <span>Email Address</span>
                               {signUpData.email && (
                                 <span className={isEmailValid(signUpData.email) ? 'text-emerald-400' : 'text-slate-500'}>
-                                  {isEmailValid(signUpData.email) ? '✓ AST Verified' : 'Checking...'}
+                                  {isEmailValid(signUpData.email) ? 'Valid email' : 'Enter a valid email'}
                                 </span>
                               )}
                             </div>
                             <div className="relative">
                               <input
                                 type="email"
+                                required
+                                autoComplete="email"
                                 value={signUpData.email}
-                                onFocus={() => setFocusedField('email')}
                                 onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                                placeholder="alex.chen@university.edu"
-                                className="w-full px-3 py-2 pl-8 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#F59E0B] focus:bg-white/[0.07] text-white text-xs outline-none transition-all"
+                                placeholder="you@university.edu"
+                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 pl-9 text-sm text-white outline-none focus:border-amber-400"
                               />
                               <Mail className="w-3 h-3 text-slate-400 absolute left-2.5 top-2.5" />
                             </div>
@@ -1942,11 +1735,14 @@ export default function TeamMatchSignInExperience({
                             <div className="relative">
                               <input
                                 type={showPassword ? 'text' : 'password'}
+                                required
+                                minLength={12}
+                                maxLength={128}
+                                autoComplete="new-password"
                                 value={signUpData.password}
-                                onFocus={() => setFocusedField('password')}
                                 onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                                placeholder="••••••••••••"
-                                className="w-full px-3 py-2 pl-8 pr-8 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#F59E0B] focus:bg-white/[0.07] text-white text-xs outline-none transition-all font-mono"
+                                placeholder="At least 12 characters"
+                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 pl-9 pr-9 text-sm text-white outline-none focus:border-amber-400"
                               />
                               <Lock className="w-3 h-3 text-slate-400 absolute left-2.5 top-2.5" />
                               <button
@@ -1959,7 +1755,7 @@ export default function TeamMatchSignInExperience({
                             </div>
 
                             {/* Password Strength Indicator */}
-                            {signUpData.password && signUpData.password !== '••••••••••••' && (
+                            {signUpData.password && (
                               <div className="pt-0.5 space-y-0.5">
                                 <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
                                   <div 
@@ -1974,6 +1770,8 @@ export default function TeamMatchSignInExperience({
                             )}
                           </div>
 
+                          {!cvFile && !resumeProfile && (
+                          <div className="space-y-4">
                           {/* Preferred Role & Experience Level */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div className="space-y-1">
@@ -1984,8 +1782,9 @@ export default function TeamMatchSignInExperience({
                               <select
                                 value={signUpData.role}
                                 onChange={(e) => setSignUpData({ ...signUpData, role: e.target.value })}
-                                className="w-full px-2.5 py-1.5 rounded-xl bg-[#0A0E18] border border-white/10 focus:border-[#F59E0B] text-white text-xs outline-none cursor-pointer"
+                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-amber-400"
                               >
+                                <option value="">Select a role (optional)</option>
                                 {PREFERRED_ROLES.map((r) => (
                                   <option key={r} value={r}>{r}</option>
                                 ))}
@@ -2000,8 +1799,9 @@ export default function TeamMatchSignInExperience({
                               <select
                                 value={signUpData.experience}
                                 onChange={(e) => setSignUpData({ ...signUpData, experience: e.target.value })}
-                                className="w-full px-2.5 py-1.5 rounded-xl bg-[#0A0E18] border border-white/10 focus:border-[#F59E0B] text-white text-xs outline-none cursor-pointer"
+                                className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white outline-none focus:border-amber-400"
                               >
+                                <option value="">Select experience (optional)</option>
                                 {EXPERIENCE_LEVELS.map((exp) => (
                                   <option key={exp} value={exp}>{exp}</option>
                                 ))}
@@ -2066,35 +1866,36 @@ export default function TeamMatchSignInExperience({
                               </button>
                             </div>
                           </div>
+                          </div>
+                          )}
                         </div>
 
                         {/* RIGHT COLUMN: CV Upload Dropzone & Extracted Skills */}
-                        <div className="space-y-2.5">
-                          <div className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider flex items-center justify-between border-b border-white/5 pb-1">
+                        <div className="space-y-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
                             <span className="flex items-center gap-1.5">
                               <UploadCloud className="w-3 h-3 text-[#F59E0B]" />
-                              <span>2. CV Upload & Extracted Skills</span>
+                              <span className="text-sm font-semibold text-white">Profile information</span>
                             </span>
-                            <span className="text-[9px] text-slate-500 font-normal">PDF, DOCX, TXT</span>
+                            <span className="text-xs text-slate-400">PDF or DOCX · up to {((resumeConfig?.maxFileSizeBytes || 5 * 1024 * 1024) / (1024 * 1024)).toFixed(0)} MB</span>
                           </div>
 
-                          {/* CV / Resume Upload Box */}
-                          <div className="space-y-1">
+                          <div className="space-y-3">
                             <input
                               ref={cvFileInputRef}
                               type="file"
-                              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                               className="hidden"
                               onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
                                   handleProcessCvFile(e.target.files[0]);
                                 }
+                                e.target.value = '';
                               }}
                             />
 
                             {!cvFile ? (
                               <div
-                                onClick={() => cvFileInputRef.current && cvFileInputRef.current.click()}
                                 onDragOver={(e) => { e.preventDefault(); setIsCvDragOver(true); }}
                                 onDragLeave={() => setIsCvDragOver(false)}
                                 onDrop={(e) => {
@@ -2104,60 +1905,140 @@ export default function TeamMatchSignInExperience({
                                     handleProcessCvFile(e.dataTransfer.files[0]);
                                   }
                                 }}
-                                className={`p-2.5 rounded-xl border-2 border-dashed text-center cursor-pointer transition-all ${
+                                className={`rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
                                   isCvDragOver
-                                    ? 'border-[#F59E0B] bg-amber-500/15 scale-[1.01]'
-                                    : 'border-white/15 bg-white/[0.02] hover:border-amber-500/40 hover:bg-white/[0.04]'
+                                    ? 'border-[#F59E0B] bg-amber-500/10'
+                                    : 'border-white/15 bg-white/[0.02]'
                                 }`}
                               >
-                                <UploadCloud className="w-4 h-4 text-[#F59E0B] mx-auto mb-0.5" />
-                                <div className="text-[11px] font-semibold text-white">
-                                  Click to upload or drag & drop CV / Resume
+                                <UploadCloud className="mx-auto mb-2 h-7 w-7 text-amber-400" />
+                                <div className="text-sm font-semibold text-white">
+                                  Upload your resume
                                 </div>
-                                <div className="text-[9px] text-slate-400 font-mono">
-                                  AI scans document & auto-extracts technical skills below
+                                <div className="mt-1 text-xs text-slate-400">
+                                  PDF or DOCX. You can review and edit extracted details before saving.
                                 </div>
+                                <button
+                                  type="button"
+                                  onClick={() => cvFileInputRef.current?.click()}
+                                  className="mt-3 rounded-lg border border-amber-400/40 px-4 py-2 text-sm font-medium text-amber-200 hover:bg-amber-400/10"
+                                >
+                                  Browse file
+                                </button>
                               </div>
                             ) : (
-                              <div className="space-y-1.5">
-                                <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
+                              <div className="space-y-2">
+                                <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
                                   <div className="flex items-center gap-2 truncate mr-2">
                                     <FileText className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
                                     <div className="truncate">
                                       <span className="text-xs font-semibold text-white truncate block">{cvFile.name}</span>
-                                      <span className="text-[9px] text-slate-400 font-mono">{(cvFile.size / 1024).toFixed(1)} KB</span>
+                                      <span className="text-[10px] text-slate-400">{(cvFile.size / 1024).toFixed(1)} KB</span>
                                     </div>
                                   </div>
-                                  <button
-                                    type="button"
-                                    onClick={handleRemoveCvFile}
-                                    className="text-slate-400 hover:text-rose-400 p-1 cursor-pointer transition-colors"
-                                    title="Remove CV"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => cvFileInputRef.current?.click()}
+                                      className="text-[10px] font-semibold text-amber-300 hover:text-amber-200"
+                                    >
+                                      Replace
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={handleRemoveCvFile}
+                                      className="text-slate-400 hover:text-rose-400 p-1 transition-colors"
+                                      aria-label="Remove resume"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
                                 </div>
 
-                                {cvUploadPhase === 'analyzing' && (
-                                  <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 font-mono flex items-center gap-2 animate-pulse">
+                                {['uploading', 'extracting'].includes(cvUploadPhase) && (
+                                  <div role="status" aria-live="polite" className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center gap-2">
                                     <span className="w-3 h-3 rounded-full border-2 border-[#F59E0B] border-t-transparent animate-spin" />
                                     <span>{cvAnalysisStep}</span>
                                   </div>
                                 )}
+
+                                {['selected', 'error'].includes(cvUploadPhase) && (
+                                  <label className="flex items-start gap-2 rounded-lg bg-white/[0.03] p-2 text-[10px] leading-relaxed text-slate-300">
+                                    <input
+                                      type="checkbox"
+                                      checked={resumeConsent}
+                                      onChange={(event) => setResumeConsent(event.target.checked)}
+                                      className="mt-0.5 accent-amber-400"
+                                    />
+                                    <span>
+                                      I consent to sending the text extracted from this resume to the selected AI provider
+                                      {resumeConfig?.provider ? ` (${resumeConfig.provider})` : ''} for profile extraction.
+                                      The provider name is shown without exposing its API key.
+                                    </span>
+                                  </label>
+                                )}
+
+                                {['selected', 'error'].includes(cvUploadPhase) && (
+                                  <button
+                                    type="button"
+                                    onClick={handleExtractResume}
+                                    disabled={!resumeConsent || resumeConfig?.providerConfigured === false}
+                                    className="w-full rounded-lg bg-amber-400 px-3 py-2 text-[11px] font-bold text-[#080B12] disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {cvUploadPhase === 'error' ? 'Retry extraction' : 'Extract profile'}
+                                  </button>
+                                )}
                               </div>
                             )}
+
+                            {resumeConfig?.providerConfigured === false && (
+                              <p className="text-[10px] text-amber-200" role="status">
+                                Resume analysis is not configured on the server. You can continue with manual profile entry.
+                              </p>
+                            )}
+                            {resumeConfigError && <p className="text-[10px] text-amber-200">{resumeConfigError}</p>}
+                            {resumeError && <p className="rounded-lg bg-rose-500/10 p-2 text-[10px] text-rose-200" role="alert">{resumeError}</p>}
+                            {resumeWarnings.length > 0 && cvUploadPhase === 'extracted' && (
+                              <ul className="list-disc space-y-0.5 pl-4 text-[10px] text-amber-200" aria-label="Profile sections to complete">
+                                {resumeWarnings.map((warning) => <li key={warning}>{warning}</li>)}
+                              </ul>
+                            )}
+
+                            <p className="text-[10px] leading-relaxed text-slate-500">
+                              Resume text is sent to the configured third-party AI provider only after your consent. The resume file is not retained.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (cvFile || resumeDraftToken || resumeProfile) {
+                                  handleRemoveCvFile();
+                                } else {
+                                  setCvUploadPhase('idle');
+                                  setResumeError('');
+                                  setResumeWarnings([]);
+                                }
+                              }}
+                              className="text-[10px] font-semibold text-slate-400 underline underline-offset-2 hover:text-white"
+                            >
+                              Continue with manual profile entry
+                            </button>
                           </div>
 
-                          {/* Extracted Skills Chips & Custom Skill Input */}
-                          <div className="space-y-1">
+                          {resumeProfile && (
+                            <>
+                              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2 text-[10px] text-emerald-200">
+                                Extraction complete. Review and edit the details below before saving.
+                              </div>
+                              <ResumeProfileReview profile={resumeProfile} onChange={handleProfileChange} />
+                            </>
+                          )}
+
+                          {!cvFile && !resumeProfile && <div className="space-y-1">
                             <div className="flex items-center justify-between text-[10px] font-mono text-slate-300">
                               <span className="flex items-center gap-1">
                                 <Zap className="w-3 h-3 text-[#F59E0B]" />
-                                <span>Extracted Skills ({extractedSkills.length})</span>
+                                <span>Skills ({extractedSkills.length})</span>
                               </span>
-                              {cvUploadPhase === 'extracted' && (
-                                <span className="text-emerald-400 font-bold">✓ Extracted from CV</span>
-                              )}
                             </div>
 
                             <div 
@@ -2182,7 +2063,7 @@ export default function TeamMatchSignInExperience({
 
                               {extractedSkills.length === 0 && (
                                 <span className="text-[10px] text-slate-500 font-mono py-0.5">
-                                  No skills yet. Upload CV or add below.
+                                  No skills added yet.
                                 </span>
                               )}
                             </div>
@@ -2210,8 +2091,10 @@ export default function TeamMatchSignInExperience({
                                 + Add
                               </button>
                             </div>
-                          </div>
+                          </div>}
 
+                          {!cvFile && !resumeProfile && (
+                          <>
                           {/* Previous Projects Section */}
                           <div className="space-y-1.5 pt-1.5 border-t border-white/5">
                             <div className="flex items-center justify-between text-[10px] font-mono text-slate-300">
@@ -2236,7 +2119,7 @@ export default function TeamMatchSignInExperience({
                             >
                               {signUpData.previousProjects.length === 0 ? (
                                 <div className="p-2 rounded-xl bg-white/[0.02] border border-dashed border-white/10 text-center text-[10px] text-slate-500 font-mono">
-                                  No projects yet. Upload CV to auto-extract or click + Add Project.
+                                  No projects added yet. Add them manually or import a resume.
                                 </div>
                               ) : (
                                 signUpData.previousProjects.map((proj, pIdx) => (
@@ -2320,6 +2203,8 @@ export default function TeamMatchSignInExperience({
                               </div>
                             )}
                           </div>
+                          </>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -2331,24 +2216,25 @@ export default function TeamMatchSignInExperience({
                          ======================================================= */
                       <div className="space-y-4 max-w-md mx-auto py-1">
                         
-                        {/* Email Address with AST Validation */}
+                        {/* Email Address */}
                         <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                          <div className="flex items-center justify-between text-sm font-medium text-slate-300">
                             <span>Email Address</span>
                             {signInData.email && (
                               <span className={isEmailValid(signInData.email) ? 'text-emerald-400 font-semibold' : 'text-slate-500'}>
-                                {isEmailValid(signInData.email) ? '✓ AST Verified' : 'Enter institutional email'}
+                                {isEmailValid(signInData.email) ? 'Valid email' : 'Enter a valid email'}
                               </span>
                             )}
                           </div>
                           <div className="relative">
                             <input
                               type="email"
+                              required
+                              autoComplete="email"
                               value={signInData.email}
-                              onFocus={() => setFocusedField('email')}
                               onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
-                              placeholder="alex.chen@university.edu"
-                              className="w-full px-3.5 py-2.5 pl-9 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#F59E0B] focus:bg-white/[0.07] text-white text-xs sm:text-sm outline-none transition-all shadow-inner"
+                              placeholder="you@university.edu"
+                              className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-3 pl-10 text-sm text-white outline-none focus:border-amber-400"
                             />
                             <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                           </div>
@@ -2356,8 +2242,8 @@ export default function TeamMatchSignInExperience({
 
                         {/* Password Field with Show/Hide Toggle */}
                         <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-400">
-                            <span>Access Key / Password</span>
+                          <div className="flex items-center justify-between text-sm font-medium text-slate-300">
+                            <span>Password</span>
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
@@ -2369,11 +2255,14 @@ export default function TeamMatchSignInExperience({
                           <div className="relative">
                             <input
                               type={showPassword ? 'text' : 'password'}
+                              required
+                              maxLength={128}
+                              autoComplete="current-password"
+                              minLength={4}
                               value={signInData.password}
-                              onFocus={() => setFocusedField('password')}
                               onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
-                              placeholder="••••••••••••"
-                              className="w-full px-3.5 py-2.5 pl-9 pr-9 rounded-xl bg-white/[0.04] border border-white/10 focus:border-[#F59E0B] focus:bg-white/[0.07] text-white text-xs sm:text-sm outline-none transition-all font-mono shadow-inner"
+                              placeholder="Enter your password"
+                              className="w-full rounded-lg border border-white/10 bg-slate-900 px-3 py-3 pl-10 pr-10 text-sm text-white outline-none focus:border-amber-400"
                             />
                             <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                             <button
@@ -2386,7 +2275,7 @@ export default function TeamMatchSignInExperience({
                           </div>
                         </div>
 
-                        {/* Helper Links: Remember Me, Virtual Deck & Forgot Key */}
+                        {/* Session preference */}
                         <div className="pt-1 flex items-center justify-between text-xs">
                           <label className="flex items-center gap-2 text-slate-400 hover:text-slate-300 cursor-pointer select-none">
                             <input 
@@ -2395,75 +2284,24 @@ export default function TeamMatchSignInExperience({
                               onChange={(e) => setSignInData({ ...signInData, rememberMe: e.target.checked })}
                               className="w-3.5 h-3.5 rounded bg-black/40 border border-white/20 accent-[#F59E0B] cursor-pointer"
                             />
-                            <span className="text-[11px] font-mono">Keep session active</span>
+                            <span className="text-sm">Keep me signed in</span>
                           </label>
-
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setShowKeyboard(!showKeyboard)}
-                              className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-[#F59E0B] font-mono transition-colors cursor-pointer"
-                            >
-                              <Keyboard className="w-3.5 h-3.5 text-[#F59E0B]" />
-                              <span>{showKeyboard ? 'Hide Deck' : 'Virtual Deck'}</span>
-                            </button>
-
-                            <a 
-                              href="#forgot" 
-                              onClick={(e) => { e.preventDefault(); alert(`Reset key link dispatched to ${signInData.email || 'your email'}.`); }} 
-                              className="text-[11px] text-slate-400 hover:text-white transition-colors"
-                            >
-                              Forgot key?
-                            </a>
-                          </div>
                         </div>
 
-                        {/* Automatic profile retrieval status message */}
-                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-2.5 text-[11px] font-mono text-slate-400">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span>Signing in will immediately retrieve and open your verified employee profile, experience, interests & projects.</span>
+                        <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-relaxed text-amber-100/80">
+                          Sign in uses your account password and a server-managed session. Keep me signed in extends the session to seven days.
                         </div>
                       </div>
                     )}
                     {/* Interactive Holographic Virtual Deck */}
-                    {showKeyboard && (
-                      <div className="p-2.5 rounded-xl bg-black/80 border border-white/10 space-y-1 backdrop-blur-xl animate-fade-in">
-                        {KEYBOARD_ROWS.map((row, rIdx) => (
-                          <div key={rIdx} className="flex justify-center gap-1">
-                            {row.map((k) => {
-                              const isKeyLit = pressedKey === k;
-                              return (
-                                <button
-                                  key={k}
-                                  type="button"
-                                  onClick={() => handleVirtualKeyPress(k)}
-                                  className={`px-2 py-1 rounded text-[10px] font-mono transition-all cursor-pointer ${
-                                    isKeyLit
-                                      ? 'bg-[#F59E0B] text-[#080B12] font-bold shadow-lg shadow-amber-500/50 scale-95'
-                                      : 'bg-white/5 hover:bg-white/15 text-slate-200 border border-white/5'
-                                  } ${k === 'SPACE' ? 'px-5' : ''}`}
-                                >
-                                  {k}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* MAGNETIC 4-STAGE AUTHENTICATION CTA IN METALLIC AMBER GOLD */}
                     <div className="pt-2">
                       <button
-                        ref={magneticBtnRef}
                         type="submit"
-                        disabled={authPhase !== 'idle'}
-                        onMouseMove={handleMagneticMove}
-                        onMouseLeave={handleMagneticLeave}
-                        className={`w-full py-3.5 rounded-xl font-extrabold text-xs tracking-widest uppercase transition-all duration-300 shadow-xl flex items-center justify-center gap-2 cursor-pointer ${
+                        disabled={authPhase !== 'idle' || ['uploading', 'extracting'].includes(cvUploadPhase)}
+                        className={`w-full rounded-lg px-4 py-3 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer ${
                           authPhase === 'idle'
-                            ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-[#080B12] hover:brightness-110 shadow-amber-500/25'
-                            : 'bg-amber-500/20 border border-[#F59E0B] text-amber-300 cursor-wait'
+                            ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
+                            : 'bg-amber-500/20 text-amber-200 cursor-wait'
                         }`}
                       >
                         {authPhase === 'idle' && (
@@ -2475,19 +2313,19 @@ export default function TeamMatchSignInExperience({
                         {authPhase === 'authenticating' && (
                           <>
                             <span className="w-3.5 h-3.5 rounded-full border-2 border-[#F59E0B] border-t-transparent animate-spin" />
-                            <span>Authenticating Credentials...</span>
+                        <span>Continuing...</span>
                           </>
                         )}
                         {authPhase === 'verifying' && (
                           <>
-                            <Brain className="w-3.5 h-3.5 text-[#F59E0B] animate-pulse" />
-                            <span>Verifying {currentConfig.label} Profile...</span>
+                        <span className="w-3.5 h-3.5 rounded-full border-2 border-[#F59E0B] border-t-transparent animate-spin" />
+                        <span>Saving profile...</span>
                           </>
                         )}
                         {authPhase === 'complete' && (
                           <>
                             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                            <span>AI Authentication Complete ✓</span>
+                        <span>Complete</span>
                           </>
                         )}
                       </button>
@@ -2496,17 +2334,13 @@ export default function TeamMatchSignInExperience({
                   </form>
 
                   {/* Security Guarantee Badge */}
-                  <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-center gap-2 text-[10px] font-mono text-slate-500">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#F59E0B]" />
-                    <span>Zero-Trust 256-Bit Cognitive AST Encryption</span>
+                  <div className="mt-4 border-t border-white/10 pt-4 text-center text-xs text-slate-400">
+                    {authMode === 'signup'
+                      ? 'The uploaded resume file is processed in memory and is not retained. The reviewed profile is saved with your account.'
+                      : 'Sessions are revocable and expire automatically after seven days.'}
                   </div>
 
                 </div>
-              </div>
-
-              {/* Scroll Up Hint inside Stage 7 */}
-              <div className="mt-3 text-center text-slate-500 text-[10px] font-mono">
-                <span>↑ Scroll to top to explore previous scenes or change track</span>
               </div>
 
             </div>
@@ -2518,6 +2352,7 @@ export default function TeamMatchSignInExperience({
       {/* =========================================================================
           BOTTOM HUD BAR (STAGE NAVIGATION PILLS)
           ========================================================================= */}
+      {currentStage !== 7 && (
       <footer className="relative z-30 px-5 sm:px-8 py-2.5 border-t border-white/5 bg-[#080B12]/80 backdrop-blur-md flex items-center justify-between text-xs text-slate-400">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
@@ -2561,6 +2396,7 @@ export default function TeamMatchSignInExperience({
           </button>
         </div>
       </footer>
+      )}
 
     </div>
   );

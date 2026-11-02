@@ -12,8 +12,18 @@
     "test": "node --test"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.140",
+    "@ai-sdk/openai": "^3.0.135",
+    "@ai-sdk/xai": "^3.0.147",
+    "ai": "^6.0.320",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "mongoose": "^8.19.1"
+    "express-rate-limit": "^8.7.2",
+    "jszip": "^3.10.2",
+    "mammoth": "^1.13.0",
+    "mongoose": "^8.19.1",
+    "multer": "^2.5.0",
+    "pdf-parse": "^2.4.5",
+    "zod": "^4.6.7"
   }
 }

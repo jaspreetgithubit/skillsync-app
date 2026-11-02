@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   ChevronDown, 
   Menu, 
@@ -11,23 +11,14 @@ import {
   UserPlus,
   ShieldCheck
 } from 'lucide-react';
-import SignUpModal from './SignUpModal';
-
 export default function Navbar({ onOpenAuth, onOpenAdmin }) {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('signup');
   const dropdownRef = useRef(null);
 
   const openAuth = (mode = 'signup') => {
-    if (onOpenAuth) {
-      onOpenAuth(mode);
-    } else {
-      setAuthMode(mode);
-      setIsAuthOpen(true);
-    }
+    onOpenAuth?.(mode);
   };
 
   useEffect(() => {
@@ -322,12 +313,6 @@ export default function Navbar({ onOpenAuth, onOpenAdmin }) {
         )}
       </nav>
 
-      {/* Global Student Sign Up & Authentication Modal */}
-      <SignUpModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        initialMode={authMode}
-      />
     </header>
   );
 }
