@@ -38,7 +38,10 @@ const writeLocalProjects = (data) => {
 router.get('/', async (req, res) => {
   try {
     if (Project && Project.db && Project.db.readyState === 1) {
-      const projects = await Project.find().sort({ createdAt: -1 });
+      const mongoProjects = await Project.find().sort({ createdAt: -1 });
+      const mongoProjectIds = new Set(mongoProjects.map((project) => String(project.id || project._id)));
+      const localProjects = readLocalProjects().filter((project) => !mongoProjectIds.has(String(project.id)));
+      const projects = [...mongoProjects, ...localProjects];
       return res.status(200).json({ success: true, count: projects.length, projects });
     }
     const local = readLocalProjects();
@@ -105,4 +108,3 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
-
