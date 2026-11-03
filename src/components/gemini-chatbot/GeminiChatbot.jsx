@@ -42,10 +42,19 @@ export default function GeminiChatbot({ onNavigate }) {
   };
 
   useEffect(() => {
-    if (isOpen) {
-      checkChatHealth().then((h) => setLiveConnected(Boolean(h.keyConfigured)));
-    }
-  }, [isOpen]);
+    let isMounted = true;
+    const verifyHealth = () => {
+      checkChatHealth().then((h) => {
+        if (isMounted) setLiveConnected(Boolean(h && h.keyConfigured));
+      });
+    };
+    verifyHealth();
+    const interval = setInterval(verifyHealth, 15000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen && !isMinimized) {
@@ -85,7 +94,7 @@ export default function GeminiChatbot({ onNavigate }) {
         {
           id: `bot-err-${idCounter.current++}`,
           sender: 'bot',
-          text: "I couldn't reach the server right now. Please make sure the chat server is running (npm run chat-server).",
+          text: "I couldn't reach the server right now. Please try your message again in a moment.",
           time: 'Now'
         }
       ]);

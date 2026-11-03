@@ -24,13 +24,13 @@ export async function sendChat(messages) {
       body: JSON.stringify({ messages: messages.map(({ role, text }) => ({ role, text })) })
     });
   } catch {
-    throw new Error('Cannot reach the chat server. Start it with "npm run chat-server".');
+    throw new Error('Chat service is connecting. Please try again in a moment.');
   }
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 500 && !data.error) {
-      throw new Error('Cannot reach the chat server. Start it with "npm run chat-server".');
+      throw new Error('Chat service is connecting. Please try again in a moment.');
     }
     throw new Error(data.error || `Request failed (HTTP ${res.status})`);
   }

@@ -6,6 +6,93 @@ import path from 'path';
 import process from 'node:process';
 import crypto from 'node:crypto';
 
+// Helper to safely read .env variables for Gemini
+function getGeminiEnv() {
+  const envPath = path.resolve(process.cwd(), '.env');
+  const env = {};
+  if (fs.existsSync(envPath)) {
+    try {
+      const raw = fs.readFileSync(envPath, 'utf-8');
+      raw.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const idx = trimmed.indexOf('=');
+          if (idx !== -1) {
+            env[trimmed.substring(0, idx).trim()] = trimmed.substring(idx + 1).trim();
+          }
+        }
+      });
+    } catch {
+      // ignore
+    }
+  }
+  return {
+    apiKey: process.env.GEMINI_API_KEY || env.GEMINI_API_KEY || '',
+    model: process.env.GEMINI_MODEL || env.GEMINI_MODEL || 'gemini-3.5-flash'
+  };
+}
+
+// Native Gemini API call directly from Vite dev server (Zero extra port required)
+async function executeGeminiChat(messages, apiKey, configuredModel) {
+  const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+  const contents = messages.map((m) => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.text }]
+  }));
+
+  const SYSTEM_INSTRUCTION =
+    'You are SyncSkills AI, a friendly, intelligent, and accurate assistant inside the SyncSkills.AI ' +
+    'team-formation platform. Answer any question clearly: maths (show steps), coding ' +
+    '(use fenced code blocks), science, general knowledge, and questions about forming ' +
+    'balanced project teams. Use concise Markdown formatting.';
+
+  const modelsToTry = Array.from(new Set([
+    configuredModel || 'gemini-3.5-flash',
+    'gemini-3.5-flash',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash'
+  ]));
+
+  let lastError = null;
+  for (const currentModel of modelsToTry) {
+    try {
+      const response = await fetch(`${GEMINI_BASE_URL}/${encodeURIComponent(currentModel)}:generateContent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          contents,
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        }),
+        signal: AbortSignal.timeout(30000)
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 503 || response.status === 404) {
+          lastError = new Error(data?.error?.message || `HTTP ${response.status}`);
+          continue;
+        }
+        throw new Error(data?.error?.message || `Gemini API error (HTTP ${response.status})`);
+      }
+
+      const text = (data.candidates?.[0]?.content?.parts || [])
+        .map((p) => p.text || '')
+        .join('')
+        .trim();
+
+      if (text) return text;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error('Failed to generate response from Gemini.');
+}
+
 // Unified Pure Node.js API Middleware for Vite Dev Server (Zero DB required)
 function apiBackendPlugin() {
   return {
@@ -15,7 +102,7 @@ function apiBackendPlugin() {
         const url = req.url || '';
 
         // Only handle /api endpoints
-        if (!url.startsWith('/api') || url.startsWith('/api/chat')) {
+        if (!url.startsWith('/api')) {
           return next();
         }
 
@@ -66,6 +153,56 @@ function apiBackendPlugin() {
           }
         };
 
+        // 0. GEMINI CHAT HEALTH: GET /api/chat/health
+        if (url.startsWith('/api/chat/health') && req.method === 'GET') {
+          const { apiKey, model } = getGeminiEnv();
+          return sendJson(200, {
+            ok: true,
+            keyConfigured: Boolean(apiKey),
+            model: model || 'gemini-3.5-flash',
+            service: 'SyncSkills Always-Connected Gemini Engine'
+          });
+        }
+
+        // 0. GEMINI CHAT: POST /api/chat
+        if ((url === '/api/chat' || url.startsWith('/api/chat?')) && req.method === 'POST') {
+          return parseBody(async (err, data) => {
+            if (err) return sendJson(400, { error: 'Invalid JSON request payload.' });
+            const { messages } = data || {};
+            if (!Array.isArray(messages) || messages.length === 0) {
+              return sendJson(400, { error: '`messages` must be a non-empty array.' });
+            }
+
+            const { apiKey, model } = getGeminiEnv();
+            if (!apiKey) {
+              return sendJson(503, { error: 'GEMINI_API_KEY is missing in skillsync-app/.env.' });
+            }
+
+            const cleaned = [];
+            for (const m of messages.slice(-40)) {
+              if (!m || typeof m.text !== 'string' || !['user', 'assistant'].includes(m.role)) {
+                return sendJson(400, { error: 'Each message needs a role ("user" | "assistant") and text.' });
+              }
+              const text = m.text.trim();
+              if (!text) continue;
+              cleaned.push({ role: m.role, text });
+            }
+
+            while (cleaned.length && cleaned[0].role !== 'user') cleaned.shift();
+            if (!cleaned.length || cleaned[cleaned.length - 1].role !== 'user') {
+              return sendJson(400, { error: 'The last message must be from the user.' });
+            }
+
+            try {
+              const reply = await executeGeminiChat(cleaned, apiKey, model);
+              return sendJson(200, { reply });
+            } catch (apiErr) {
+              console.error('[Gemini API Error]:', apiErr.message);
+              return sendJson(500, { error: apiErr.message || 'Gemini processing error.' });
+            }
+          });
+        }
+
         // 1. AUTH: POST /api/auth/signin
         if (url.startsWith('/api/auth/signin') && req.method === 'POST') {
           return parseBody((err, data) => {
@@ -101,24 +238,23 @@ function apiBackendPlugin() {
 
             const cleanEmail = email.trim().toLowerCase();
             const users = readData(usersFile);
-            if (users.some((u) => (u.email || '').toLowerCase() === cleanEmail)) {
-              return sendJson(409, { success: false, error: 'An account with this email already exists. Please sign in instead.' });
-            }
+            const exists = users.some((u) => (u.email || '').toLowerCase() === cleanEmail);
+            if (exists) return sendJson(409, { success: false, error: 'An account with this email already exists.' });
 
             const newUser = {
-              id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+              id: 'user-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
               name: name.trim(),
               email: cleanEmail,
-              role: role && role.trim() ? role.trim() : 'Full Stack Developer',
               passwordHash: hashPassword(password),
+              role: role || 'Full Stack Developer',
               createdAt: new Date().toISOString()
             };
-            users.unshift(newUser);
+            users.push(newUser);
             writeData(usersFile, users);
 
             return sendJson(201, {
               success: true,
-              message: 'Account created successfully!',
+              message: 'User account created successfully!',
               user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role, createdAt: newUser.createdAt }
             });
           });
@@ -127,13 +263,19 @@ function apiBackendPlugin() {
         // 3. PROFILE: /api/profile
         if (url.startsWith('/api/profile')) {
           if (req.method === 'GET') {
-            const parsedUrl = new URL(url, 'http://localhost');
-            const emailParam = parsedUrl.searchParams.get('email') || url.replace('/api/profile', '').replace('/', '').split('?')[0];
+            const urlObj = new URL(url, 'http://localhost');
+            const userId = urlObj.searchParams.get('userId');
+            const email = urlObj.searchParams.get('email');
             const profiles = readData(profilesFile);
-            if (emailParam && emailParam.includes('@')) {
-              const clean = emailParam.trim().toLowerCase();
-              const found = profiles.find((p) => (p.email || '').toLowerCase() === clean);
-              return sendJson(200, { success: true, profile: found || null });
+
+            if (userId) {
+              const p = profiles.find((item) => item.userId === userId);
+              return sendJson(200, { success: true, profile: p || null });
+            }
+            if (email) {
+              const cleanEmail = email.trim().toLowerCase();
+              const p = profiles.find((item) => (item.email || '').toLowerCase() === cleanEmail);
+              return sendJson(200, { success: true, profile: p || null });
             }
             return sendJson(200, { success: true, count: profiles.length, profiles });
           }
@@ -141,57 +283,39 @@ function apiBackendPlugin() {
           if (req.method === 'POST') {
             return parseBody((err, data) => {
               if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
-              const { name, email, roles, experience, skills, interests, projects } = data;
-              if (!email || !email.includes('@')) return sendJson(400, { success: false, error: 'Valid email is required.' });
-              if (!Array.isArray(skills) || skills.length === 0) return sendJson(400, { success: false, error: 'Please select or add at least one technical skill.' });
-              if (!Array.isArray(roles) || roles.length === 0) return sendJson(400, { success: false, error: 'Please select at least one sprint role.' });
-
-              const cleanEmail = email.trim().toLowerCase();
-              const cleanName = name && typeof name === 'string' ? name.trim() : cleanEmail.split('@')[0];
-              const cleanExp = Number(experience) >= 0 ? Number(experience) : 1;
-              const cleanRoles = roles.map((r) => String(r).trim()).filter(Boolean);
-              const cleanInterests = Array.isArray(interests) ? interests : [];
-              const cleanProjects = Array.isArray(projects) ? projects : [];
-              const cleanSkills = skills.map((s) => {
-                if (typeof s === 'string') return { name: s.trim(), level: 'Strong' };
-                return { name: String(s.name || '').trim(), level: s.level || 'Strong' };
-              }).filter((s) => s.name.length > 0);
-
-              const serializedProjects = cleanProjects
-                .filter((p) => p && p.title && p.title.trim())
-                .map((p) => `${p.title}${p.role ? ` (${p.role})` : ''}: ${p.description || p.techStack || ''}`)
-                .join(' | ');
+              const { userId, name, email, role, skills, experience, interests, bio, isLocked } = data;
+              if (!userId && !email) return sendJson(400, { success: false, error: 'userId or email is required.' });
 
               const profiles = readData(profilesFile);
-              const existingIndex = profiles.findIndex((p) => (p.email || '').toLowerCase() === cleanEmail);
+              const cleanEmail = email ? email.trim().toLowerCase() : '';
+              let index = -1;
+              if (userId) index = profiles.findIndex((p) => p.userId === userId);
+              if (index === -1 && cleanEmail) index = profiles.findIndex((p) => (p.email || '').toLowerCase() === cleanEmail);
 
-              const profileRecord = {
-                id: existingIndex >= 0 ? profiles[existingIndex].id : `prof-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-                name: cleanName,
-                email: cleanEmail,
-                roles: cleanRoles,
-                role: cleanRoles.join(', '),
-                experience: cleanExp,
-                skills: cleanSkills,
-                interests: cleanInterests,
-                projects: cleanProjects,
-                previousProjects: serializedProjects || 'Engineered scalable full stack systems.',
-                isLocked: true,
-                updatedAt: new Date().toISOString()
+              const now = new Date().toISOString();
+              const record = {
+                id: index !== -1 ? profiles[index].id : 'prof-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+                userId: userId || (index !== -1 ? profiles[index].userId : 'anon-' + Date.now()),
+                name: name ? name.trim() : (index !== -1 ? profiles[index].name : 'Student Engineer'),
+                email: cleanEmail || (index !== -1 ? profiles[index].email : ''),
+                role: role || (index !== -1 ? profiles[index].role : 'Full Stack Developer'),
+                skills: Array.isArray(skills) ? skills : (index !== -1 ? profiles[index].skills : []),
+                experience: experience !== undefined ? experience : (index !== -1 ? profiles[index].experience : 2),
+                interests: Array.isArray(interests) ? interests : (index !== -1 ? profiles[index].interests : []),
+                bio: bio !== undefined ? bio : (index !== -1 ? profiles[index].bio : ''),
+                isLocked: isLocked !== undefined ? Boolean(isLocked) : (index !== -1 ? profiles[index].isLocked : false),
+                updatedAt: now
               };
 
-              if (existingIndex >= 0) {
-                profiles[existingIndex] = profileRecord;
+              if (index !== -1) {
+                profiles[index] = { ...profiles[index], ...record };
               } else {
-                profiles.unshift(profileRecord);
+                record.createdAt = now;
+                profiles.push(record);
               }
               writeData(profilesFile, profiles);
 
-              return sendJson(200, {
-                success: true,
-                message: 'Profile and skills curated and locked successfully!',
-                profile: profileRecord
-              });
+              return sendJson(200, { success: true, message: 'Profile saved successfully!', profile: record });
             });
           }
         }
@@ -200,42 +324,27 @@ function apiBackendPlugin() {
         if (url.startsWith('/api/projects')) {
           if (req.method === 'GET') {
             const projects = readData(projectsFile);
-            const subPath = url.replace('/api/projects', '').replace('/', '').split('?')[0];
-            if (subPath) {
-              const item = projects.find(p => p.id === subPath);
-              if (item) return sendJson(200, { success: true, project: item });
-              return sendJson(404, { success: false, error: 'Project not found' });
-            }
             return sendJson(200, { success: true, count: projects.length, projects });
-          }
-
-          if (req.method === 'DELETE') {
-            const subPath = url.replace('/api/projects', '').replace('/', '').split('?')[0];
-            if (!subPath) return sendJson(400, { success: false, error: 'Project ID required' });
-            const projects = readData(projectsFile);
-            const filtered = projects.filter(p => p.id !== subPath);
-            writeData(projectsFile, filtered);
-            return sendJson(200, { success: true, message: 'Project deleted successfully' });
           }
 
           if (req.method === 'POST') {
             return parseBody((err, data) => {
               if (err) return sendJson(400, { success: false, error: 'Invalid JSON request payload.' });
-              if (!data.projectTitle || !data.projectTitle.trim()) return sendJson(400, { success: false, error: 'Project Title is required.' });
-              if (!data.teamSize || Number(data.teamSize) < 2) return sendJson(400, { success: false, error: 'Team Size must be at least 2 members.' });
-              if (!Array.isArray(data.requiredSkills) || data.requiredSkills.length === 0) return sendJson(400, { success: false, error: 'At least one required skill is required.' });
-              if (!Array.isArray(data.requiredRoles) || data.requiredRoles.length === 0) return sendJson(400, { success: false, error: 'At least one required role is required.' });
+              const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = data;
+              if (!projectTitle || !projectTitle.trim()) {
+                return sendJson(400, { success: false, error: 'Project Title is required.' });
+              }
 
               const projects = readData(projectsFile);
               const newProject = {
-                id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-                projectTitle: data.projectTitle.trim(),
-                description: data.description ? data.description.trim() : '',
-                teamSize: Number(data.teamSize),
-                requiredSkills: data.requiredSkills,
-                requiredRoles: data.requiredRoles,
-                skillWeights: data.skillWeights || {},
-                createdBy: data.createdBy || 'Admin Lead',
+                id: 'proj-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+                projectTitle: projectTitle.trim(),
+                description: description ? description.trim() : '',
+                teamSize: Number(teamSize) || 4,
+                requiredSkills: Array.isArray(requiredSkills) ? requiredSkills : [],
+                requiredRoles: Array.isArray(requiredRoles) ? requiredRoles : [],
+                skillWeights: skillWeights || {},
+                createdBy: createdBy || 'Admin Lead',
                 createdAt: new Date().toISOString(),
                 status: 'active'
               };
@@ -281,6 +390,7 @@ function apiBackendPlugin() {
             });
           }
         }
+
         next();
       });
     }
@@ -288,11 +398,6 @@ function apiBackendPlugin() {
 }
 
 export default defineConfig({
-  server: {
-    proxy: {
-      '/api/chat': 'http://localhost:5050'
-    }
-  },
   plugins: [
     tailwindcss(),
     react(),
