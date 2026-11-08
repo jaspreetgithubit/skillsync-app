@@ -2,9 +2,10 @@
 // Express API routes for TeamMatch AI Projects
 
 const express = require('express');
-const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const { projectSkillRequirementsSchema } = require('../schemas/projectRequirements');
+const { normalizeSkillName } = require('../services/skillNormalization');
 
 let Project;
 try {
@@ -34,27 +35,34 @@ const writeLocalProjects = (data) => {
   }
 };
 
-// GET /api/projects - Retrieve all projects
-router.get('/', async (req, res) => {
-  try {
-    if (Project && Project.db && Project.db.readyState === 1) {
-      const mongoProjects = await Project.find().sort({ createdAt: -1 });
-      const mongoProjectIds = new Set(mongoProjects.map((project) => String(project.id || project._id)));
-      const localProjects = readLocalProjects().filter((project) => !mongoProjectIds.has(String(project.id)));
-      const projects = [...mongoProjects, ...localProjects];
-      return res.status(200).json({ success: true, count: projects.length, projects });
-    }
-    const local = readLocalProjects();
-    return res.status(200).json({ success: true, count: local.length, projects: local });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
+function createProjectRouter(dependencies = {}) {
+  const router = express.Router();
+  const projects = dependencies.Project || Project;
+  const isDatabaseReady = dependencies.isDatabaseReady || (() => (
+    projects && projects.db && projects.db.readyState === 1
+  ));
+  const localProjects = dependencies.readLocalProjects || readLocalProjects;
+  const saveLocalProjects = dependencies.writeLocalProjects || writeLocalProjects;
 
-// POST /api/projects - Create a new project
-router.post('/', async (req, res) => {
-  try {
-    const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = req.body;
+  router.get('/', async (req, res) => {
+    try {
+      if (isDatabaseReady()) {
+        const mongoProjects = await projects.find().sort({ createdAt: -1 });
+        const mongoProjectIds = new Set(mongoProjects.map((project) => String(project.id || project._id)));
+        const otherProjects = localProjects().filter((project) => !mongoProjectIds.has(String(project.id)));
+        const allProjects = [...mongoProjects, ...otherProjects];
+        return res.status(200).json({ success: true, count: allProjects.length, projects: allProjects });
+      }
+      const local = localProjects();
+      return res.status(200).json({ success: true, count: local.length, projects: local });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  router.post('/', async (req, res) => {
+    try {
+      const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = req.body;
 
     // Validation
     if (!projectTitle || !projectTitle.trim()) {
@@ -66,16 +74,27 @@ router.post('/', async (req, res) => {
     if (!Array.isArray(requiredSkills) || requiredSkills.length === 0) {
       return res.status(400).json({ success: false, error: 'At least one required skill is required' });
     }
+    const skillRequirements = projectSkillRequirementsSchema.safeParse(requiredSkills);
+    if (!skillRequirements.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Skill requirements must include valid names, priorities, weights, critical flags, and proficiency levels'
+      });
+    }
+    const normalizedSkills = skillRequirements.data.map((skill) => ({
+      ...skill,
+      name: normalizeSkillName(skill.name)
+    }));
     if (!Array.isArray(requiredRoles) || requiredRoles.length === 0) {
       return res.status(400).json({ success: false, error: 'At least one required role is required' });
     }
 
-    if (Project && Project.db && Project.db.readyState === 1) {
-      const newProj = await Project.create({
+    if (isDatabaseReady()) {
+      const newProj = await projects.create({
         projectTitle: projectTitle.trim(),
         description: description ? description.trim() : '',
         teamSize: Number(teamSize),
-        requiredSkills,
+        requiredSkills: normalizedSkills,
         requiredRoles,
         skillWeights: skillWeights || {},
         createdBy: createdBy || 'Admin Lead'
@@ -84,13 +103,13 @@ router.post('/', async (req, res) => {
     }
 
     // Local JSON Database Fallback
-    const local = readLocalProjects();
+    const local = localProjects();
     const newProject = {
       id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       projectTitle: projectTitle.trim(),
       description: description ? description.trim() : '',
       teamSize: Number(teamSize),
-      requiredSkills,
+      requiredSkills: normalizedSkills,
       requiredRoles,
       skillWeights: skillWeights || {},
       createdBy: createdBy || 'Admin Lead',
@@ -99,12 +118,15 @@ router.post('/', async (req, res) => {
     };
 
     local.unshift(newProject);
-    writeLocalProjects(local);
+    saveLocalProjects(local);
 
     return res.status(201).json({ success: true, message: 'Project saved to Local Store', project: newProject });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  });
+  return router;
+}
 
-module.exports = router;
+module.exports = createProjectRouter();
+module.exports.createProjectRouter = createProjectRouter;

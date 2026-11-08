@@ -9,9 +9,10 @@ import {
   BrainCircuit, 
   Sparkles,
   UserPlus,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from 'lucide-react';
-export default function Navbar({ onOpenAuth, onOpenAdmin }) {
+export default function Navbar({ onOpenAuth, onOpenAdmin, currentUser, onOpenDashboard, onSignOut }) {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -209,22 +210,47 @@ export default function Navbar({ onOpenAuth, onOpenAdmin }) {
             )}
           </div>
 
-          {/* Right-Side Desktop Auth Action Buttons */}
+          {/* Right-Side Desktop Account Actions */}
           <div className="hidden md:flex items-center space-x-2">
-            <button
-              onClick={() => openAuth('signin')}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
-            >
-              Sign In
-            </button>
+            {currentUser ? (
+              <>
+                <span className="max-w-36 truncate px-2 text-xs text-slate-300" title={currentUser.name}>
+                  {currentUser.name ? `Hi, ${currentUser.name}` : 'Signed in'}
+                </span>
+                <button
+                  type="button"
+                  onClick={onOpenDashboard}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
+                >
+                  Dashboard
+                </button>
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => openAuth('signin')}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer"
+                >
+                  Sign In
+                </button>
 
-            <button
-              onClick={() => openAuth('signup')}
-              className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl btn-amber-gold text-xs uppercase tracking-wider font-extrabold focus:outline-none cursor-pointer shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-transform"
-            >
-              <UserPlus className="h-3.5 w-3.5" />
-              <span>Sign Up</span>
-            </button>
+                <button
+                  onClick={() => openAuth('signup')}
+                  className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl btn-amber-gold text-xs uppercase tracking-wider font-extrabold focus:outline-none cursor-pointer shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-transform"
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  <span>Sign Up</span>
+                </button>
+              </>
+            )}
           </div>
 
           <div className="flex md:hidden items-center space-x-2">
@@ -289,25 +315,53 @@ export default function Navbar({ onOpenAuth, onOpenAdmin }) {
             </div>
 
             <div className="pt-3 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openAuth('signin');
-                }}
-                className="py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-slate-200 text-xs uppercase tracking-wider font-bold hover:bg-white/10 text-center cursor-pointer"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openAuth('signup');
-                }}
-                className="flex items-center justify-center space-x-1.5 py-2.5 rounded-xl btn-amber-gold text-xs uppercase tracking-wider font-extrabold text-center shadow-lg cursor-pointer"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span>Sign Up</span>
-              </button>
+              {currentUser ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenDashboard?.();
+                    }}
+                    className="py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-slate-200 text-xs uppercase tracking-wider font-bold hover:bg-white/10 text-center cursor-pointer"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onSignOut?.();
+                    }}
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl btn-amber-gold text-xs uppercase tracking-wider font-extrabold text-center shadow-lg cursor-pointer"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      openAuth('signin');
+                    }}
+                    className="py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-slate-200 text-xs uppercase tracking-wider font-bold hover:bg-white/10 text-center cursor-pointer"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      openAuth('signup');
+                    }}
+                    className="flex items-center justify-center space-x-1.5 py-2.5 rounded-xl btn-amber-gold text-xs uppercase tracking-wider font-extrabold text-center shadow-lg cursor-pointer"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span>Sign Up</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

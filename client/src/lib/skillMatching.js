@@ -1,18 +1,5 @@
 // Keep aliases deliberately conservative; unrelated technologies must remain distinct.
-const ALIASES = new Map([
-  ['js', 'JavaScript'],
-  ['javascript', 'JavaScript'],
-  ['react', 'React'],
-  ['react js', 'React'],
-  ['node js', 'Node.js'],
-  ['nodejs', 'Node.js'],
-  ['postgres', 'PostgreSQL'],
-  ['postgresql', 'PostgreSQL'],
-  ['mongo db', 'MongoDB'],
-  ['mongodb', 'MongoDB'],
-  ['ml', 'Machine Learning'],
-  ['machine learning', 'Machine Learning']
-]);
+import skillAliases from '../../../shared/skill-aliases.json' with { type: 'json' };
 
 function normalizeSkillKey(value) {
   if (typeof value !== 'string') return '';
@@ -20,9 +7,23 @@ function normalizeSkillKey(value) {
     .normalize('NFKC')
     .toLowerCase()
     .trim()
-    .replace(/[^\p{L}\p{N}+#]+/gu, ' ')
-    .replace(/\s+/g, ' ');
+    .replace(/[\s._-]+/g, '');
 }
+
+function normalizeSkillLabel(value) {
+  if (typeof value !== 'string') return '';
+  return value.normalize('NFKC').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+const ALIASES = new Map(
+  Object.entries(skillAliases).map(([alias, canonical]) => [
+    normalizeSkillKey(alias),
+    {
+      canonicalKey: normalizeSkillKey(canonical),
+      canonicalLabel: normalizeSkillLabel(canonical)
+    }
+  ])
+);
 
 function toSkillEntry(value) {
   const name = typeof value === 'string' ? value : value?.name;
@@ -30,11 +31,14 @@ function toSkillEntry(value) {
 
   const normalizedKey = normalizeSkillKey(name);
   if (!normalizedKey) return null;
+  const alias = ALIASES.get(normalizedKey);
 
   return {
     name: name.trim().replace(/\s+/g, ' '),
+    normalizedLabel: normalizeSkillLabel(name),
     normalizedKey,
-    canonicalKey: normalizeSkillKey(ALIASES.get(normalizedKey) || name)
+    canonicalKey: alias?.canonicalKey || normalizedKey,
+    canonicalLabel: alias?.canonicalLabel || normalizeSkillLabel(name)
   };
 }
 
@@ -131,7 +135,8 @@ export function matchStudentToProject(student = {}, project = {}) {
     matchedRequirements.push({
       requiredSkill: requirement.name,
       studentSkill: studentSkill.name,
-      matchMethod: studentSkill.normalizedKey === requirement.normalizedKey
+      matchMethod: studentSkill.normalizedLabel === requirement.canonicalLabel
+        && requirement.normalizedLabel === requirement.canonicalLabel
         ? 'exact'
         : 'known_alias',
       weight

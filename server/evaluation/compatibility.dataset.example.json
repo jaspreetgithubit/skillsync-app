@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "name": "Replace with a human-reviewed dataset",
+    "labelingMethod": "human_review",
+    "notes": "Empty template only. Do not treat generated examples or this template as evidence of accuracy."
+  },
+  "train": [],
+  "validation": [],
+  "test": []
+}

@@ -223,7 +223,12 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
 
     // Allocate default initial weight
     const newWeight = Math.max(10, Math.floor(100 / (requiredSkills.length + 1)));
-    const updated = [...requiredSkills, { name: clean, weight: newWeight }];
+    const updated = [...requiredSkills, {
+      name: clean,
+      weight: newWeight,
+      priority: 'required',
+      critical: false
+    }];
     setRequiredSkills(updated);
     setSkillSearch('');
     setShowSkillDropdown(false);
@@ -239,6 +244,12 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
       updated[skillIndex] = { ...updated[skillIndex], weight: Number(newWeight) };
       return updated;
     });
+  };
+
+  const handleUpdateSkillRequirement = (skillIndex, updates) => {
+    setRequiredSkills(prev => prev.map((skill, idx) => (
+      idx === skillIndex ? { ...skill, ...updates } : skill
+    )));
   };
 
   // Role Management
@@ -274,7 +285,11 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
     setProjectTitle(tpl.title);
     setDescription(tpl.description);
     setTeamSize(tpl.teamSize);
-    setRequiredSkills(tpl.skills);
+    setRequiredSkills(tpl.skills.map(skill => ({
+      priority: 'required',
+      critical: false,
+      ...skill
+    })));
     setRequiredRoles(tpl.roles);
     setFormError('');
   };
@@ -692,7 +707,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-mono uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
                           <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />
-                          <span>Required Skills & Weights <span className="text-[#F59E0B]">*</span></span>
+                          <span>Skill Requirements & Weights <span className="text-[#F59E0B]">*</span></span>
                         </label>
                         <span className="text-[10px] font-mono text-slate-400">
                           {requiredSkills.length} Added
@@ -780,34 +795,58 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                           {requiredSkills.map((skill, idx) => (
                             <div 
                               key={idx}
-                              className="p-2.5 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-between gap-3 hover:border-amber-500/30 transition-all"
+                              className="space-y-2.5 p-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-amber-500/30 transition-all"
                             >
-                              <div className="flex items-center gap-2 min-w-[130px]">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
-                                <span className="text-xs font-semibold text-white">{skill.name}</span>
+                              <div className="flex items-center gap-3">
+                                <div className="flex min-w-0 flex-1 items-center gap-2">
+                                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#F59E0B]" />
+                                  <span className="truncate text-xs font-semibold text-white">{skill.name}</span>
+                                </div>
+                                <div className="flex w-36 items-center gap-2">
+                                  <span className="w-10 text-right text-[10px] font-mono text-slate-400">{skill.weight}%</span>
+                                  <input
+                                    type="range"
+                                    min={5}
+                                    max={80}
+                                    value={skill.weight}
+                                    aria-label={`${skill.name} importance weight`}
+                                    onChange={(e) => handleUpdateSkillWeight(idx, e.target.value)}
+                                    className="h-1.5 flex-1 cursor-pointer rounded-lg bg-white/10 accent-[#F59E0B]"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveSkill(idx)}
+                                  className="rounded p-1 text-slate-400 transition-colors hover:bg-rose-500/10 hover:text-rose-400"
+                                  title="Remove skill"
+                                  aria-label={`Remove ${skill.name}`}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
                               </div>
-
-                              {/* Weight Slider */}
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-[10px] font-mono text-slate-400 w-12 text-right">{skill.weight}%</span>
-                                <input 
-                                  type="range" 
-                                  min={5} 
-                                  max={80} 
-                                  value={skill.weight}
-                                  onChange={(e) => handleUpdateSkillWeight(idx, e.target.value)}
-                                  className="flex-1 accent-[#F59E0B] h-1.5 bg-white/10 rounded-lg cursor-pointer"
-                                />
+                              <div className="grid gap-2 border-t border-white/5 pt-2 sm:grid-cols-[1fr_auto] sm:items-center">
+                                <label className="text-[10px] font-mono text-slate-400">
+                                  Requirement type
+                                  <select
+                                    value={skill.priority || 'required'}
+                                    aria-label={`${skill.name} requirement type`}
+                                    onChange={(e) => handleUpdateSkillRequirement(idx, { priority: e.target.value })}
+                                    className="mt-1 w-full rounded-lg border border-white/10 bg-[#10141e] px-2 py-1.5 text-xs text-white"
+                                  >
+                                    <option value="required">Required</option>
+                                    <option value="preferred">Preferred</option>
+                                  </select>
+                                </label>
+                                <label className="flex items-center gap-2 pt-3 text-xs text-slate-300">
+                                  <input
+                                    type="checkbox"
+                                    checked={skill.critical === true}
+                                    onChange={(e) => handleUpdateSkillRequirement(idx, { critical: e.target.checked })}
+                                    className="accent-rose-400"
+                                  />
+                                  Critical
+                                </label>
                               </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveSkill(idx)}
-                                className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                                title="Remove skill"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
                             </div>
                           ))}
                         </div>
@@ -1086,7 +1125,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                   {/* 3. REQUIRED SKILLS LIVE LIST */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                      <span>REQUIRED SKILLS</span>
+                      <span>SKILL REQUIREMENTS</span>
                       <span>({requiredSkills.length})</span>
                     </div>
 
@@ -1105,6 +1144,18 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                               <div className="flex items-center gap-2">
                                 <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />
                                 <span className="text-xs font-semibold text-white">{skill.name}</span>
+                                <span className={`rounded px-1.5 py-0.5 text-[9px] uppercase ${
+                                  skill.priority === 'preferred'
+                                    ? 'bg-sky-400/10 text-sky-200'
+                                    : 'bg-amber-400/10 text-amber-200'
+                                }`}>
+                                  {skill.priority || 'required'}
+                                </span>
+                                {skill.critical && (
+                                  <span className="rounded bg-rose-400/10 px-1.5 py-0.5 text-[9px] uppercase text-rose-200">
+                                    critical
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-mono font-bold text-amber-400">{skill.weight}%</span>

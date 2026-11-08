@@ -179,9 +179,88 @@ npm test
 npm run build
 ```
 
-The extracted normalized skill and project data is structured so a later
-individual project-compatibility milestone can consume it. This implementation
-does not add compatibility scoring, team recommendations, or ranking.
+## Individual student–project compatibility
+
+The authenticated student dashboard includes **Project Compatibility**. It
+compares the signed-in account's confirmed profile with a selected project's
+skill requirements. The browser does not submit a student ID; the API resolves
+the student from the existing HttpOnly session cookie.
+
+`GET /api/projects/:projectId/compatibility` returns an explainable result:
+score and classification, required/preferred coverage, exact matches,
+missing required skills, partial matches, critical gaps, and a
+deterministic explanation. The endpoint calculates from the latest profile
+and project data; it does not persist scores or make AI-provider calls.
+This endpoint evaluates only the currently authenticated student. It does not
+provide a teacher-facing ranking of multiple students or persist project
+assignments; those require a separate, authorized assignment workflow.
+
+Project creation continues to use `requiredSkills`. Each entry now supports
+`priority` (`required` or `preferred`), `weight` (1–100), and `critical`.
+Student proficiency is not part of project compatibility scoring.
+
+### Scoring and normalization
+
+The deterministic scoring service compares skills only. It defaults to
+relative component weights of 70% required skill coverage and 20% preferred
+skill coverage. Coverage is the weight-adjusted sum of match strengths divided
+by total requirement weight. When a project has no preferred skills, that
+component is omitted and the remaining component weights are renormalized.
+
+The default classification threshold is 60. These server-only settings may be
+overridden in `server/.env`:
+
+```env
+COMPATIBILITY_REQUIRED_WEIGHT=70
+COMPATIBILITY_PREFERRED_WEIGHT=20
+COMPATIBILITY_CLASSIFICATION_THRESHOLD=60
+```
+
+Trusted aliases normalize to canonical names (for example `React.js` → `React`,
+`NodeJS` → `Node.js`, `JS` → `JavaScript`, and `Postgres` → `PostgreSQL`).
+Java and JavaScript, React and React Native, and MongoDB and PostgreSQL are not
+equivalents. A small, explicit related-skill list can award limited partial
+credit (currently JavaScript for React/Node.js and deep learning for machine
+learning); partial matches do not satisfy required or critical skills. No
+semantic AI provider is used.
+
+The score is a suitability score, not a probability of success or statistical
+accuracy. Critical eligibility is reported separately from the score.
+
+### Human-reviewed accuracy evaluation
+
+No human-labeled compatibility dataset is currently available in this
+repository. Therefore the target of **more than 90% held-out accuracy is not
+verified**. The example file
+`server/evaluation/compatibility.dataset.example.json` is intentionally empty
+and is not evidence of accuracy.
+
+To evaluate, create a JSON dataset with non-empty `train`, `validation`, and
+`test` arrays. Every pair must include anonymized `studentId` and `projectId`,
+the confirmed `profile`, `project`, and a human-reviewed `label` of
+`RELEVANT` or `NOT_RELEVANT`. Set metadata `labelingMethod` to `human_review`.
+Keep both student and project identities disjoint across all three splits;
+this grouped split rule prevents the same student or project from leaking
+between development, validation, and held-out test data. Aim for at least 200
+reviewed pairs and representative positive/negative examples.
+
+The evaluator calibrates a threshold using validation F1 (ties use higher
+accuracy, then proximity to the default threshold) and reports accuracy,
+precision, recall, F1, confusion matrix, threshold, split sizes, and test
+examples on the independent test set. It never uses the test split for
+calibration and refuses overlapping identities. Run:
+
+```sh
+npm run evaluate:compatibility -- evaluation/human-reviewed.json
+```
+
+This writes adjacent `.evaluation.json` and `.evaluation.md` reports without
+overwriting existing files. A held-out accuracy at or below 90% is reported as
+below target (and exits with status 2). The classification threshold selected
+from validation can be set as
+`COMPATIBILITY_CLASSIFICATION_THRESHOLD` for the application. Do not claim the
+target until a suitably sized, independently held-out human dataset actually
+meets it.
 
 ## Test and lint
 
@@ -190,7 +269,7 @@ npm test
 npm run lint
 ```
 
-`npm test` runs the frontend skill-matching tests and backend API tests.
+`npm test` runs frontend utility tests and backend unit and API tests.
 
 ## Production build and start
 

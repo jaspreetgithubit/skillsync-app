@@ -1,6 +1,5 @@
 const { promisify } = require('node:util');
 const {
-  createHash,
   randomBytes,
   randomUUID,
   scrypt: scryptCallback,
@@ -9,6 +8,12 @@ const {
 const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const mongoose = require('mongoose');
+const {
+  SESSION_COOKIE,
+  SESSION_TOKEN_PATTERN,
+  hashToken,
+  readSessionToken
+} = require('../services/authTokens');
 const AuthSession = require('../models/AuthSession');
 const ResumeDraft = require('../models/ResumeDraft');
 const User = require('../models/User');
@@ -20,15 +25,9 @@ const PASSWORD_MAX_LENGTH = 128;
 const PASSWORD_KEY_LENGTH = 64;
 const SCRYPT_OPTIONS = { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const SESSION_COOKIE = 'syncskills_session';
-const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 const GOAL_TRACKS = new Set(['company', 'college', 'capstone', 'hackathon']);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DUMMY_PASSWORD_HASH = hashPassword(randomBytes(32).toString('hex'));
-
-function hashToken(token) {
-  return createHash('sha256').update(token).digest('hex');
-}
 
 async function hashPassword(password) {
   const salt = randomBytes(16);
@@ -51,16 +50,6 @@ async function verifyPassword(password, encodedHash) {
   } catch {
     return false;
   }
-}
-
-function readCookie(req, name) {
-  const cookieHeader = req.get('cookie') || '';
-  for (const part of cookieHeader.split(';')) {
-    const separator = part.indexOf('=');
-    if (separator < 0 || part.slice(0, separator).trim() !== name) continue;
-    return part.slice(separator + 1).trim();
-  }
-  return null;
 }
 
 function allowedOrigins(env) {
@@ -194,7 +183,7 @@ function createAuthRouter(dependencies = {}) {
   }
 
   async function claimResumeDraft(token) {
-    if (!TOKEN_PATTERN.test(token)) {
+    if (!SESSION_TOKEN_PATTERN.test(token)) {
       const error = new Error('The resume draft is invalid. Please upload and extract your resume again.');
       error.status = 404;
       error.code = 'DRAFT_NOT_FOUND';
@@ -439,8 +428,8 @@ function createAuthRouter(dependencies = {}) {
 
   router.get('/me', async (req, res) => {
     if (!requireDatabase(res)) return;
-    const token = readCookie(req, SESSION_COOKIE);
-    if (!token || !TOKEN_PATTERN.test(token)) {
+    const token = readSessionToken(req);
+    if (!token || !SESSION_TOKEN_PATTERN.test(token)) {
       clearSessionCookie(res);
       return res.status(401).json({
         success: false,
@@ -480,9 +469,9 @@ function createAuthRouter(dependencies = {}) {
 
   router.post('/logout', verifyRequestOrigin, async (req, res) => {
     if (!requireDatabase(res)) return;
-    const token = readCookie(req, SESSION_COOKIE);
+    const token = readSessionToken(req);
     try {
-      if (token && TOKEN_PATTERN.test(token)) {
+      if (token && SESSION_TOKEN_PATTERN.test(token)) {
         await sessions.deleteOne({ tokenHash: hashToken(token) });
       }
       clearSessionCookie(res);

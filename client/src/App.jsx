@@ -130,6 +130,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenDashboard = () => {
+    setCurrentView('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAuthenticated = (userData) => {
     setSessionError('');
     setCurrentUser(userData);
@@ -262,7 +267,13 @@ export default function App() {
               ===================================================================== */}
           <div className="relative z-10 flex flex-col min-h-screen">
             {/* Top Navigation Bar with Sign In / Sign Up Connected */}
-            <Navbar onOpenAuth={handleOpenAuth} onOpenAdmin={handleOpenAdmin} />
+            <Navbar
+              onOpenAuth={handleOpenAuth}
+              onOpenAdmin={handleOpenAdmin}
+              currentUser={currentUser}
+              onOpenDashboard={handleOpenDashboard}
+              onSignOut={handleSignOut}
+            />
             
             <main className="flex-1">
               {/* Hero Section with Live Squad Formation Visualizer */}

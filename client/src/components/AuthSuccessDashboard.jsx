@@ -14,10 +14,11 @@ import {
   X,
   Target
 } from 'lucide-react';
+import ProjectCompatibility from './ProjectCompatibility';
 
 export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) {
   // Local editable state populated from the authenticated account profile.
-  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'experience' | 'projects' | 'interests' | 'squad'
+  const [activeTab, setActiveTab] = useState('all'); // 'all' | 'experience' | 'projects' | 'interests' | 'opportunities' | 'squad'
   
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -244,6 +245,17 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
               }`}
             >
               Team Matching
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('opportunities')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                activeTab === 'opportunities'
+                  ? 'bg-[#F59E0B] text-[#080B12] font-bold shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Project Compatibility
             </button>
           </div>
 
@@ -566,6 +578,8 @@ export default function AuthSuccessDashboard({ user, onSignOut, onBackToHome }) 
               </p>
             </div>
           )}
+
+          {activeTab === 'opportunities' && <ProjectCompatibility />}
 
           {/* Bottom Action Bar */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 text-xs font-mono">

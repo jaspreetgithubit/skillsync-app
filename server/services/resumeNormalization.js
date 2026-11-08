@@ -1,21 +1,5 @@
 const { resumeProfileSchema } = require('./resumeProfileSchema');
-
-const SKILL_ALIASES = new Map([
-  ['react.js', 'React'],
-  ['reactjs', 'React'],
-  ['nodejs', 'Node.js'],
-  ['node js', 'Node.js'],
-  ['postgresql', 'PostgreSQL'],
-  ['postgre sql', 'PostgreSQL'],
-  ['mongo db', 'MongoDB'],
-  ['js', 'JavaScript'],
-  ['ts', 'TypeScript']
-]);
-
-function normalizeSkillName(value) {
-  const trimmed = value.trim().replace(/\s+/g, ' ');
-  return SKILL_ALIASES.get(trimmed.toLowerCase()) || trimmed;
-}
+const { normalizeSkillName } = require('./skillNormalization');
 
 function normalizeStringList(values, normalizer = (value) => value.trim().replace(/\s+/g, ' ')) {
   const seen = new Set();

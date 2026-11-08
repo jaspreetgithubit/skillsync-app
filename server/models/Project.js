@@ -5,8 +5,9 @@ const mongoose = require('mongoose');
 
 const SkillWeightSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  weight: { type: Number, default: 20 },
-  level: { type: String, default: 'Intermediate' }
+  weight: { type: Number, default: 20, min: 1, max: 100 },
+  priority: { type: String, enum: ['required', 'preferred'], default: 'required' },
+  critical: { type: Boolean, default: false }
 }, { _id: false });
 
 const RoleQuantitySchema = new mongoose.Schema({
@@ -55,4 +56,3 @@ const ProjectSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.models.Project || mongoose.model('Project', ProjectSchema);
-
