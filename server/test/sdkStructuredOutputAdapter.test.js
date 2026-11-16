@@ -29,6 +29,9 @@ test('uses the shared structured-output contract with a local AI SDK mock', asyn
     config
   });
 
+  assert.equal(adapter.provider, 'gemini');
+  assert.equal(adapter.model, 'gemini-test');
+
   const result = await adapter.generateStructuredOutput({
     systemPrompt: 'Extract only supported facts.',
     userPrompt: 'Resume text.',

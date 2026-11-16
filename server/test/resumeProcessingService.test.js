@@ -68,6 +68,12 @@ test('rejects invalid provider output instead of returning an empty profile', as
 test('maps timeout, rate limit, malformed output, and outage errors safely', () => {
   assert.equal(classifyProviderError(Object.assign(new Error('private prompt'), { name: 'TimeoutError' })).code, 'AI_TIMEOUT');
   assert.equal(classifyProviderError(Object.assign(new Error('raw response'), { statusCode: 429 })).code, 'AI_RATE_LIMITED');
+  assert.equal(classifyProviderError(Object.assign(new Error('invalid API key'), { statusCode: 400 })).code, 'AI_AUTHENTICATION_FAILED');
+  assert.equal(classifyProviderError(Object.assign(new Error('raw response'), { statusCode: 401 })).code, 'AI_AUTHENTICATION_FAILED');
+  assert.equal(classifyProviderError(Object.assign(new Error('raw response'), { statusCode: 403 })).code, 'AI_AUTHENTICATION_FAILED');
+  assert.equal(classifyProviderError(Object.assign(new Error('model unavailable'), { statusCode: 400 })).code, 'AI_MODEL_UNAVAILABLE');
+  assert.equal(classifyProviderError(Object.assign(new Error('raw response'), { statusCode: 404 })).code, 'AI_MODEL_UNAVAILABLE');
+  assert.equal(classifyProviderError(Object.assign(new Error('raw response'), { statusCode: 400 })).code, 'AI_PROVIDER_REJECTED_REQUEST');
   assert.equal(classifyProviderError(Object.assign(new Error('raw response'), { code: 'INVALID_STRUCTURED_OUTPUT' })).code, 'INVALID_AI_RESPONSE');
   assert.equal(classifyProviderError(new Error('raw provider response')).code, 'AI_PROVIDER_UNAVAILABLE');
   assert.doesNotMatch(classifyProviderError(new Error('secret resume content')).message, /secret resume content/);
@@ -94,4 +100,7 @@ test('does not log resume text, names, email, or raw provider errors', async () 
   await assert.rejects(service.process({ buffer: Buffer.from('unused') }));
   assert.equal(logEntries.length, 1);
   assert.doesNotMatch(logEntries[0], /PRIVATE RESUME TEXT|Ada Student|ada@example\.edu/);
+  const failureLog = JSON.parse(logEntries[0]);
+  assert.equal(failureLog.provider, 'xai');
+  assert.equal(failureLog.model, 'grok-test');
 });

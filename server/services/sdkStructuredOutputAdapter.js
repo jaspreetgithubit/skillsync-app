@@ -1,5 +1,7 @@
 function createSdkStructuredOutputAdapter({ provider, modelId, model, config }) {
   return {
+    provider,
+    model: modelId,
     async generateStructuredOutput({ systemPrompt, userPrompt, schema, schemaName }) {
       const { generateText, Output } = await import('ai');
       const result = await generateText({

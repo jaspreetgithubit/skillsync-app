@@ -26,6 +26,29 @@ function classifyProviderError(error) {
   if (status === 429) {
     return new ResumeProviderError('AI_RATE_LIMITED', 'The AI provider is temporarily rate-limiting requests. Please retry later.', 503);
   }
+  const providerErrorText = `${error?.code || ''} ${error?.message || ''}`.toLowerCase();
+  if (status === 401 || status === 403
+    || /api.?key.{0,40}(invalid|not valid|unauthori[sz]ed)|invalid.{0,40}api.?key|permission denied/.test(providerErrorText)) {
+    return new ResumeProviderError(
+      'AI_AUTHENTICATION_FAILED',
+      'The AI provider rejected authentication. Verify the configured API key and its permissions.',
+      503
+    );
+  }
+  if (status === 404 || /model.{0,60}(not found|unavailable|not supported)|(?:not found|unavailable).{0,60}model/.test(providerErrorText)) {
+    return new ResumeProviderError(
+      'AI_MODEL_UNAVAILABLE',
+      'The configured AI model was not found or is unavailable for this provider. Check AI_MODEL and try again.',
+      503
+    );
+  }
+  if (status === 400) {
+    return new ResumeProviderError(
+      'AI_PROVIDER_REJECTED_REQUEST',
+      'The AI provider rejected the request. Verify the selected model and provider configuration.',
+      502
+    );
+  }
   return new ResumeProviderError('AI_PROVIDER_UNAVAILABLE', 'Resume analysis is temporarily unavailable. Please try again later.', 503);
 }
 

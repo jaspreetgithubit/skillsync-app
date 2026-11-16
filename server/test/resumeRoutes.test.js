@@ -3,6 +3,7 @@ const { createHash, randomUUID } = require('node:crypto');
 const express = require('express');
 const { after, test } = require('node:test');
 const { createResumeRouter } = require('../routes/resumeRoutes');
+const { ResumeProviderError } = require('../services/resumeProcessingService');
 const { validProfile, createPdf } = require('../test-support/resumeFixtures');
 
 const servers = [];
@@ -10,7 +11,7 @@ after(async () => {
   await Promise.all(servers.map((server) => new Promise((resolve) => server.close(resolve))));
 });
 
-async function createHarness({ databaseReady = true, maxFileSizeBytes = 1024 } = {}) {
+async function createHarness({ databaseReady = true, maxFileSizeBytes = 1024, processResume } = {}) {
   const draftStore = new Map();
   const profileStore = new Map();
   const drafts = {
@@ -70,7 +71,7 @@ async function createHarness({ databaseReady = true, maxFileSizeBytes = 1024 } =
     ResumeDraft: drafts,
     StudentProfile: profiles,
     isDatabaseReady: () => databaseReady,
-    processResume: async () => {
+    processResume: processResume || (async () => {
       processed += 1;
       return {
         profileDraft: validProfile(),
@@ -79,7 +80,7 @@ async function createHarness({ databaseReady = true, maxFileSizeBytes = 1024 } =
         metadata: { schemaVersion: '1.0', provider: 'gemini', model: 'gemini-test', pageCount: 1 },
         document: { filename: 'resume.pdf', fileType: 'pdf' }
       };
-    },
+    }),
     logger: { error() {}, info() {}, warn() {} }
   }));
   const server = await new Promise((resolve, reject) => {
@@ -142,6 +143,31 @@ test('parse returns a short-lived opaque draft token and stores only its hash', 
   assert.ok(harness.draftStore.has(tokenHash));
   assert.equal(harness.draftStore.get(tokenHash).tokenHash, tokenHash);
   assert.notEqual(harness.draftStore.get(tokenHash).tokenHash, body.data.draftToken);
+});
+
+test('resume parse returns a safe provider error instead of crashing the server', async () => {
+  const harness = await createHarness({
+    processResume: async () => {
+      throw new ResumeProviderError(
+        'AI_PROVIDER_UNAVAILABLE',
+        'Resume analysis is temporarily unavailable. Please try again later.',
+        503
+      );
+    }
+  });
+
+  const { status, body } = await readJson(await fetch(`${harness.baseUrl}/api/resumes/parse`, {
+    method: 'POST',
+    body: createUpload()
+  }));
+  assert.equal(status, 503);
+  assert.equal(body.success, false);
+  assert.equal(body.error.code, 'AI_PROVIDER_UNAVAILABLE');
+  assert.equal(body.error.message, 'Resume analysis is temporarily unavailable. Please try again later.');
+  assert.ok(body.requestId);
+
+  const configResponse = await fetch(`${harness.baseUrl}/api/resumes/config`);
+  assert.equal(configResponse.status, 200);
 });
 
 test('enforces upload size and does not invoke extraction for an oversized file', async () => {

@@ -6,7 +6,8 @@ const { rateLimit } = require('express-rate-limit');
 const ResumeDraft = require('../models/ResumeDraft');
 const StudentProfile = require('../models/StudentProfile');
 const { getAIConfig, getResumeConfig } = require('../config/resumeConfig');
-const { ResumeProcessingError, createResumeProcessingService } = require('../services/resumeProcessingService');
+const { ResumeProcessingError } = require('../services/resumeDocumentExtractor');
+const { createResumeProcessingService } = require('../services/resumeProcessingService');
 const { normalizeResumeProfile } = require('../services/resumeNormalization');
 
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
