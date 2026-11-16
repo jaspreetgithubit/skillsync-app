@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, FolderGit2, LoaderCircle, RefreshCw, ShieldAlert, Sparkles } from 'lucide-react';
 import { fetchProjectCompatibility, getCompatibilityErrorMessage } from '../lib/compatibilityApi';
+import TeamRecommendations from './TeamRecommendations';
 
 const fieldClassName = 'w-full rounded-xl border border-white/15 bg-[#10141e] px-3 py-3 text-sm text-white outline-none transition focus:border-amber-400';
 
@@ -110,6 +111,9 @@ export default function ProjectCompatibility() {
     setError(null);
     setSelectedProject(null);
   };
+  const selectedProjectForTeams = projects.find(
+    (project) => String(project.id || project._id) === selectedProjectId
+  ) || null;
 
   return (
     <section className="space-y-5 rounded-3xl border border-amber-400/25 bg-black/30 p-5 text-left shadow-2xl shadow-amber-950/20 backdrop-blur-xl sm:p-7">
@@ -267,6 +271,9 @@ export default function ProjectCompatibility() {
             The percentage is a suitability score based on configured skill weights; it is not statistical accuracy or a probability of project success.
           </p>
         </div>
+      )}
+      {selectedProjectForTeams && (
+        <TeamRecommendations key={selectedProjectId} project={selectedProjectForTeams} />
       )}
     </section>
   );

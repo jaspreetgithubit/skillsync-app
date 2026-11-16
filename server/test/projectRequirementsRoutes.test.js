@@ -106,3 +106,67 @@ test('project creation keeps default required priority for legacy-compatible pay
     await harness.close();
   }
 });
+
+test('project creation defaults team size to three and permits roles without role-specific skills', async () => {
+  const harness = await createHarness();
+  try {
+    const response = await fetch(`${harness.baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectTitle: 'Default team size',
+        requiredSkills: [{ name: 'React' }],
+        requiredRoles: [{ role: 'Frontend Developer', count: 1, requiredSkills: ['React'] }]
+      })
+    });
+
+    assert.equal(response.status, 201);
+    assert.equal(harness.getCreatedProject().teamSize, 3);
+    assert.deepEqual(harness.getCreatedProject().requiredRoles[0].requiredSkills, ['React']);
+  } finally {
+    await harness.close();
+  }
+});
+
+test('project creation rejects non-integer team sizes and accepts no role requirements', async () => {
+  const harness = await createHarness();
+  try {
+    const invalid = await fetch(`${harness.baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...validPayload, teamSize: 1.5 })
+    });
+    assert.equal(invalid.status, 400);
+
+    const noRoles = await fetch(`${harness.baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ projectTitle: 'No roles', teamSize: 1, requiredSkills: [{ name: 'React' }] })
+    });
+    assert.equal(noRoles.status, 201);
+    assert.deepEqual(harness.getCreatedProject().requiredRoles, []);
+  } finally {
+    await harness.close();
+  }
+});
+
+test('project creation rejects duplicate role names ignoring case', async () => {
+  const harness = await createHarness();
+  try {
+    const response = await fetch(`${harness.baseUrl}/api/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...validPayload,
+        requiredRoles: [
+          { role: 'Backend Developer', count: 1, requiredSkills: ['Node.js'] },
+          { role: 'backend developer', count: 1, requiredSkills: ['Express'] }
+        ]
+      })
+    });
+    assert.equal(response.status, 400);
+    assert.equal(harness.getCreatedProject(), undefined);
+  } finally {
+    await harness.close();
+  }
+});

@@ -51,10 +51,10 @@ const TEMPLATE_INSPIRATIONS = [
       { name: 'Node.js', weight: 10 }
     ],
     roles: [
-      { role: 'ML Engineer', count: 2 },
-      { role: 'Frontend Developer', count: 1 },
-      { role: 'Backend Developer', count: 1 },
-      { role: 'Data Scientist', count: 1 }
+      { role: 'ML Engineer', count: 2, requiredSkills: ['Python', 'Machine Learning'] },
+      { role: 'Frontend Developer', count: 1, requiredSkills: ['React'] },
+      { role: 'Backend Developer', count: 1, requiredSkills: ['Node.js'] },
+      { role: 'Data Scientist', count: 1, requiredSkills: ['Python', 'Machine Learning'] }
     ]
   },
   {
@@ -68,10 +68,10 @@ const TEMPLATE_INSPIRATIONS = [
       { name: 'Docker', weight: 10 }
     ],
     roles: [
-      { role: 'Backend Developer', count: 2 },
-      { role: 'ML Engineer', count: 2 },
-      { role: 'DevOps Engineer', count: 1 },
-      { role: 'Full Stack Developer', count: 1 }
+      { role: 'Backend Developer', count: 2, requiredSkills: ['Rust', 'Go'] },
+      { role: 'ML Engineer', count: 2, requiredSkills: ['Computer Vision'] },
+      { role: 'DevOps Engineer', count: 1, requiredSkills: ['Docker'] },
+      { role: 'Full Stack Developer', count: 1, requiredSkills: ['Rust', 'Go'] }
     ]
   },
   {
@@ -85,8 +85,8 @@ const TEMPLATE_INSPIRATIONS = [
       { name: 'GraphQL', weight: 10 }
     ],
     roles: [
-      { role: 'Backend Developer', count: 2 },
-      { role: 'Full Stack Developer', count: 1 },
+      { role: 'Backend Developer', count: 2, requiredSkills: ['Solana', 'Rust', 'GraphQL'] },
+      { role: 'Full Stack Developer', count: 1, requiredSkills: ['TypeScript', 'GraphQL'] },
       { role: 'UI/UX Designer', count: 1 }
     ]
   }
@@ -101,7 +101,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
   // Form Fields State - Starts clean without hardcoded placeholder data
   const [projectTitle, setProjectTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [teamSize, setTeamSize] = useState(5);
+  const [teamSize, setTeamSize] = useState(3);
   const [requiredSkills, setRequiredSkills] = useState([]);
   const [requiredRoles, setRequiredRoles] = useState([]);
 
@@ -261,7 +261,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
       setShowRoleDropdown(false);
       return;
     }
-    setRequiredRoles(prev => [...prev, { role: clean, count: 1 }]);
+    setRequiredRoles(prev => [...prev, { role: clean, count: 1, requiredSkills: [], requiredSkillsInput: '' }]);
     setRoleSearch('');
     setShowRoleDropdown(false);
   };
@@ -274,10 +274,22 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
     setRequiredRoles(prev => {
       const updated = [...prev];
       const current = updated[roleIndex].count;
-      const nextCount = Math.max(1, Math.min(15, current + delta));
+      const nextCount = Math.max(1, Math.min(8, current + delta));
       updated[roleIndex] = { ...updated[roleIndex], count: nextCount };
       return updated;
     });
+  };
+
+  const handleUpdateRoleSkills = (roleIndex, value) => {
+    setRequiredRoles(prev => prev.map((role, idx) => (
+      idx === roleIndex
+        ? {
+            ...role,
+            requiredSkillsInput: value,
+            requiredSkills: [...new Set(value.split(',').map(skill => skill.trim()).filter(Boolean))]
+          }
+        : role
+    )));
   };
 
   // Quick Preset Inspiration
@@ -290,7 +302,11 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
       critical: false,
       ...skill
     })));
-    setRequiredRoles(tpl.roles);
+    setRequiredRoles(tpl.roles.map(role => ({
+      ...role,
+      requiredSkills: role.requiredSkills || [],
+      requiredSkillsInput: (role.requiredSkills || []).join(', ')
+    })));
     setFormError('');
   };
 
@@ -301,9 +317,6 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
     }
     if (requiredSkills.length === 0) {
       return { text: 'Add required skills', isReady: false };
-    }
-    if (requiredRoles.length === 0) {
-      return { text: 'Add required roles', isReady: false };
     }
     return { text: 'Ready to Create Project', isReady: true };
   };
@@ -320,19 +333,14 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
       setFormError('Please enter a descriptive Project Title.');
       return;
     }
-    if (teamSize < 2) {
-      setFormError('Team size must be at least 2 members.');
+    if (!Number.isInteger(teamSize) || teamSize < 1 || teamSize > 8) {
+      setFormError('Team size must be a whole number from 1 to 8.');
       return;
     }
     if (requiredSkills.length === 0) {
       setFormError('Please add at least one Required Skill.');
       return;
     }
-    if (requiredRoles.length === 0) {
-      setFormError('Please configure at least one Required Role.');
-      return;
-    }
-
     const skillWeightsMap = {};
     requiredSkills.forEach(s => {
       skillWeightsMap[s.name] = s.weight;
@@ -343,7 +351,11 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
       description: description.trim(),
       teamSize: Number(teamSize),
       requiredSkills,
-      requiredRoles,
+      requiredRoles: requiredRoles.map((role) => ({
+        role: role.role,
+        count: role.count,
+        requiredSkills: role.requiredSkills || []
+      })),
       skillWeights: skillWeightsMap,
       createdBy: 'Admin Lead',
       createdAt: new Date().toISOString()
@@ -673,7 +685,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
 
                         {/* Squad Typology Badge */}
                         <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300">
-                          {teamSize <= 4 ? 'Agile Squad (2-4)' : teamSize <= 7 ? 'Balanced Pod (5-7)' : 'Enterprise Cluster (8+)'}
+                          {teamSize <= 4 ? 'Agile Squad (1-4)' : 'Balanced Pod (5-8)'}
                         </span>
                       </div>
 
@@ -681,7 +693,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                       <div className="flex items-center gap-4">
                         <button
                           type="button"
-                          onClick={() => setTeamSize(prev => Math.max(2, prev - 1))}
+                          onClick={() => setTeamSize(prev => Math.max(1, prev - 1))}
                           className="w-10 h-10 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white text-lg font-bold flex items-center justify-center transition-all cursor-pointer"
                         >
                           −
@@ -694,7 +706,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
 
                         <button
                           type="button"
-                          onClick={() => setTeamSize(prev => Math.min(20, prev + 1))}
+                          onClick={() => setTeamSize(prev => Math.min(8, prev + 1))}
                           className="w-10 h-10 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-white text-lg font-bold flex items-center justify-center transition-all cursor-pointer"
                         >
                           +
@@ -858,10 +870,10 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-mono uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
                           <Layers className="w-3.5 h-3.5 text-[#F59E0B]" />
-                          <span>Required Roles & Headcounts <span className="text-[#F59E0B]">*</span></span>
+                          <span>Optional Roles & Headcounts</span>
                         </label>
                         <span className="text-[10px] font-mono text-slate-400">
-                          Configured: <strong className={totalConfiguredRoles === teamSize ? 'text-emerald-400' : 'text-amber-400'}>{totalConfiguredRoles}</strong>/{teamSize}
+                          Planned positions: <strong className="text-amber-400">{totalConfiguredRoles}</strong>
                         </span>
                       </div>
 
@@ -923,44 +935,55 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                       {requiredRoles.length === 0 ? (
                         <div className="p-4 rounded-xl border border-dashed border-white/10 text-center bg-white/[0.01]">
                           <p className="text-xs text-slate-400">No roles added yet.</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">Click a suggestion above or type a role to assign positions.</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">Roles are optional. Add skills to a role to include role coverage in team scoring.</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                           {requiredRoles.map((r, idx) => (
                             <div 
                               key={idx}
-                              className="p-2.5 rounded-xl bg-white/[0.02] border border-white/10 flex items-center justify-between hover:border-amber-500/30 transition-all"
+                              className="p-2.5 rounded-xl bg-white/[0.02] border border-white/10 space-y-2 hover:border-amber-500/30 transition-all"
                             >
-                              <span className="text-xs font-semibold text-white truncate max-w-[140px]">
-                                {r.role}
-                              </span>
-
-                              {/* Stepper Count */}
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => handleUpdateRoleCount(idx, -1)}
-                                  className="w-6 h-6 rounded bg-white/[0.06] hover:bg-white/[0.12] text-xs font-bold text-white flex items-center justify-center cursor-pointer"
-                                >
-                                  −
-                                </button>
-                                <span className="text-xs font-mono font-bold text-[#F59E0B] px-1">×{r.count}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleUpdateRoleCount(idx, 1)}
-                                  className="w-6 h-6 rounded bg-white/[0.06] hover:bg-white/[0.12] text-xs font-bold text-white flex items-center justify-center cursor-pointer"
-                                >
-                                  +
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveRole(idx)}
-                                  className="ml-1 text-slate-400 hover:text-rose-400 cursor-pointer"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-semibold text-white truncate">{r.role}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateRoleCount(idx, -1)}
+                                    aria-label={`Decrease ${r.role} positions`}
+                                    className="w-6 h-6 rounded bg-white/[0.06] hover:bg-white/[0.12] text-xs font-bold text-white flex items-center justify-center cursor-pointer"
+                                  >
+                                    −
+                                  </button>
+                                  <span className="text-xs font-mono font-bold text-[#F59E0B] px-1">×{r.count}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateRoleCount(idx, 1)}
+                                    aria-label={`Increase ${r.role} positions`}
+                                    className="w-6 h-6 rounded bg-white/[0.06] hover:bg-white/[0.12] text-xs font-bold text-white flex items-center justify-center cursor-pointer"
+                                  >
+                                    +
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRole(idx)}
+                                    aria-label={`Remove ${r.role}`}
+                                    className="ml-1 text-slate-400 hover:text-rose-400 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
                               </div>
+                              <label className="block text-[10px] text-slate-400">
+                                Role skills (comma-separated; leave blank to omit role scoring)
+                                <input
+                                  type="text"
+                                  value={r.requiredSkillsInput ?? (r.requiredSkills || []).join(', ')}
+                                  onChange={(event) => handleUpdateRoleSkills(idx, event.target.value)}
+                                  placeholder="e.g. React, CSS, JavaScript"
+                                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-2.5 py-2 text-xs text-white outline-none focus:border-amber-400"
+                                />
+                              </label>
                             </div>
                           ))}
                         </div>
@@ -1315,7 +1338,7 @@ export default function AdminCreateProject({ onBackToHome, onProjectCreated }) {
                         </h4>
                       </div>
                       <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 shrink-0">
-                        {p.teamSize} Members
+                        {p.teamSize || 3} Members{p.teamSize ? '' : ' (default)'}
                       </span>
                     </div>
 

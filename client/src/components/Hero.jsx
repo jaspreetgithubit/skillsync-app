@@ -273,8 +273,8 @@ export default function Hero() {
                 href="#simulator"
                 className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/20 hover:border-[#F59E0B]/60 text-xs uppercase tracking-wider font-bold text-white transition-all backdrop-blur-md cursor-pointer"
               >
-                <Brain className="h-4 w-4 text-[#F59E0B] animate-pulse" />
-                <span>Try Live NLP Demo</span>
+                <Brain className="h-4 w-4 text-[#F59E0B]" />
+                <span>Explore Real Matching</span>
               </a>
             </div>
 

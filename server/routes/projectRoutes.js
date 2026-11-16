@@ -4,8 +4,12 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { projectSkillRequirementsSchema } = require('../schemas/projectRequirements');
+const {
+  projectRoleRequirementsSchema,
+  projectSkillRequirementsSchema
+} = require('../schemas/projectRequirements');
 const { normalizeSkillName } = require('../services/skillNormalization');
+const { readTeamScoringConfig } = require('../services/teamScoringConfig');
 
 let Project;
 try {
@@ -43,6 +47,7 @@ function createProjectRouter(dependencies = {}) {
   ));
   const localProjects = dependencies.readLocalProjects || readLocalProjects;
   const saveLocalProjects = dependencies.writeLocalProjects || writeLocalProjects;
+  const env = dependencies.env || process.env;
 
   router.get('/', async (req, res) => {
     try {
@@ -62,14 +67,21 @@ function createProjectRouter(dependencies = {}) {
 
   router.post('/', async (req, res) => {
     try {
-      const { projectTitle, description, teamSize, requiredSkills, requiredRoles, skillWeights, createdBy } = req.body;
+      const { projectTitle, description, requiredSkills, skillWeights, createdBy } = req.body;
+      const config = readTeamScoringConfig(env);
+      const requestedTeamSize = req.body.teamSize == null || req.body.teamSize === ''
+        ? config.defaultTeamSize
+        : Number(req.body.teamSize);
 
     // Validation
     if (!projectTitle || !projectTitle.trim()) {
       return res.status(400).json({ success: false, error: 'Project Title is required' });
     }
-    if (!teamSize || Number(teamSize) < 2) {
-      return res.status(400).json({ success: false, error: 'Team Size must be at least 2 members' });
+    if (!Number.isSafeInteger(requestedTeamSize) || requestedTeamSize <= 0 || requestedTeamSize > config.maxTeamSize) {
+      return res.status(400).json({
+        success: false,
+        error: `Team Size must be a positive whole number no greater than ${config.maxTeamSize}`
+      });
     }
     if (!Array.isArray(requiredSkills) || requiredSkills.length === 0) {
       return res.status(400).json({ success: false, error: 'At least one required skill is required' });
@@ -78,24 +90,29 @@ function createProjectRouter(dependencies = {}) {
     if (!skillRequirements.success) {
       return res.status(400).json({
         success: false,
-        error: 'Skill requirements must include valid names, priorities, weights, critical flags, and proficiency levels'
+        error: 'Skill requirements must include valid names, priorities, weights, and critical flags'
       });
     }
     const normalizedSkills = skillRequirements.data.map((skill) => ({
       ...skill,
       name: normalizeSkillName(skill.name)
     }));
-    if (!Array.isArray(requiredRoles) || requiredRoles.length === 0) {
-      return res.status(400).json({ success: false, error: 'At least one required role is required' });
+    const roleRequirements = projectRoleRequirementsSchema.safeParse(req.body.requiredRoles ?? []);
+    if (!roleRequirements.success) {
+      return res.status(400).json({ success: false, error: 'Role requirements must include valid names, counts, and skill lists' });
     }
+    const normalizedRoles = roleRequirements.data.map((role) => ({
+      ...role,
+      requiredSkills: role.requiredSkills.map((skill) => normalizeSkillName(skill))
+    }));
 
     if (isDatabaseReady()) {
       const newProj = await projects.create({
         projectTitle: projectTitle.trim(),
         description: description ? description.trim() : '',
-        teamSize: Number(teamSize),
+        teamSize: requestedTeamSize,
         requiredSkills: normalizedSkills,
-        requiredRoles,
+        requiredRoles: normalizedRoles,
         skillWeights: skillWeights || {},
         createdBy: createdBy || 'Admin Lead'
       });
@@ -108,9 +125,9 @@ function createProjectRouter(dependencies = {}) {
       id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       projectTitle: projectTitle.trim(),
       description: description ? description.trim() : '',
-      teamSize: Number(teamSize),
+      teamSize: requestedTeamSize,
       requiredSkills: normalizedSkills,
-      requiredRoles,
+      requiredRoles: normalizedRoles,
       skillWeights: skillWeights || {},
       createdBy: createdBy || 'Admin Lead',
       createdAt: new Date().toISOString(),

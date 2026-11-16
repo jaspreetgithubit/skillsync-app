@@ -9,6 +9,7 @@ const projectRoutes = require('./routes/projectRoutes');
 const { createResumeRouter } = require('./routes/resumeRoutes');
 const { createAuthRouter } = require('./routes/authRoutes');
 const { createCompatibilityRouter } = require('./routes/compatibilityRoutes');
+const { createTeamRouter } = require('./routes/teamRoutes');
 const User = require('./models/User');
 const AuthSession = require('./models/AuthSession');
 const ResumeDraft = require('./models/ResumeDraft');
@@ -35,6 +36,7 @@ app.use(express.json({ limit: '256kb' }));
 // API Routes
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects', createCompatibilityRouter());
+app.use('/api/projects', createTeamRouter());
 app.use('/api', createResumeRouter());
 app.use('/api/auth', createAuthRouter());
 

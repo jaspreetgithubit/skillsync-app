@@ -74,11 +74,11 @@ export default function Navbar({ onOpenAuth, onOpenAdmin, currentUser, onOpenDas
       badge: "Corporate"
     },
     {
-      title: "NLP Skill Extraction",
-      desc: "Semantic AI model extracting technical requirements from project titles & calculating compatibility.",
+      title: "Project & Team Matching",
+      desc: "Compare saved student skills with project requirements and explore ranked team recommendations.",
       icon: BrainCircuit,
       href: "#simulator",
-      badge: "AI Model"
+      badge: "Live Feature"
     }
   ];
 

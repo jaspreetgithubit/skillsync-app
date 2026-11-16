@@ -4,7 +4,7 @@ import Hero from './components/Hero';
 import TechMarquee from './components/TechMarquee';
 import HowItWorks from './components/HowItWorks';
 import BentoGrid from './components/BentoGrid';
-import SquadSimulator from './components/SquadSimulator';
+import ProjectCompatibility from './components/ProjectCompatibility';
 import ImpactMetrics from './components/ImpactMetrics';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
@@ -13,8 +13,6 @@ import AuthSuccessDashboard from './components/AuthSuccessDashboard';
 import AdminCreateProject from './components/AdminCreateProject';
 
 export default function App() {
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  
   // Read initial view from URL query param (?page=admin or ?type=...)
   const getInitialView = () => {
     try {
@@ -219,48 +217,21 @@ export default function App() {
       )}
 
       {/* =========================================================================
-          VIEW 4: COMPLETE ORIGINAL LANDING PAGE (WITH ALL SECTIONS & VIDEO)
+          VIEW 4: COMPLETE ORIGINAL LANDING PAGE
           ========================================================================= */}
       {currentView === 'landing' && (
         <>
-          {/* =====================================================================
-              USER'S CINEMATIC CORPORATE OFFICE VIDEO (PUBLIC FOLDER)
-              PRESERVED IN FULL-SCREEN LOOPING GLORY ACROSS THE ENTIRE WEBSITE
-              ===================================================================== */}
-          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-            <video
-              key="user-cinematic-corporate-v1"
-              autoPlay
-              loop
-              muted
-              playsInline
-              onLoadedData={() => setVideoLoaded(true)}
-              className={`absolute inset-0 w-full h-full object-cover filter contrast-105 brightness-105 transition-opacity duration-1000 ${
-                videoLoaded ? 'opacity-100' : 'opacity-70'
-              }`}
-            >
-              <source src="/videos/Cinematic_K_corporate_office.mp4" type="video/mp4" />
-              <source src="/videos/office-loop.mp4" type="video/mp4" />
-              <source src="/videos/cinematic-demo.mp4" type="video/mp4" />
-            </video>
-
-            {/* Lightweight translucent vignette: allows video motion to shine */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35 pointer-events-none" />
-            
-            {/* Ambient Warm Amber & Soft Violet Bleeds Harmonized with the Video Lighting */}
-            <div className="absolute top-12 left-1/4 w-[750px] h-[500px] bg-purple-900/15 blur-[180px] rounded-full pointer-events-none" />
-            <div className="absolute top-1/2 right-12 w-[650px] h-[650px] bg-amber-500/10 blur-[190px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-12 left-12 w-[600px] h-[600px] bg-amber-600/10 blur-[170px] rounded-full pointer-events-none" />
-
-            {/* Micro Grid Texture */}
-            <div 
-              className="absolute inset-0 opacity-[0.03] pointer-events-none"
-              style={{
-                backgroundImage: 'radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)',
-                backgroundSize: '40px 40px'
-              }}
-            />
-          </div>
+          <div
+            aria-hidden="true"
+            className="fixed inset-0 pointer-events-none z-0"
+            style={{
+              background: [
+                'radial-gradient(ellipse at 18% 8%, rgba(124, 58, 237, 0.16), transparent 42%)',
+                'radial-gradient(ellipse at 88% 28%, rgba(245, 158, 11, 0.10), transparent 38%)',
+                'linear-gradient(180deg, #0d111b 0%, #080b12 48%, #0c0a10 100%)'
+              ].join(', ')
+            }}
+          />
 
           {/* =====================================================================
               WEBSITE CONTENT LAYER (FULL ORIGINAL LANDING PAGE)
@@ -276,7 +247,7 @@ export default function App() {
             />
             
             <main className="flex-1">
-              {/* Hero Section with Live Squad Formation Visualizer */}
+              {/* Landing page hero and matching overview */}
               <Hero onOpenAuth={handleOpenAuth} />
 
               {/* Verified Ingestion & Integrations Marquee */}
@@ -288,8 +259,42 @@ export default function App() {
               {/* Core Capability Matrix (Bento Grid) */}
               <BentoGrid onOpenAuth={handleOpenAuth} />
 
-              {/* Interactive Live Squad Simulator */}
-              <SquadSimulator />
+              <section id="simulator" className="relative py-20 lg:py-28">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_15%_20%,rgba(124,58,237,0.12),transparent_45%),radial-gradient(ellipse_at_85%_70%,rgba(245,158,11,0.08),transparent_42%)]" />
+                <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                  {currentUser ? (
+                    <ProjectCompatibility />
+                  ) : (
+                    <div className="mx-auto max-w-4xl rounded-3xl border border-amber-400/25 bg-[#0b0e16]/90 p-6 text-center shadow-2xl shadow-black/30 sm:p-10">
+                      <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-300">
+                        Real project and team matching
+                      </div>
+                      <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+                        Match saved student profiles to real projects
+                      </h2>
+                      <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+                        Sign in to compare your saved skills with a project, or find ranked team recommendations from confirmed student profiles. Results use your project and account data, not sample profiles.
+                      </p>
+                      <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAuth('signup')}
+                          className="rounded-xl bg-amber-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+                        >
+                          Create an account to get started
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAuth('signin')}
+                          className="rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:border-amber-400/50 hover:bg-white/5"
+                        >
+                          Sign in
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
 
               {/* Measurable Results & Impact Metrics */}
               <ImpactMetrics />

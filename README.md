@@ -227,6 +227,83 @@ semantic AI provider is used.
 The score is a suitability score, not a probability of success or statistical
 accuracy. Critical eligibility is reported separately from the score.
 
+## Team compatibility and recommendations
+
+The landing page's **Project & Team Matching** section points visitors to
+sign in or create an account. For signed-in users, it displays the same live
+**Project Compatibility** and **Find Best Teams** interface used on the
+dashboard; it does not use sample students or simulated team results. The
+endpoint
+`GET /api/projects/:projectId/team-recommendations` uses the session cookie to
+authorize the request; it does not accept a student ID from the browser.
+Candidate profiles come from confirmed account profiles with at least one
+usable technical skill. The project creator is not automatically excluded.
+The response contains only each student's name, project-relevant skills,
+contributions, and individual fit score; it never includes email, student
+account identifiers, resume content, or the full profile.
+
+New projects default to a team of three. The project form allows teams of 1–8.
+Legacy projects without a stored team size use the application default of 3,
+which is identified in the recommendations. At present the application has a
+project-creation form but no project-edit endpoint or editing screen.
+
+Project roles are optional. To include role coverage, add one or more role
+entries and enter that role's explicit required skills as comma-separated
+values. Role coverage is weighted by the configured position count. A role is
+fully covered only when every configured skill has an exact or trusted-alias
+match; related-skill matches are partial. If no role skills are configured,
+role coverage is omitted and the remaining component weights are renormalized.
+No role skills are inferred from role names or project descriptions.
+
+Each possible team has exactly the configured team size and contains distinct
+eligible students. The current student's own profile remains a candidate when
+it is eligible. The application does not create teams, assign students, change
+availability, or send invitations.
+
+Team skill coverage reuses Feature 2's canonical aliases and explicit partial
+match rules. For each requirement, the strongest member match is counted once,
+weighted by that requirement. Required and preferred coverage are calculated
+separately; when both exist, combined coverage is 80% required and 20%
+preferred. If only one priority exists, it supplies the whole component.
+Missing critical requirements are reported separately and require exact
+canonical matches, even when the overall score is high.
+
+Individual member relevance is the average of each member's actual Feature 2
+compatibility score. Complementarity is the percentage of covered required
+and preferred skill weight for which exactly one member has a valid match.
+Unrelated skills do not contribute. The default final score is:
+
+```text
+(combined skill coverage × 0.60)
++ (role coverage × 0.15)
++ (individual member relevance × 0.15)
++ (skill complementarity × 0.10)
+```
+
+When role coverage is unavailable, its weight is removed and the remaining
+weights are renormalized. The default classifications are highly compatible
+(80+), moderately compatible (65+), low compatibility (50+), and poor
+compatibility (below 50). Ties are broken by critical requirements, required
+coverage, role coverage, individual relevance, complementarity, then sorted
+student IDs. These are deterministic heuristic rankings, not an outcome
+probability.
+
+The search evaluates all combinations when there are at most 25,000 possible
+teams. Larger searches use a deterministic bounded beam search, returning the
+best complete teams found within that search rather than claiming the global
+top five. Defaults are 50 candidates maximum, team size 8 maximum, beam width
+200, and five recommendations. Requests above the candidate or team-size
+limits are rejected with an actionable error. Server-only settings are in
+`server/.env.example` under `TEAM_RECOMMENDATION_*` and
+`TEAM_COMPATIBILITY_*`.
+
+The response includes the search strategy, possible/evaluated team counts,
+team size/default status, score breakdown, critical gaps, matched and missing
+skills, role coverage, unique contributions, and a deterministic explanation.
+Tests use controlled profiles and projects; there is no human-labeled team
+recommendation dataset, so real-world team-ranking accuracy has not been
+independently evaluated.
+
 ### Human-reviewed accuracy evaluation
 
 No human-labeled compatibility dataset is currently available in this

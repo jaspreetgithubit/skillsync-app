@@ -8,5 +8,30 @@ const projectSkillRequirementSchema = z.object({
 });
 
 const projectSkillRequirementsSchema = z.array(projectSkillRequirementSchema).min(1).max(100);
+const projectRoleRequirementSchema = z.object({
+  role: z.string().trim().min(1).max(80),
+  count: z.coerce.number().int().min(1).max(25).default(1),
+  requiredSkills: z.array(z.string().trim().min(1).max(80)).max(30).default([])
+});
+const projectRoleRequirementsSchema = z.array(projectRoleRequirementSchema).max(20).default([])
+  .superRefine((roles, context) => {
+    const roleNames = new Set();
+    roles.forEach((role, index) => {
+      const key = role.role.toLowerCase();
+      if (roleNames.has(key)) {
+        context.addIssue({
+          code: 'custom',
+          path: [index, 'role'],
+          message: 'Project role names must be unique.'
+        });
+      }
+      roleNames.add(key);
+    });
+  });
 
-module.exports = { projectSkillRequirementSchema, projectSkillRequirementsSchema };
+module.exports = {
+  projectRoleRequirementSchema,
+  projectRoleRequirementsSchema,
+  projectSkillRequirementSchema,
+  projectSkillRequirementsSchema
+};

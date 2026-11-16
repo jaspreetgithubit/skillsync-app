@@ -12,7 +12,8 @@ const SkillWeightSchema = new mongoose.Schema({
 
 const RoleQuantitySchema = new mongoose.Schema({
   role: { type: String, required: true },
-  count: { type: Number, default: 1, min: 1 }
+  count: { type: Number, default: 1, min: 1 },
+  requiredSkills: [{ type: String, trim: true, maxlength: 80 }]
 }, { _id: false });
 
 const ProjectSchema = new mongoose.Schema({
@@ -29,12 +30,12 @@ const ProjectSchema = new mongoose.Schema({
   },
   teamSize: {
     type: Number,
-    required: [true, 'Team size is required'],
-    min: [2, 'Team size must be at least 2 members'],
+    default: 3,
+    min: [1, 'Team size must be at least 1 member'],
     max: [25, 'Team size cannot exceed 25 members']
   },
   requiredSkills: [SkillWeightSchema],
-  requiredRoles: [RoleQuantitySchema],
+  requiredRoles: { type: [RoleQuantitySchema], default: [] },
   skillWeights: {
     type: Map,
     of: Number,
